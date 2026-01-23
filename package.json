@@ -6,7 +6,7 @@
 		"dev": "next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
-		"lint": "next lint"
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"@heroui/avatar": "^2.2.7",
@@ -28,8 +28,8 @@
 		"ham-web-wasm": "link:wasm/pkg",
 		"jotai": "^2.16.2",
 		"js-cookie": "^3.0.5",
-		"lodash": "^4.17.21",
-		"next": "15.1.6",
+		"lodash": "4.17.23",
+		"next": "16.1.4",
 		"qrcode.react": "^4.2.0",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
@@ -40,7 +40,7 @@
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.3.3",
 		"@eslint/js": "^9.39.2",
-		"@next/eslint-plugin-next": "^15.1.6",
+		"@next/eslint-plugin-next": "^16.1.4",
 		"@playwright/test": "^1.57.0",
 		"@types/js-cookie": "^3.0.6",
 		"@types/lodash": "^4.17.15",
