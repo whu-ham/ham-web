@@ -30,6 +30,7 @@ const LoginQRCode = () => {
 	}, [request]);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect
 		refreshQRCodeTicket().then(() => {});
 	}, [refreshQRCodeTicket]);
 

@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { SearchBarItem } from '@/app/component/type';
 import { JsCourseService } from '@/wasm/pkg';
 import { useRouter } from 'next/navigation';
-import { Button } from '@heroui/button';
 import useRequest from '@/app/common/request';
 import _ from 'lodash';
 
