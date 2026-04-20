@@ -1,0 +1,127 @@
+{
+	"common": {
+		"appName": "Ham",
+		"forWeb": "for Web",
+		"retry": "Retry",
+		"cancel": "Cancel",
+		"confirm": "Confirm",
+		"loading": "Loading…"
+	},
+	"language": {
+		"switcher": {
+			"ariaLabel": "Change language",
+			"label": "Language",
+			"auto": "Follow browser",
+			"autoWithDetected": "Follow browser ({detected})",
+			"autoUnsupported": "Follow browser (unsupported)"
+		}
+	},
+	"theme": {
+		"switcher": {
+			"ariaLabel": "Change theme",
+			"auto": "Follow system",
+			"light": "Light",
+			"dark": "Dark"
+		}
+	},
+	"login": {
+		"meta": {
+			"title": "Sign in to Ham"
+		},
+		"title": "Sign in to Ham",
+		"subtitle": "for Web",
+		"qr": {
+			"tip": "Scan the QR code with your camera or the Ham app",
+			"scanned": "Scanned, waiting for confirmation",
+			"expired": "QR code expired",
+			"refresh": "Refresh QR code",
+			"loginSuccess": "Signed in"
+		},
+		"divider": {
+			"other": "Or sign in with"
+		},
+		"passkey": {
+			"cta": "Sign in with passkey"
+		}
+	},
+	"home": {
+		"meta": {
+			"title": "Workbench | Ham"
+		},
+		"greeting": {
+			"lateNight": "Still up?",
+			"dawn": "Early bird",
+			"morning": "Good morning",
+			"noon": "Good noon",
+			"afternoon": "Good afternoon",
+			"evening": "Good evening",
+			"default": "Hello"
+		},
+		"logout": "Sign out",
+		"workbench": "Workbench",
+		"card": {
+			"grade": {
+				"title": "Grades",
+				"subtitle": "View grade distribution"
+			}
+		}
+	},
+	"sso": {
+		"meta": {
+			"title": "Authorize Ham"
+		},
+		"invalid": {
+			"title": "Invalid request",
+			"description": "Required authorization parameters are missing. Please go back to the third-party app and try again."
+		},
+		"deepLink": {
+			"title": "Ham app not detected",
+			"description": "The app may not be installed. Install the Ham app first and try again, or continue authorizing in this browser with a passkey.",
+			"download": "Download Ham app",
+			"reopen": "Already installed, reopen app",
+			"trying": {
+				"title": "Continuing in Ham",
+				"description": "Trying to open the Ham app, please wait\u2026",
+				"openApp": "Open Ham manually",
+				"opening": "Opening\u2026"
+			}
+		},
+		"login": {
+			"title": "Sign in to Ham to continue",
+			"subtitle": "You need to sign in before authorizing",
+			"divider": {
+				"other": "Or sign in with"
+			}
+		},
+		"qr": {
+			"tip": "Scan the QR code with the Ham app",
+			"scanned": "Scanned, waiting for confirmation",
+			"expired": "QR code expired",
+			"refresh": "Click to refresh",
+			"loginSuccess": "Signed in",
+			"createFailed": "Failed to create QR code, please retry later"
+		},
+		"passkey": {
+			"description": "Use the passkey you already registered in the Ham app to sign in without scanning.",
+			"cta": "Sign in with passkey",
+			"noPick": "No available passkey selected",
+			"loginFailed": "Passkey sign-in failed",
+			"unsupported": "This browser does not support passkeys. Please use the QR code instead.",
+			"hint": "No passkey yet? Sign in with the QR code first, then create one inside the Ham app."
+		},
+		"consent": {
+			"scopeHeader": "The app will receive the following permissions:",
+			"alreadyGranted": "Previously granted",
+			"switchAccount": "Switch account",
+			"reject": "Reject",
+			"authorize": "Authorize",
+			"autoAuthorize": "Auto-authorizing… tap to cancel",
+			"fetchFailed": "Failed to load authorization details",
+			"submitFailed": "Authorization failed",
+			"serverError": "Server error, please retry later",
+			"accessDenied": "Authorization cancelled",
+			"errorTitle": "Authorization failed",
+			"backToThirdParty": "Back to third-party app"
+		}
+	}
+}

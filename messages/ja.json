@@ -1,0 +1,127 @@
+{
+	"common": {
+		"appName": "Ham",
+		"forWeb": "for Web",
+		"retry": "再試行",
+		"cancel": "キャンセル",
+		"confirm": "確認",
+		"loading": "読み込み中…"
+	},
+	"language": {
+		"switcher": {
+			"ariaLabel": "言語を切り替える",
+			"label": "言語",
+			"auto": "ブラウザに従う",
+			"autoWithDetected": "ブラウザに従う（{detected}）",
+			"autoUnsupported": "ブラウザに従う（未対応）"
+		}
+	},
+	"theme": {
+		"switcher": {
+			"ariaLabel": "テーマを切り替える",
+			"auto": "システムに従う",
+			"light": "ライト",
+			"dark": "ダーク"
+		}
+	},
+	"login": {
+		"meta": {
+			"title": "Hamにログイン"
+		},
+		"title": "Hamにログイン",
+		"subtitle": "for Web",
+		"qr": {
+			"tip": "カメラまたはHamでQRコードをスキャンしてください",
+			"scanned": "スキャン完了、確認を待っています",
+			"expired": "QRコードの有効期限が切れました",
+			"refresh": "QRコードを更新",
+			"loginSuccess": "ログインしました"
+		},
+		"divider": {
+			"other": "その他のログイン方法"
+		},
+		"passkey": {
+			"cta": "パスキーでログイン"
+		}
+	},
+	"home": {
+		"meta": {
+			"title": "ワークベンチ | Ham"
+		},
+		"greeting": {
+			"lateNight": "まだ起きていますか",
+			"dawn": "おはようございます（早朝）",
+			"morning": "おはようございます",
+			"noon": "お昼です",
+			"afternoon": "こんにちは",
+			"evening": "こんばんは",
+			"default": "こんにちは"
+		},
+		"logout": "ログアウト",
+		"workbench": "ワークベンチ",
+		"card": {
+			"grade": {
+				"title": "成績",
+				"subtitle": "成績分布を確認"
+			}
+		}
+	},
+	"sso": {
+		"meta": {
+			"title": "Hamを認可"
+		},
+		"invalid": {
+			"title": "無効なリクエスト",
+			"description": "必要な認可パラメータが不足しています。サードパーティアプリに戻って再度お試しください。"
+		},
+		"deepLink": {
+			"title": "Hamアプリが見つかりません",
+			"description": "アプリがインストールされていない可能性があります。Hamアプリをインストールしてから再度開くか、このブラウザでパスキーを使って認可を続けてください。",
+			"download": "Hamアプリをダウンロード",
+			"reopen": "インストール済み、アプリを再度開く",
+			"trying": {
+				"title": "Hamで続行しています",
+				"description": "Hamアプリを開こうとしています。しばらくお待ちください…",
+				"openApp": "手動でHamを開く",
+				"opening": "開いています…"
+			}
+		},
+		"login": {
+			"title": "Hamにログインして認可を続ける",
+			"subtitle": "認可の前にHamアカウントでのログインが必要です",
+			"divider": {
+				"other": "または他の方法でログイン"
+			}
+		},
+		"qr": {
+			"tip": "HamアプリでQRコードをスキャンしてください",
+			"scanned": "スキャン完了、確認を待っています",
+			"expired": "QRコードの有効期限が切れました",
+			"refresh": "タップして更新",
+			"loginSuccess": "ログインしました",
+			"createFailed": "QRコードを作成できませんでした。後でもう一度お試しください"
+		},
+		"passkey": {
+			"description": "Hamアプリで登録済みのパスキーを使えば、スキャンせずにすばやくログインできます。",
+			"cta": "パスキーでログイン",
+			"noPick": "利用可能なパスキーが選択されていません",
+			"loginFailed": "パスキーログインに失敗しました",
+			"unsupported": "このブラウザはパスキーに対応していません。QRコードでログインしてください。",
+			"hint": "まだパスキーがない場合は、先にQRコードでログインし、HamアプリでPasskeyを作成してください。"
+		},
+		"consent": {
+			"scopeHeader": "次の権限が付与されます：",
+			"alreadyGranted": "以前に許可済み",
+			"switchAccount": "アカウントを切り替える",
+			"reject": "拒否",
+			"authorize": "認可する",
+			"autoAuthorize": "自動認可中… タップでキャンセル",
+			"fetchFailed": "認可情報の取得に失敗しました",
+			"submitFailed": "認可に失敗しました",
+			"serverError": "サーバーエラーです。後でもう一度お試しください",
+			"accessDenied": "認可をキャンセルしました",
+			"errorTitle": "認可に失敗しました",
+			"backToThirdParty": "サードパーティアプリに戻る"
+		}
+	}
+}
