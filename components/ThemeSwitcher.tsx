@@ -30,28 +30,29 @@
 'use client';
 
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { Key, useCallback, useEffect, useSyncExternalStore } from 'react';
+import { Key, useEffect } from 'react';
 
 import {
 	THEMES,
 	THEME_CLASSES,
-	THEME_COOKIE,
 	Theme,
 	isTheme,
 } from '@/components/theme/config';
+import {
+	resolvedThemeAtom,
+	systemThemeAtom,
+	themeOverrideAtom,
+} from '@/store/themeAtom';
 
 interface ThemeSwitcherProps {
 	className?: string;
 }
 
 const AUTO_KEY = 'auto' as const;
-
 type MenuKey = typeof AUTO_KEY | Theme;
 
-// Material Icons glyph per menu entry. Using the round family to
-// match the rest of the app (see `language` icon in
-// `LanguageSwitcher`).
 const THEME_ICON: Record<MenuKey, string> = {
 	auto: 'brightness_auto',
 	light: 'light_mode',
@@ -59,38 +60,8 @@ const THEME_ICON: Record<MenuKey, string> = {
 };
 
 /**
- * Reads `NEXT_THEME` directly off `document.cookie`. Cheap enough
- * that pulling in `js-cookie` here would be overkill.
- */
-const readThemeCookie = (): Theme | null => {
-	if (typeof document === 'undefined') return null;
-	const raw = document.cookie
-		.split(';')
-		.map((c) => c.trim())
-		.find((c) => c.startsWith(`${THEME_COOKIE}=`));
-	if (!raw) return null;
-	const value = decodeURIComponent(raw.slice(THEME_COOKIE.length + 1));
-	return isTheme(value) ? value : null;
-};
-
-/**
- * Resolves the theme that CSS `prefers-color-scheme` is currently
- * advertising. Returns `light` on the server / in browsers that
- * don't expose `matchMedia` so the resolved theme is always a
- * concrete value.
- */
-const detectSystemTheme = (): Theme => {
-	if (typeof window === 'undefined' || !window.matchMedia) return 'light';
-	return window.matchMedia('(prefers-color-scheme: dark)').matches
-		? 'dark'
-		: 'light';
-};
-
-/**
  * Writes BOTH `class="light|dark"` and `data-theme="light|dark"` on
- * `<html>`. The HeroUI v3 Colors guide explicitly names both hooks,
- * so covering both ensures user stylesheets targeting either
- * convention keep working regardless of which one they prefer.
+ * `<html>`. HeroUI v3 requires both hooks.
  */
 const applyThemeToDocument = (resolved: Theme) => {
 	if (typeof document === 'undefined') return;
@@ -99,82 +70,40 @@ const applyThemeToDocument = (resolved: Theme) => {
 	root.classList.remove(THEME_CLASSES[other]);
 	root.classList.add(THEME_CLASSES[resolved]);
 	root.setAttribute('data-theme', resolved);
-	// `color-scheme` lets the UA pick sensible defaults for scrollbars
-	// and form controls without per-element theming.
 	root.style.colorScheme = resolved;
 };
 
 const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 	const t = useTranslations('theme');
 
-	// Cookie snapshot. On the server there is no cookie to read, so
-	// we return `null` ("no override → follow system"). The first
-	// client render corrects this if the cookie is actually present.
-	const override = useSyncExternalStore(
-		subscribeNoop,
-		getOverrideSnapshot,
-		getOverrideServerSnapshot
-	);
+	const [override, setOverride] = useAtom(themeOverrideAtom);
+	const setSystemTheme = useSetAtom(systemThemeAtom);
+	const resolvedTheme = useAtomValue(resolvedThemeAtom);
 
-	// System preference snapshot. Unlike the cookie, this has a real
-	// change source (`matchMedia(...).addEventListener('change')`), so
-	// we wire the subscriber up properly to re-render on OS-level
-	// light/dark switches when the user is in auto mode.
-	const systemTheme = useSyncExternalStore(
-		subscribeSystemTheme,
-		getSystemThemeSnapshot,
-		getSystemThemeServerSnapshot
-	);
+	// Keep systemThemeAtom in sync with the OS preference.
+	useEffect(() => {
+		if (typeof window === 'undefined' || !window.matchMedia) return;
+		const mql = window.matchMedia('(prefers-color-scheme: dark)');
+		const handler = () => setSystemTheme(mql.matches ? 'dark' : 'light');
+		mql.addEventListener('change', handler);
+		return () => mql.removeEventListener('change', handler);
+	}, [setSystemTheme]);
 
-	const selectedKey: MenuKey = override ?? AUTO_KEY;
-	const resolvedTheme: Theme = override ?? systemTheme;
-
-	// Apply the resolved theme on every change. This is idempotent —
-	// `applyThemeToDocument` only flips two class names + one attribute,
-	// and React will skip the effect when the deps are unchanged.
+	// Apply the resolved theme to the document on every change.
 	useEffect(() => {
 		applyThemeToDocument(resolvedTheme);
 	}, [resolvedTheme]);
 
-	const writeOverride = useCallback((next: Theme) => {
-		document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=31536000; SameSite=Lax`;
-		try {
-			window.localStorage.setItem(THEME_COOKIE, next);
-		} catch {
-			// Ignore — private mode may block storage access.
-		}
-	}, []);
-
-	const clearOverride = useCallback(() => {
-		document.cookie = `${THEME_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
-		try {
-			window.localStorage.removeItem(THEME_COOKIE);
-		} catch {
-			// Ignore — private mode may block storage access.
-		}
-	}, []);
+	const selectedKey: MenuKey = override ?? AUTO_KEY;
 
 	const onAction = (rawKey: Key) => {
 		const key = String(rawKey);
 		if (key === AUTO_KEY) {
-			if (override === null) return;
-			clearOverride();
+			setOverride(null);
 		} else if (isTheme(key)) {
-			if (override === key) return;
-			writeOverride(key);
-		} else {
-			return;
+			setOverride(key);
 		}
-		// Kick the external-store subscribers so the component
-		// re-reads the cookie we just mutated. `useSyncExternalStore`
-		// only re-runs its getter on subscription events, so we
-		// dispatch a storage-like event manually. We piggy-back on
-		// `window`'s own event bus to keep the contract symmetric
-		// with the `subscribeNoop` helper (no external bus needed).
-		window.dispatchEvent(new Event('ham:theme-change'));
 	};
-
-	const triggerIcon = THEME_ICON[selectedKey];
 
 	return (
 		<Dropdown>
@@ -193,7 +122,7 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 					}
 					aria-hidden={true}
 				>
-					{triggerIcon}
+					{THEME_ICON[selectedKey]}
 				</span>
 			</Dropdown.Trigger>
 			<Dropdown.Popover placement={'bottom end'}>
@@ -230,42 +159,3 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 };
 
 export default ThemeSwitcher;
-
-// --- useSyncExternalStore helpers ------------------------------------
-
-/**
- * Cookie subscribers. `onAction` dispatches `ham:theme-change` after
- * mutating the cookie, which re-runs `getOverrideSnapshot` and
- * flushes the new selection to subscribers.
- */
-const subscribeNoop = (onChange: () => void) => {
-	if (typeof window === 'undefined') return () => {};
-	window.addEventListener('ham:theme-change', onChange);
-	// Cross-tab sync: another tab writing to localStorage should also
-	// invalidate our snapshot.
-	window.addEventListener('storage', onChange);
-	return () => {
-		window.removeEventListener('ham:theme-change', onChange);
-		window.removeEventListener('storage', onChange);
-	};
-};
-
-const getOverrideSnapshot = (): Theme | null => readThemeCookie();
-// Server snapshot: assume "no override" so the initial paint follows
-// whatever the inline bootstrap (or the browser default) rendered.
-const getOverrideServerSnapshot = (): Theme | null => null;
-
-/**
- * System-theme subscriber. `matchMedia(...).addEventListener('change')`
- * fires whenever the OS flips between light and dark, so we can keep
- * auto mode reactive without polling.
- */
-const subscribeSystemTheme = (onChange: () => void) => {
-	if (typeof window === 'undefined' || !window.matchMedia) return () => {};
-	const mql = window.matchMedia('(prefers-color-scheme: dark)');
-	mql.addEventListener('change', onChange);
-	return () => mql.removeEventListener('change', onChange);
-};
-
-const getSystemThemeSnapshot = (): Theme => detectSystemTheme();
-const getSystemThemeServerSnapshot = (): Theme => 'light';
