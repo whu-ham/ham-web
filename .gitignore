@@ -40,3 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /.idea/
+
+# claude code (keep shared rules/config, ignore local/private state)
+.claude/local/
+.claude/settings.local.json
+.claude/cache/
+.claude/logs/
+.claude/history/
+.claude/*.local.*
