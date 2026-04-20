@@ -7,15 +7,16 @@
  */
 import { useCallback, useEffect, useState } from 'react';
 import { CheckQRCodeLoginResponse, LoginService } from '@/wasm/pkg';
-import { Link } from '@heroui/link';
-import { Avatar } from '@heroui/avatar';
+import { Avatar, Link } from '@heroui/react';
 import { QRCodeSVG } from 'qrcode.react';
-import { useUserInfo } from '@/app/common/userinfo';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { useRouter } from 'next/navigation';
-import useRequest from '@/app/common/request';
+import useRequest from '@/hooks/useRequest';
+import { useTranslations } from 'next-intl';
 
 const LoginQRCode = () => {
 	const router = useRouter();
+	const t = useTranslations('login');
 	const [qrCodeLoginTicket, setQrCodeLoginTicket] = useState('');
 	const [qrCodeLoginResponse, setQrCodeLoginResponse] =
 		useState<CheckQRCodeLoginResponse>();
@@ -83,7 +84,7 @@ const LoginQRCode = () => {
 
 	return (
 		<div className={'flex flex-col items-center justify-center gap-4 mb-4'}>
-			<div className={'text-sm'}>使用相机或Ham扫描二维码登录</div>
+			<div className={'text-sm'}>{t('qr.tip')}</div>
 
 			<div className={'h-[128px]'}>
 				{(!qrCodeLoginResponse ||
@@ -100,12 +101,25 @@ const LoginQRCode = () => {
 					<div
 						className={'h-full flex flex-row justify-center items-center gap-2'}
 					>
-						<Avatar src={qrCodeLoginResponse.scan_user_info?.avatar_url} />
+						<Avatar>
+							{qrCodeLoginResponse.scan_user_info?.avatar_url ? (
+								<Avatar.Image
+									src={qrCodeLoginResponse.scan_user_info.avatar_url}
+									alt={qrCodeLoginResponse.scan_user_info.nickname ?? ''}
+								/>
+							) : null}
+							<Avatar.Fallback>
+								{(qrCodeLoginResponse.scan_user_info?.nickname ?? '?').slice(
+									0,
+									1
+								)}
+							</Avatar.Fallback>
+						</Avatar>
 						<div className={'max-w-32'}>
 							<div className={'overflow-ellipsis overflow-hidden font-bold'}>
 								{qrCodeLoginResponse.scan_user_info?.nickname}
 							</div>
-							<div className={'text-sm'}>扫码成功，等待确认</div>
+							<div className={'text-sm'}>{t('qr.scanned')}</div>
 						</div>
 					</div>
 				)}
@@ -115,7 +129,7 @@ const LoginQRCode = () => {
 						CheckQRCodeLoginResponse.check_qr_code_login_state_expired()) && (
 					<div className={'flex flex-col items-center gap-2 h-full'}>
 						<div className={'text-[36px]'}>\(o_o)/</div>
-						<div>{qrCodeLoginResponse?.message ?? '验证码已失效'}</div>
+						<div>{qrCodeLoginResponse?.message ?? t('qr.expired')}</div>
 						<Link
 							className={
 								'flex flex-row items-center text-blue-500 cursor-pointer'
@@ -123,7 +137,7 @@ const LoginQRCode = () => {
 							onPress={() => refreshQRCodeTicket()}
 						>
 							<div className={'material-icons-round'}>refresh</div>
-							<div>刷新二维码</div>
+							<div>{t('qr.refresh')}</div>
 						</Link>
 					</div>
 				)}
@@ -139,7 +153,7 @@ const LoginQRCode = () => {
 								done
 							</span>
 						</div>
-						<div>登录成功</div>
+						<div>{t('qr.loginSuccess')}</div>
 					</div>
 				)}
 			</div>

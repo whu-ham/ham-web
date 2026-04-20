@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2025/1/26 20:33
  */
-import { Divider } from '@heroui/divider';
+import { Separator } from '@heroui/react';
 import { JsCourseScoreItem, JsCourseScoreRangeResponseItem } from '@/wasm/pkg';
 
 const CourseGradeStatItem = ({ result }: { result: JsCourseScoreItem }) => {
@@ -27,7 +27,7 @@ const CourseGradeStatItem = ({ result }: { result: JsCourseScoreItem }) => {
 					})}
 				</div>
 			</div>
-			<Divider
+			<Separator
 				orientation={'vertical'}
 				className={'justify-self-center max-h-36'}
 			/>

@@ -18,8 +18,17 @@ export const config = {
 	],
 };
 
+// Paths that must be accessible to anonymous visitors. The SSO consent page is
+// explicitly allow-listed because it hosts its own login surface (QR + passkey)
+// and needs to preserve the original OAuth query parameters across the login
+// step — redirecting to /login would drop client_id / redirect_uri / state.
+const PUBLIC_PATHS = ['/login', '/sso-authorize'];
+
 export const middleware = (request: NextRequest) => {
-	if (request.nextUrl.pathname === '/login') {
+	const { pathname } = request.nextUrl;
+	if (
+		PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))
+	) {
 		return NextResponse.next();
 	}
 	if (request.cookies.has('token')) {

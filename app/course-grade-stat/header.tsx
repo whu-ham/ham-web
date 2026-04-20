@@ -1,4 +1,4 @@
-import { UserInfoAvatar } from '@/app/component/userinfo/UserInfoAvatar';
+import { UserInfoAvatar } from '@/components/userinfo/UserInfoAvatar';
 
 /**
  * @author orangeboyChen

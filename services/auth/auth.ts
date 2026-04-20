@@ -1,4 +1,4 @@
-import { useUserInfo } from '@/app/common/userinfo';
+import { useUserInfo } from '@/hooks/useUserInfo';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie';

@@ -3,16 +3,15 @@
  * @version 1.0
  * @date 2025/1/26 15:43
  */
-import { SearchBar } from '@/app/component/SearchBar';
+import { SearchBar } from '@/components/SearchBar';
 import { useCallback, useEffect, useState } from 'react';
-import { Divider } from '@heroui/divider';
-import { Link } from '@heroui/link';
+import { Separator, Link } from '@heroui/react';
 import { JsCourseService, JsSearchScoreHitItem } from '@/wasm/pkg';
-import { SearchBarItem } from '@/app/component/type';
+import { SearchBarItem } from '@/components/type';
 import { useRouter } from 'next/navigation';
-import { UserInfoAvatar } from '@/app/component/userinfo/UserInfoAvatar';
+import { UserInfoAvatar } from '@/components/userinfo/UserInfoAvatar';
 import _ from 'lodash';
-import useRequest from '@/app/common/request';
+import useRequest from '@/hooks/useRequest';
 
 const Header = ({ queryKeyword }: { queryKeyword: string }) => {
 	const [inputKeyword, setInputKeyword] = useState(queryKeyword);
@@ -84,7 +83,7 @@ const Header = ({ queryKeyword }: { queryKeyword: string }) => {
 					<UserInfoAvatar />
 				</div>
 			</div>
-			<Divider />
+			<Separator />
 		</div>
 	);
 };

@@ -1,11 +1,11 @@
 'use client';
 
-import { SearchBar } from '@/app/component/SearchBar';
+import { SearchBar } from '@/components/SearchBar';
 import { useCallback, useEffect, useState } from 'react';
-import { SearchBarItem } from '@/app/component/type';
+import { SearchBarItem } from '@/components/type';
 import { JsCourseService } from '@/wasm/pkg';
 import { useRouter } from 'next/navigation';
-import useRequest from '@/app/common/request';
+import useRequest from '@/hooks/useRequest';
 import _ from 'lodash';
 
 /**

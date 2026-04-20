@@ -5,10 +5,13 @@
  */
 import './page.scss';
 import { LoginBody, TitleLogo } from '@/app/login/components';
+import { getTranslations } from 'next-intl/server';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export async function generateMetadata() {
+	const t = await getTranslations('login');
 	return {
-		title: '登录Ham',
+		title: t('meta.title'),
 	};
 }
 
@@ -17,9 +20,12 @@ const LoginPage = () => {
 		<div
 			className={
 				'bg-black/10 min-h-screen flex justify-center items-center ' +
-				'px-4 md:px-12 lg:px-16 xl:px-32 2xl:px-48'
+				'px-4 md:px-12 lg:px-16 xl:px-32 2xl:px-48 relative'
 			}
 		>
+			<div className={'absolute top-4 right-4'}>
+				<LanguageSwitcher />
+			</div>
 			<div
 				className={
 					'grid grid-cols-[1fr] md:grid-cols-[1fr_1fr] bg-white rounded-[16px] ' +

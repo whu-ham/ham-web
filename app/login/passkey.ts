@@ -6,7 +6,7 @@
  * @date 2025/1/28 00:24
  */
 import { JsPasskeyService } from '@/wasm/pkg';
-import useRequest from '@/app/common/request';
+import useRequest from '@/hooks/useRequest';
 
 const usePasskey = () => {
 	const { request } = useRequest();

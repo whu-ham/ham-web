@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Divider } from '@heroui/divider';
-import { SearchBarItem } from '@/app/component/type';
+import { Separator } from '@heroui/react';
+import { SearchBarItem } from '@/components/type';
 import classNames from 'classnames';
 
 /**
@@ -165,7 +165,7 @@ const SearchBar = <T,>({
 					}
 				>
 					<div className={'px-[16px] w-full'}>
-						<Divider />
+						<Separator />
 					</div>
 					<div className={'overscroll-contain overflow-auto max-h-[80vh] '}>
 						<div className={'mt-[4px]'}>

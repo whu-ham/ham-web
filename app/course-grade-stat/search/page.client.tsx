@@ -8,7 +8,7 @@ import {
 	JsCourseScoreItemType,
 	JsScoreService,
 } from '@/wasm/pkg';
-import useRequest from '@/app/common/request';
+import useRequest from '@/hooks/useRequest';
 import { Header } from '@/app/course-grade-stat/search/header';
 import Body from '@/app/course-grade-stat/search/body';
 

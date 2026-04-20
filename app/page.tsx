@@ -4,10 +4,12 @@
  * @date 2025/1/25 12:40
  */
 import { CardItem, Header } from '@/app/page.client';
+import { getTranslations } from 'next-intl/server';
 
 export async function generateMetadata() {
+	const t = await getTranslations('home');
 	return {
-		title: '工具台 | Ham',
+		title: t('meta.title'),
 	};
 }
 

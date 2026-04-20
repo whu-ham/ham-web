@@ -4,20 +4,22 @@ import Image from 'next/image';
 import icon from '@/public/icon-1024.png';
 import usePasskey from '@/app/login/passkey';
 import { LoginQRCode } from '@/app/login/loginQRCode';
-import { Divider } from '@heroui/divider';
-import { Button } from '@heroui/button';
+import { Separator, Button } from '@heroui/react';
+import { useTranslations } from 'next-intl';
 
 const TitleLogo = () => {
+	const t = useTranslations('login');
 	return (
 		<div className={'mb-4 flex flex-col items-center md:items-start'}>
 			<Image src={icon} alt={'logo'} className={'size-16 rounded-[12px]'} />
-			<h1 className={'text-2xl mt-3'}>登录Ham</h1>
-			<div className={'text-sm'}>for Web</div>
+			<h1 className={'text-2xl mt-3'}>{t('title')}</h1>
+			<div className={'text-sm'}>{t('subtitle')}</div>
 		</div>
 	);
 };
 
 const LoginBody = () => {
+	const t = useTranslations('login');
 	const { getPasskeyCredentials } = usePasskey();
 	const doPasskeyLogin = () => {
 		getPasskeyCredentials()
@@ -30,13 +32,16 @@ const LoginBody = () => {
 			<LoginQRCode />
 			<div className={'w-full'}>
 				<div className={'flex items-center justify-center gap-4 m-2'}>
-					<Divider className={'clear-no-shrink max-w-16'} />
-					<span className={'shrink-0 text-sm text-gray-400'}>其它登录方式</span>
-					<Divider className={'clear-no-shrink max-w-16'} />
+					<Separator className={'clear-no-shrink max-w-16'} />
+					<span className={'shrink-0 text-sm text-gray-400'}>
+						{t('divider.other')}
+					</span>
+					<Separator className={'clear-no-shrink max-w-16'} />
 				</div>
 				<div className={'text-center'}>
 					<Button onPress={doPasskeyLogin}>
-						<span className={'material-icons-round'}>key</span>通过Passkey登录
+						<span className={'material-icons-round'}>key</span>
+						{t('passkey.cta')}
 					</Button>
 					{/*<div className={'flex justify-center items-center gap-8 mt-4'}>*/}
 					{/*	<div*/}
