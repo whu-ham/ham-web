@@ -78,6 +78,7 @@
 			"title": "Hamアプリが見つかりません",
 			"description": "アプリがインストールされていない可能性があります。Hamアプリをインストールしてから再度開くか、このブラウザでパスキーを使って認可を続けてください。",
 			"download": "Hamアプリをダウンロード",
+			"downloadAppStore": "App Storeで入手する",
 			"reopen": "インストール済み、アプリを再度開く",
 			"trying": {
 				"title": "Hamで続行しています",

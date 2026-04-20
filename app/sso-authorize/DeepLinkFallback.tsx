@@ -45,10 +45,11 @@ interface DeepLinkFallbackProps {
 
 const DeepLinkFallback = ({ reopenApp, onLoggedIn }: DeepLinkFallbackProps) => {
 	const t = useTranslations('sso');
-	const storeUrl = useMemo(() => {
-		if (typeof navigator === 'undefined') return undefined;
-		return getAppStoreURL(detectDeviceKind(navigator.userAgent));
+	const deviceKind = useMemo(() => {
+		if (typeof navigator === 'undefined') return 'desktop' as const;
+		return detectDeviceKind(navigator.userAgent);
 	}, []);
+	const storeUrl = useMemo(() => getAppStoreURL(deviceKind), [deviceKind]);
 	// Passkey availability is only known on the client.
 	// useSyncExternalStore is React's official SSR-safe way to expose a
 	// browser-only value without triggering the set-state-in-effect rule.
@@ -79,27 +80,27 @@ const DeepLinkFallback = ({ reopenApp, onLoggedIn }: DeepLinkFallbackProps) => {
 				</header>
 
 				<div className={'flex flex-col gap-3'}>
-					{storeUrl && (
-						// v3 Button dropped the `as` polymorphic prop. Wrap in a
-						// native anchor so the primary CTA still navigates to the
-						// app store while keeping the Button styling.
-						<a
-							href={storeUrl}
-							target={'_blank'}
-							rel={'noreferrer'}
-							className={'contents'}
-						>
-							<Button variant={'primary'} className={'w-full'}>
-								<span
-									className={'material-icons-round !text-[18px] !leading-none'}
-									aria-hidden={true}
-								>
-									get_app
-								</span>
-								{t('deepLink.download')}
-							</Button>
-						</a>
-					)}
+					{/* v3 Button dropped the `as` polymorphic prop. Wrap in a
+					    native anchor so the primary CTA still navigates to the
+					    store/download page while keeping the Button styling. */}
+					<a
+						href={storeUrl}
+						target={'_blank'}
+						rel={'noreferrer'}
+						className={'contents'}
+					>
+						<Button variant={'primary'} className={'w-full'}>
+							<span
+								className={'material-icons-round !text-[18px] !leading-none'}
+								aria-hidden={true}
+							>
+								get_app
+							</span>
+							{deviceKind === 'ios'
+								? t('deepLink.downloadAppStore')
+								: t('deepLink.download')}
+						</Button>
+					</a>
 					{/*
 					 * "I already installed it" is a secondary escape hatch —
 					 * rendered as a text link so it doesn't compete with the

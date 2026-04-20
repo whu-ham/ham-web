@@ -42,14 +42,12 @@ export function isMobile(userAgent: string): boolean {
  * product-approved defaults keeps the fallback page self-contained until
  * that config pipeline lands.
  */
-export function getAppStoreURL(kind: DeviceKind): string | undefined {
+export function getAppStoreURL(kind: DeviceKind): string {
 	switch (kind) {
 		case 'ios':
-			return 'https://apps.apple.com/app/ham/id0000000000';
-		case 'android':
-			return 'https://ham.nowcent.cn/download/ham-android.apk';
+			return 'https://apps.apple.com/cn/app/ham/id1577896044';
 		default:
-			return undefined;
+			return 'https://whu-ham.github.io/download/';
 	}
 }
 

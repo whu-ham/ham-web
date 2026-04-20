@@ -78,6 +78,7 @@
 			"title": "未检测到HAM App",
 			"description": "可能是APP未安装。请先安装HAM App后再次打开，或使用Passkey在当前浏览器中继续授权。",
 			"download": "下载HAM App",
+			"downloadAppStore": "前往App Store",
 			"reopen": "我已安装，重新打开App",
 			"trying": {
 				"title": "正在Ham中继续",

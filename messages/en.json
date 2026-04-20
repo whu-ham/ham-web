@@ -78,6 +78,7 @@
 			"title": "Ham app not detected",
 			"description": "The app may not be installed. Install the Ham app first and try again, or continue authorizing in this browser with a passkey.",
 			"download": "Download Ham app",
+			"downloadAppStore": "Get it on the App Store",
 			"reopen": "Already installed, reopen app",
 			"trying": {
 				"title": "Continuing in Ham",
