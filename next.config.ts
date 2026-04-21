@@ -1,3 +1,8 @@
+/**
+ * @author Claude
+ * @version 1.2
+ * @date 2026/4/21 20:30:23
+ */
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
 

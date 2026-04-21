@@ -5,7 +5,9 @@
 	"scripts": {
 		"dev": "next dev --turbopack",
 		"build": "next build",
+		"build:cf": "opennextjs-cloudflare build",
 		"start": "next start",
+		"preview": "opennextjs-cloudflare preview",
 		"lint": "eslint ."
 	},
 	"dependencies": {
@@ -19,7 +21,7 @@
 		"jotai": "^2.16.2",
 		"js-cookie": "^3.0.5",
 		"lodash": "4.17.23",
-		"next": "16.1.4",
+		"next": "16.2.4",
 		"next-intl": "^4.9.1",
 		"qrcode.react": "^4.2.0",
 		"react": "^19.0.0",
@@ -32,6 +34,7 @@
 		"@eslint/eslintrc": "^3.3.3",
 		"@eslint/js": "^9.39.2",
 		"@next/eslint-plugin-next": "^16.1.4",
+		"@opennextjs/cloudflare": "^1.19.3",
 		"@playwright/test": "^1.57.0",
 		"@tailwindcss/postcss": "^4",
 		"@types/js-cookie": "^3.0.6",
@@ -52,6 +55,7 @@
 		"sass": "^1.83.4",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^5",
-		"typescript-eslint": "^8.53.1"
+		"typescript-eslint": "^8.53.1",
+		"wrangler": "^4.84.0"
 	}
 }
