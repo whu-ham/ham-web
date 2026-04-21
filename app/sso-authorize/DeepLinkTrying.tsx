@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.2
+ * @date 2026/4/21 10:10:12
  *
  * Intermediate mobile screen shown while we auto-attempt `ham://` and
  * wait to see whether the OS hands the user off to the native App.
@@ -14,26 +14,20 @@
  */
 'use client';
 
-import { Button, Spinner } from '@heroui/react';
+import { Link, Spinner } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
 import HeaderBar from '@/app/sso-authorize/HeaderBar';
 
 interface DeepLinkTryingProps {
 	/**
-	 * Re-attempt the deep-link navigation. Driven by the orchestrator so
-	 * the same timeout/failure rules apply to manual taps as to the
-	 * initial auto-attempt.
+	 * The deep-link URL to open. Rendered as a plain anchor `<Link>`
+	 * so the OS can handle the `ham://` scheme natively.
 	 */
-	openApp: () => void;
-	/**
-	 * True while a manual attempt is in flight. We disable the button
-	 * and swap the label to "Opening…" for visual feedback.
-	 */
-	opening: boolean;
+	deepLinkUrl: string;
 }
 
-const DeepLinkTrying = ({ openApp, opening }: DeepLinkTryingProps) => {
+const DeepLinkTrying = ({ deepLinkUrl }: DeepLinkTryingProps) => {
 	const t = useTranslations('sso.deepLink.trying');
 
 	return (
@@ -53,14 +47,9 @@ const DeepLinkTrying = ({ openApp, opening }: DeepLinkTryingProps) => {
 					<h1 className={'text-xl font-bold text-foreground'}>{t('title')}</h1>
 					<p className={'text-sm text-muted'}>{t('description')}</p>
 				</div>
-				<Button
-					variant={'primary'}
-					className={'w-full'}
-					isPending={opening}
-					onPress={openApp}
-				>
-					{opening ? t('opening') : t('openApp')}
-				</Button>
+			<Link href={deepLinkUrl} className={'w-full flex justify-center'}>
+				{t('openApp')}
+			</Link>
 			</div>
 		</div>
 	);

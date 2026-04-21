@@ -1,7 +1,7 @@
 /**
- * @author Codex
- * @version 1.2
- * @date 2026/4/20
+ * @author Claude
+ * @version 1.3
+ * @date 2026/4/21 12:43:48
  *
  * Mobile fallback view shown when the `ham://sso-authorize` deep link did
  * not switch the user to the native HAM App. Offers three exit doors,
@@ -24,7 +24,7 @@ import {
 	isPasskeySupported,
 } from '@/services/sso/ua';
 import HeaderBar from '@/app/sso-authorize/HeaderBar';
-import PasskeyLoginTab from '@/app/sso-authorize/PasskeyLoginTab';
+import PasskeyLoginView from '@/app/sso-authorize/PasskeyLoginView';
 
 // Passkey support never changes at runtime, so subscribe() is a no-op —
 // useSyncExternalStore gives us an SSR-safe client-only boolean without
@@ -38,7 +38,7 @@ interface DeepLinkFallbackProps {
 	/**
 	 * Invoked when Passkey authentication succeeds. The parent is
 	 * responsible for re-reading the session and transitioning into
-	 * the consent stage — same contract that `LoginTabs` uses.
+	 * the consent stage — same contract that `LoginView` uses.
 	 */
 	onLoggedIn: () => void;
 }
@@ -126,7 +126,7 @@ const DeepLinkFallback = ({ reopenApp, onLoggedIn }: DeepLinkFallbackProps) => {
 				 * already the "login" surface, so a second page switch just
 				 * added friction. We reuse the existing `login.divider.other`
 				 * copy ("Or sign in with") so the wording stays consistent
-				 * with LoginTabs on desktop.
+	 * with LoginView on desktop.
 				 *
 				 * Rendered only when WebAuthn is actually available; on
 				 * unsupported browsers we fall through to "install the app"
@@ -141,7 +141,7 @@ const DeepLinkFallback = ({ reopenApp, onLoggedIn }: DeepLinkFallbackProps) => {
 							</span>
 							<Separator className={'w-16 shrink'} />
 						</div>
-						<PasskeyLoginTab compact={true} onLoggedIn={onLoggedIn} />
+					<PasskeyLoginView compact={true} onLoggedIn={onLoggedIn} />
 					</>
 				)}
 			</div>

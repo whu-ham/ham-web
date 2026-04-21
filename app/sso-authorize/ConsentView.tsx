@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.5
+ * @date 2026/4/21 11:52:04
  *
  * Consent page rendered once the user is signed into HAM Web. Mirrors
  * the layout of the native App consent dialog: third-party app header,
@@ -13,7 +13,7 @@
  */
 'use client';
 
-import { Avatar, Button, Link } from '@heroui/react';
+import { Avatar, Button, Checkbox, CheckboxGroup, Link } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -47,6 +47,14 @@ const ConsentView = ({ params, me, onSwitchAccount }: ConsentViewProps) => {
 	const [submitting, setSubmitting] = useState(false);
 	const [autoConfirmPending, setAutoConfirmPending] = useState(false);
 	const autoConfirmTimer = useRef<number | null>(null);
+	// Tracks which scopes the user has selected.
+	const [checkedScopes, setCheckedScopes] = useState<string[]>([]);
+
+	// Initialise checkedScopes whenever info loads.
+	useEffect(() => {
+		if (!info) return;
+		setCheckedScopes(info.scopes.map((s) => s.scope));
+	}, [info]);
 
 	const bail = useCallback(
 		(oauthError: 'access_denied' | 'server_error') => {
@@ -72,7 +80,7 @@ const ConsentView = ({ params, me, onSwitchAccount }: ConsentViewProps) => {
 			try {
 				const resp = await WebAuthApi.consentConfirm({
 					app_id: params.appId,
-					scope: params.scope,
+					scope: checkedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
 					nonce,
@@ -89,7 +97,7 @@ const ConsentView = ({ params, me, onSwitchAccount }: ConsentViewProps) => {
 				setSubmitting(false);
 			}
 		},
-		[bail, params.appId, params.redirectUri, params.scope, params.state, t]
+		[bail, checkedScopes, params.appId, params.redirectUri, params.state, t]
 	);
 
 	// Load consent info on mount. The backend issues a fresh nonce each
@@ -218,22 +226,33 @@ const ConsentView = ({ params, me, onSwitchAccount }: ConsentViewProps) => {
 					<h2 className={'text-sm font-medium text-muted'}>
 						{t('scopeHeader')}
 					</h2>
-					<ul className={'flex flex-col gap-2'}>
+					<CheckboxGroup
+						value={checkedScopes}
+						onChange={(v) => {
+							// Required scopes must remain selected regardless of user
+							// interaction. Merge the incoming selection with the
+							// required set so the UI never drops them.
+							const next = new Set(v as string[]);
+							info.scopes.forEach((s) => {
+								if (s.required) next.add(s.scope);
+							});
+							setCheckedScopes(Array.from(next));
+						}}
+						className={'flex flex-col gap-0'}
+					>
 						{info.scopes.map((s) => (
-							<li
+							<Checkbox
 								key={s.scope}
+								value={s.scope}
+								isDisabled={s.required || s.already_granted}
 								className={
-									'flex items-start gap-2 bg-default rounded-[12px] p-3'
+									'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
 								}
 							>
-								<span
-									className={
-										'material-icons-round text-accent !text-[20px] mt-0.5 shrink-0'
-									}
-								>
-									check_circle
-								</span>
-								<div className={'flex flex-col min-w-0'}>
+								<Checkbox.Control className={'mt-0.5 shrink-0'}>
+									<Checkbox.Indicator />
+								</Checkbox.Control>
+								<Checkbox.Content className={'flex flex-col min-w-0'}>
 									<span
 										className={
 											'text-sm font-medium text-foreground break-words'
@@ -241,15 +260,21 @@ const ConsentView = ({ params, me, onSwitchAccount }: ConsentViewProps) => {
 									>
 										{s.description}
 									</span>
-									{s.already_granted && (
+									{s.required ? (
 										<span className={'text-xs text-muted'}>
-											{t('alreadyGranted')}
+											{t('required')}
 										</span>
+									) : (
+										s.already_granted && (
+											<span className={'text-xs text-muted'}>
+												{t('alreadyGranted')}
+											</span>
+										)
 									)}
-								</div>
-							</li>
+								</Checkbox.Content>
+							</Checkbox>
 						))}
-					</ul>
+					</CheckboxGroup>
 				</section>
 
 				<footer

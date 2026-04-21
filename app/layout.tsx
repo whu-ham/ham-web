@@ -80,6 +80,16 @@ const Body = ({
 }) => {
 	return (
 		<body suppressHydrationWarning>
+			{/*
+			 * Re-run the same bootstrap script at the top of <body>.
+			 * React hydration reconciles <html> attributes against the
+			 * server-rendered HTML (which may be 'light' in auto mode),
+			 * potentially overwriting what the <head> script wrote.
+			 * Running it again here — synchronously, before any React
+			 * content is painted — ensures the correct theme is always
+			 * in place after hydration without waiting for useEffect.
+			 */}
+			<script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
 			<NextIntlClientProvider locale={locale} messages={messages}>
 				<Providers>{children}</Providers>
 			</NextIntlClientProvider>

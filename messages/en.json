@@ -76,13 +76,13 @@
 		},
 		"deepLink": {
 			"title": "Ham app not detected",
-			"description": "The app may not be installed. Install the Ham app first and try again, or continue authorizing in this browser with a passkey.",
-			"download": "Download Ham app",
+			"description": "The app may not be installed. Install Ham first and try again, or continue authorizing in this browser with a passkey.",
+			"download": "Download Ham",
 			"downloadAppStore": "Get it on the App Store",
-			"reopen": "Already installed, reopen app",
+			"reopen": "Already installed, reopen Ham",
 			"trying": {
 				"title": "Continuing in Ham",
-				"description": "Trying to open the Ham app, please wait\u2026",
+				"description": "Trying to open Ham, please wait…",
 				"openApp": "Open Ham manually",
 				"opening": "Opening\u2026"
 			}
@@ -95,7 +95,7 @@
 			}
 		},
 		"qr": {
-			"tip": "Scan the QR code with the Ham app",
+			"tip": "Scan the QR code with Ham",
 			"scanned": "Scanned, waiting for confirmation",
 			"expired": "QR code expired",
 			"refresh": "Click to refresh",
@@ -103,16 +103,17 @@
 			"createFailed": "Failed to create QR code, please retry later"
 		},
 		"passkey": {
-			"description": "Use the passkey you already registered in the Ham app to sign in without scanning.",
+			"description": "Use the passkey you already registered in Ham to sign in without scanning.",
 			"cta": "Sign in with passkey",
 			"noPick": "No available passkey selected",
 			"loginFailed": "Passkey sign-in failed",
 			"unsupported": "This browser does not support passkeys. Please use the QR code instead.",
-			"hint": "No passkey yet? Sign in with the QR code first, then create one inside the Ham app."
+			"hint": "No passkey yet? Sign in with the QR code first, then create one inside Ham."
 		},
 		"consent": {
 			"scopeHeader": "The app will receive the following permissions:",
 			"alreadyGranted": "Previously granted",
+			"required": "Required",
 			"switchAccount": "Switch account",
 			"reject": "Reject",
 			"authorize": "Authorize",
@@ -121,6 +122,8 @@
 			"submitFailed": "Authorization failed",
 			"serverError": "Server error, please retry later",
 			"accessDenied": "Authorization cancelled",
+			"rejected": "You have rejected the authorization request",
+			"authorized": "Authorization successful",
 			"errorTitle": "Authorization failed",
 			"backToThirdParty": "Back to third-party app"
 		}

@@ -1,9 +1,9 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.3
+ * @date 2026/4/21 12:43:48
  *
- * Passkey login tab. Talks to the new HTTP endpoints:
+ * Passkey login view. Talks to the new HTTP endpoints:
  *   POST /web/auth/passkey/option   — returns the WebAuthn request options
  *   POST /web/auth/passkey/login    — verifies the assertion + Set-Cookie
  *
@@ -22,21 +22,21 @@ import toast from 'react-hot-toast';
 import { ApiError, WebAuthApi } from '@/services/sso/api';
 import { isPasskeySupported } from '@/services/sso/ua';
 
-interface PasskeyLoginTabProps {
+interface PasskeyLoginViewProps {
 	onLoggedIn: () => void;
 	/**
-	 * When true, the tab renders as a slim CTA suitable for stacking
+	 * When true, the view renders as a slim CTA suitable for stacking
 	 * below the QR code (no large emoji / description / hint). Used by
-	 * `LoginTabs` on desktop where QR is the primary option and Passkey
+	 * `LoginView` on desktop where QR is the primary option and Passkey
 	 * is the secondary "or" option.
 	 */
 	compact?: boolean;
 }
 
-const PasskeyLoginTab = ({
+const PasskeyLoginView = ({
 	onLoggedIn,
 	compact = false,
-}: PasskeyLoginTabProps) => {
+}: PasskeyLoginViewProps) => {
 	const t = useTranslations('sso.passkey');
 	const [loading, setLoading] = useState(false);
 	const [supported, setSupported] = useState(true);
@@ -196,4 +196,4 @@ function credentialToJSON(credential: PublicKeyCredential) {
 	};
 }
 
-export default PasskeyLoginTab;
+export default PasskeyLoginView;

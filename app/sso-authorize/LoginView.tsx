@@ -1,13 +1,13 @@
 /**
- * @author Codex
- * @version 2.0
- * @date 2026/4/20
+ * @author Claude
+ * @version 2.4
+ * @date 2026/4/21 12:47:55
  *
  * Combined login surface for the /sso-authorize page. On desktop both
  * the QR code and the Passkey button are shown stacked, mirroring the
  * `/login` page layout: QR on top, a centered "or sign in with"
  * separator, and the Passkey CTA below. On the mobile Passkey
- * fallback path (showQR = false) we render the Passkey tab alone in
+ * fallback path (showQR = false) we render the Passkey view alone in
  * its standalone form.
  */
 'use client';
@@ -15,16 +15,16 @@
 import { Separator } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
-import QRLoginTab from '@/app/sso-authorize/QRLoginTab';
-import PasskeyLoginTab from '@/app/sso-authorize/PasskeyLoginTab';
 import HeaderBar from '@/app/sso-authorize/HeaderBar';
+import PasskeyLoginView from '@/app/sso-authorize/PasskeyLoginView';
+import QRLoginView from '@/app/sso-authorize/QRLoginView';
 
-interface LoginTabsProps {
+interface LoginViewProps {
 	showQR: boolean;
 	onLoggedIn: () => void;
 }
 
-const LoginTabs = ({ showQR, onLoggedIn }: LoginTabsProps) => {
+const LoginView = ({ showQR, onLoggedIn }: LoginViewProps) => {
 	const t = useTranslations('sso');
 
 	return (
@@ -53,7 +53,7 @@ const LoginTabs = ({ showQR, onLoggedIn }: LoginTabsProps) => {
 				<section className={'flex flex-col items-center gap-6'}>
 					{showQR ? (
 						<>
-							<QRLoginTab onLoggedIn={onLoggedIn} />
+							<QRLoginView onLoggedIn={onLoggedIn} />
 							{/*
 							 * "Or sign in with" divider — matches the pattern used on
 							 * the standalone /login page (app/login/components.tsx).
@@ -75,10 +75,10 @@ const LoginTabs = ({ showQR, onLoggedIn }: LoginTabsProps) => {
 								</span>
 								<Separator className={'w-16 shrink'} />
 							</div>
-							<PasskeyLoginTab onLoggedIn={onLoggedIn} compact />
+							<PasskeyLoginView onLoggedIn={onLoggedIn} compact />
 						</>
 					) : (
-						<PasskeyLoginTab onLoggedIn={onLoggedIn} />
+						<PasskeyLoginView onLoggedIn={onLoggedIn} />
 					)}
 				</section>
 			</div>
@@ -86,4 +86,4 @@ const LoginTabs = ({ showQR, onLoggedIn }: LoginTabsProps) => {
 	);
 };
 
-export default LoginTabs;
+export default LoginView;

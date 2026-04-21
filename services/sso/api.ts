@@ -62,6 +62,13 @@ export interface ConsentScopeDetail {
 	scope: string;
 	description: string;
 	already_granted: boolean;
+	/**
+	 * Required scopes (e.g. "openid") are mandatory — the frontend must render
+	 * them as checked + disabled so the user cannot uncheck them. The backend
+	 * always injects the required set at the head of the list, even when the
+	 * client did not request them, so this flag is authoritative.
+	 */
+	required: boolean;
 }
 
 export interface ConsentInfoResponse {

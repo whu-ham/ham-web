@@ -1,9 +1,9 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.7
+ * @date 2026/4/21 12:43:48
  *
- * QR login tab backed by the new HTTP endpoints. Differs from the legacy
+ * QR login view backed by the new HTTP endpoints. Differs from the legacy
  * `LoginQRCode` component (gRPC/WASM) in three important ways:
  *   1. `POST /web/auth/qr/ticket` / `GET /web/auth/qr/ticket/:ticket`
  *      are called via plain `fetch` with `credentials: 'include'` so the
@@ -16,7 +16,7 @@
  */
 'use client';
 
-import { Avatar, Button } from '@heroui/react';
+import { Avatar } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -35,11 +35,11 @@ const POLL_INTERVAL_MS = 2000;
 // a single on-screen toast instead of stacking.
 const CREATE_FAILED_TOAST_ID = 'sso-qr-create-failed';
 
-interface QRLoginTabProps {
+interface QRLoginViewProps {
 	onLoggedIn: () => void;
 }
 
-const QRLoginTab = ({ onLoggedIn }: QRLoginTabProps) => {
+const QRLoginView = ({ onLoggedIn }: QRLoginViewProps) => {
 	const t = useTranslations('sso.qr');
 	const [ticket, setTicket] = useState<string>('');
 	const [check, setCheck] = useState<CheckTicketResponse | null>(null);
@@ -121,48 +121,52 @@ const QRLoginTab = ({ onLoggedIn }: QRLoginTabProps) => {
 		<div className={'flex flex-col items-center gap-4'}>
 			<div className={'text-sm text-muted'}>{t('tip')}</div>
 
+		{/* Fixed-height wrapper keeps card height stable across all states */}
 			<div
 				className={
-					'size-[160px] flex items-center justify-center relative rounded-[12px] bg-surface border border-border'
+					'h-[160px] flex items-center justify-center relative rounded-[12px]'
 				}
 			>
-				{createFailed && (
-					// Placeholder shown when ticket creation failed. The
-					// whole tile is clickable so the user can retry without
-					// hunting for a tiny button — the material `refresh`
-					// glyph doubles as the affordance.
-					<button
-						type={'button'}
-						onClick={refresh}
-						disabled={creating}
-						aria-label={t('refresh')}
+			{/* Create failed: gray refresh button, no white bg */}
+			{createFailed && (
+				<button
+					type={'button'}
+					onClick={refresh}
+					disabled={creating}
+					aria-label={t('refresh')}
+					className={
+						'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+					}
+				>
+					<span
 						className={
-							'flex flex-col items-center justify-center gap-2 size-full rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+							'material-icons-round text-muted !text-[40px] !leading-none'
 						}
+						aria-hidden={true}
 					>
-						<span
-							className={
-								'material-icons-round text-muted !text-[40px] !leading-none'
-							}
-							aria-hidden={true}
-						>
-							refresh
-						</span>
-						<span className={'text-xs text-muted'}>{t('refresh')}</span>
-					</button>
-				)}
+						refresh
+					</span>
+					<span className={'text-xs text-muted'}>{t('refresh')}</span>
+				</button>
+			)}
 
-				{!createFailed &&
-					!isExpired &&
-					!isConfirmed &&
-					!isScanned &&
-					ticket && (
+			{/* White QR box — only shown when there is actually a QR code to display */}
+			{!createFailed && !isExpired && !isConfirmed && !isScanned && (
+			<div
+				className={
+					'size-[160px] flex items-center justify-center rounded-[12px] bg-white border border-border'
+				}
+			>
+					{ticket && (
 						<QRCodeSVG
 							value={`ham://qrcode-login?ticket=${ticket}`}
 							size={144}
 						/>
 					)}
+				</div>
+			)}
 
+				{/* Scanned: hide QR, show avatar + label centered */}
 				{!createFailed && isScanned && (
 					<div className={'flex flex-col items-center gap-2'}>
 						<Avatar>
@@ -183,25 +187,13 @@ const QRLoginTab = ({ onLoggedIn }: QRLoginTabProps) => {
 						>
 							{check?.scan_user_info?.nickname ?? ''}
 						</div>
-						<div className={'text-xs text-muted'}>{t('scanned')}</div>
+						<div className={'text-xs text-muted text-center'}>
+							{t('scanned')}
+						</div>
 					</div>
 				)}
 
-				{!createFailed && isExpired && (
-					<div className={'flex flex-col items-center gap-2 px-2 text-center'}>
-						<div className={'text-3xl'}>⌛</div>
-						<div className={'text-sm text-foreground'}>{t('expired')}</div>
-						<Button
-							size={'sm'}
-							variant={'primary'}
-							isPending={creating}
-							onPress={() => refresh()}
-						>
-							{t('refresh')}
-						</Button>
-					</div>
-				)}
-
+				{/* Confirmed: hide QR, show success icon + label centered */}
 				{!createFailed && isConfirmed && (
 					<div className={'flex flex-col items-center gap-2'}>
 						<div
@@ -217,12 +209,37 @@ const QRLoginTab = ({ onLoggedIn }: QRLoginTabProps) => {
 								done
 							</span>
 						</div>
-						<div className={'text-sm text-foreground'}>{t('loginSuccess')}</div>
+						<div className={'text-sm text-foreground text-center'}>
+							{t('loginSuccess')}
+						</div>
 					</div>
+				)}
+
+			{/* Expired: hide QR, show refresh button + reason centered (no white bg) */}
+				{!createFailed && isExpired && (
+					<button
+						type={'button'}
+						onClick={refresh}
+						disabled={creating}
+						aria-label={t('refresh')}
+						className={
+							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+						}
+					>
+						<span
+							className={
+								'material-icons-round text-muted !text-[40px] !leading-none'
+							}
+							aria-hidden={true}
+						>
+							refresh
+						</span>
+						<span className={'text-xs text-muted'}>{t('expired')}</span>
+					</button>
 				)}
 			</div>
 		</div>
 	);
 };
 
-export default QRLoginTab;
+export default QRLoginView;

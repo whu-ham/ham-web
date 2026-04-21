@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/20
+ * @version 1.8
+ * @date 2026/4/21 12:43:48
  *
  * Client-side orchestrator for /sso-authorize.
  *
@@ -32,8 +32,13 @@ import ConsentView from '@/app/sso-authorize/ConsentView';
 import DeepLinkFallback from '@/app/sso-authorize/DeepLinkFallback';
 import DeepLinkTrying from '@/app/sso-authorize/DeepLinkTrying';
 import InvalidRequestView from '@/app/sso-authorize/InvalidRequestView';
-import LoginTabs from '@/app/sso-authorize/LoginTabs';
-import { ApiError, MeResponse, WebAuthApi } from '@/services/sso/api';
+import LoginView from '@/app/sso-authorize/LoginView';
+import {
+	ApiError,
+	MeResponse,
+	WebAuthApi,
+} from '@/services/sso/api';
+
 import {
 	buildSsoAuthorizeDeepLink,
 	tryLaunchDeepLink,
@@ -62,6 +67,10 @@ type Stage =
 const AUTO_PROBE_TIMEOUT_MS = 1500;
 const MANUAL_PROBE_TIMEOUT_MS = 3000;
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 function parseParams(): SsoAuthorizeParams | null {
 	if (typeof window === 'undefined') {
 		return null;
@@ -80,6 +89,10 @@ function parseParams(): SsoAuthorizeParams | null {
 	const state = usp.get('state') ?? '';
 	return { appId, scope, state, redirectUri };
 }
+
+// ---------------------------------------------------------------------------
+// Page component
+// ---------------------------------------------------------------------------
 
 const SsoAuthorizePage = () => {
 	const [params, setParams] = useState<SsoAuthorizeParams | null>(null);
@@ -214,40 +227,48 @@ const SsoAuthorizePage = () => {
 		return detectDeviceKind(navigator.userAgent) === 'desktop';
 	}, []);
 
-	if (stage.kind === 'loading') {
-		return <div className={'min-h-screen'} />;
-	}
+	// ---------------------------------------------------------------------------
+	// Render
+	// ---------------------------------------------------------------------------
 
-	if (stage.kind === 'invalid') {
-		return <InvalidRequestView />;
-	}
+	const renderStage = () => {
+		if (stage.kind === 'loading') {
+			return <div className={'min-h-screen'} />;
+		}
 
-	if (stage.kind === 'deep-link-trying') {
-		return <DeepLinkTrying openApp={openApp} opening={opening} />;
-	}
+		if (stage.kind === 'invalid') {
+			return <InvalidRequestView />;
+		}
 
-	if (stage.kind === 'deep-link-fallback') {
+		if (stage.kind === 'deep-link-trying') {
+			return <DeepLinkTrying deepLinkUrl={deepLinkUrl} />;
+		}
+
+		if (stage.kind === 'deep-link-fallback') {
+			return (
+				<DeepLinkFallback reopenApp={reopenApp} onLoggedIn={onLoginSucceeded} />
+			);
+		}
+
+		if (stage.kind === 'login') {
+			return <LoginView showQR={showQRTab} onLoggedIn={onLoginSucceeded} />;
+		}
+
+		// stage.kind === 'consent' — params is guaranteed to be non-null here
+		// because we only transition into `consent` after `setParams(parsed)`.
+		if (!params) {
+			return <InvalidRequestView />;
+		}
 		return (
-			<DeepLinkFallback reopenApp={reopenApp} onLoggedIn={onLoginSucceeded} />
+			<ConsentView
+				params={params}
+				me={stage.me}
+				onSwitchAccount={onSwitchAccount}
+			/>
 		);
-	}
+	};
 
-	if (stage.kind === 'login') {
-		return <LoginTabs showQR={showQRTab} onLoggedIn={onLoginSucceeded} />;
-	}
-
-	// stage.kind === 'consent' — params is guaranteed to be non-null here
-	// because we only transition into `consent` after `setParams(parsed)`.
-	if (!params) {
-		return <InvalidRequestView />;
-	}
-	return (
-		<ConsentView
-			params={params}
-			me={stage.me}
-			onSwitchAccount={onSwitchAccount}
-		/>
-	);
+	return renderStage();
 };
 
 export default SsoAuthorizePage;

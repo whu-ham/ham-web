@@ -1,12 +1,12 @@
 /**
- * @author Codex
- * @version 1.0
- * @date 2026/4/20
+ * @author Claude
+ * @version 1.1
+ * @date 2026/4/21 12:43:48
  *
  * Shared top-right header bar used by every /sso-authorize view.
  *
  * Why a dedicated component:
- *   - All four sub-views (LoginTabs, DeepLinkTrying, DeepLinkFallback,
+ *   - All four sub-views (LoginView, DeepLinkTrying, DeepLinkFallback,
  *     InvalidRequestView) need the same pair of switchers in the same
  *     spot, and previously each inlined an identical `absolute` wrapper.
  *   - When the viewport is short the card content sits right under the
