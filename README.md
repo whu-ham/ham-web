@@ -12,7 +12,6 @@ User documentation: [https://orangeboychen.github.io/whu-ham/](https://orangeboy
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + [HeroUI v3](https://heroui.com/)
 - **State**: [Jotai](https://jotai.org/) + [React Redux](https://react-redux.js.org/)
 - **i18n**: [`next-intl`](https://next-intl.dev/) with catalogues under [`messages/`](./messages) (`zh` / `en` / `ja`)
-- **WASM**: Rust-compiled module linked from [`wasm/`](./wasm) as `ham-web-wasm`
 - **Tooling**: ESLint v9 (flat config), Prettier, pnpm
 
 ## Getting Started
@@ -29,6 +28,9 @@ pnpm dev
 # Production build
 pnpm build
 pnpm start
+
+# Cloudflare Pages build
+pnpm build:cf
 
 # Lint
 pnpm lint
@@ -47,7 +49,6 @@ app/              # Next.js App Router entry, pages, components, services
   course-grade-stat/
 i18n/             # next-intl runtime config
 messages/         # Locale message catalogues (en / zh / ja)
-wasm/             # Rust → WebAssembly package
 public/           # Static assets
 middleware.ts     # Locale + auth routing middleware
 ```

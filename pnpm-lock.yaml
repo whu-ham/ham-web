@@ -26,9 +26,6 @@ importers:
       dayjs:
         specifier: ^1.11.13
         version: 1.11.13
-      ham-web-wasm:
-        specifier: link:wasm/pkg
-        version: link:wasm/pkg
       jotai:
         specifier: ^2.16.2
         version: 2.16.2(@babel/core@7.28.6)(@babel/template@7.28.6)(@types/react@19.0.8)(react@19.0.0)

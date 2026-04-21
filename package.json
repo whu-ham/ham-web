@@ -17,7 +17,6 @@
 		"@material-design-icons/svg": "^0.14.13",
 		"classnames": "^2.5.1",
 		"dayjs": "^1.11.13",
-		"ham-web-wasm": "link:wasm/pkg",
 		"jotai": "^2.16.2",
 		"js-cookie": "^3.0.5",
 		"lodash": "4.17.23",

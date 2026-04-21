@@ -1,11 +1,13 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/21 15:26:00
+ * @version 1.2
+ * @date 2026/4/21 20:39:13
  */
 import SsoAuthorizePage from '@/app/sso-authorize/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+
+export const runtime = 'edge';
 
 export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('sso');

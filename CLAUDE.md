@@ -4,7 +4,7 @@ This file provides guidance to [Claude Code](https://docs.claude.com/claude-code
 
 ## Project Overview
 
-`ham-web` is the web frontend for Ham (WHU). It is a [Next.js](https://nextjs.org/) 16 app written in TypeScript + React 19, styled with Tailwind CSS v4 and HeroUI, internationalised via `next-intl`, and ships a Rust-compiled WebAssembly module located in `wasm/`.
+`ham-web` is the web frontend for Ham (WHU). It is a [Next.js](https://nextjs.org/) 16 app written in TypeScript + React 19, styled with Tailwind CSS v4 and HeroUI, internationalised via `next-intl`, and deployed to Cloudflare Pages via OpenNext.
 
 - Package manager: **pnpm** (see `pnpm-lock.yaml`, `.npmrc`)
 - Framework: Next.js App Router (`app/`)
@@ -22,6 +22,7 @@ Use `pnpm` for all scripts.
 | Start dev server     | `pnpm dev`     |
 | Production build     | `pnpm build`   |
 | Start built server   | `pnpm start`   |
+| Cloudflare Pages build | `pnpm build:cf` |
 | Lint                 | `pnpm lint`    |
 
 ## Repository Layout
@@ -36,7 +37,6 @@ services/     # API / service-layer code (auth, sso, ...)
 hooks/        # Shared React hooks (useRequest, useUserInfo, ...)
 i18n/         # next-intl runtime config
 messages/     # Locale message catalogs (en / zh / ja)
-wasm/         # Rust -> WebAssembly package (linked via `ham-web-wasm`)
 public/       # Static assets
 middleware.ts # Next.js middleware (locale / auth routing)
 ```
