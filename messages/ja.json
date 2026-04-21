@@ -68,7 +68,8 @@
 	},
 	"sso": {
 		"meta": {
-			"title": "Hamを認可"
+			"title": "Hamを認可",
+			"description": "Hamにログインして、サードパーティアプリを認可して続けてください。"
 		},
 		"invalid": {
 			"title": "無効なリクエスト",
@@ -117,7 +118,7 @@
 			"switchAccount": "アカウントを切り替える",
 			"reject": "拒否",
 			"authorize": "認可する",
-			"autoAuthorize": "自動認可中… タップでキャンセル",
+			"previouslyAuthorized": "このアプリは以前に認可されています",
 			"fetchFailed": "認可情報の取得に失敗しました",
 			"submitFailed": "認可に失敗しました",
 			"serverError": "サーバーエラーです。後でもう一度お試しください",

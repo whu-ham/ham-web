@@ -68,7 +68,8 @@
 	},
 	"sso": {
 		"meta": {
-			"title": "授权Ham"
+			"title": "授权Ham",
+			"description": "登录Ham并授权第三方应用以继续。"
 		},
 		"invalid": {
 			"title": "请求无效",
@@ -117,7 +118,7 @@
 			"switchAccount": "切换账号",
 			"reject": "拒绝",
 			"authorize": "授权",
-			"autoAuthorize": "正在自动授权…取消",
+			"previouslyAuthorized": "你此前已授权过此应用",
 			"fetchFailed": "授权信息获取失败",
 			"submitFailed": "授权失败",
 			"serverError": "服务器错误，请稍后重试",

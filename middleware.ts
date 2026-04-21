@@ -13,8 +13,9 @@ export const config = {
 		 * - _next/static (static files)
 		 * - _next/image (image optimization files)
 		 * - favicon.ico, sitemap.xml, robots.txt (metadata files)
+		 * - icon.png, apple-icon.png (Next.js App Router metadata image convention)
 		 */
-		'/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
+		'/((?!api|_next/static|_next/image|favicon.ico|icon\\.png|apple-icon\\.png|sitemap.xml|robots.txt).*)',
 	],
 };
 

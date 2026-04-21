@@ -1,45 +1,31 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/4/21 12:43:48
+ * @version 1.8
+ * @date 2026/4/21 15:38:00
  *
- * Passkey login view. Talks to the new HTTP endpoints:
+ * Passkey login button (compact). Talks to the HTTP endpoints:
  *   POST /web/auth/passkey/option   — returns the WebAuthn request options
  *   POST /web/auth/passkey/login    — verifies the assertion + Set-Cookie
  *
- * The backend assertion format expects the raw JSON returned by
- * `navigator.credentials.get(...)` serialized back with Base64URL IDs, which
- * the browser already produces when we stringify the PublicKeyCredential
- * via the toJSON helper exposed by level-3 WebAuthn.
+ * Renders nothing when the browser does not support WebAuthn / Passkeys.
  */
 'use client';
 
 import { Button } from '@heroui/react';
+import toast from 'react-hot-toast';
+import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 import { ApiError, WebAuthApi } from '@/services/sso/api';
 import { isPasskeySupported } from '@/services/sso/ua';
+import { stageAtom } from '@/app/sso-authorize/store';
 
-interface PasskeyLoginViewProps {
-	onLoggedIn: () => void;
-	/**
-	 * When true, the view renders as a slim CTA suitable for stacking
-	 * below the QR code (no large emoji / description / hint). Used by
-	 * `LoginView` on desktop where QR is the primary option and Passkey
-	 * is the secondary "or" option.
-	 */
-	compact?: boolean;
-}
-
-const PasskeyLoginView = ({
-	onLoggedIn,
-	compact = false,
-}: PasskeyLoginViewProps) => {
+const PasskeyLoginView = () => {
 	const t = useTranslations('sso.passkey');
+	const setStage = useSetAtom(stageAtom);
 	const [loading, setLoading] = useState(false);
-	const [supported, setSupported] = useState(true);
+	const [supported, setSupported] = useState<boolean | null>(null);
 
 	useEffect(() => {
 		setSupported(isPasskeySupported());
@@ -54,8 +40,6 @@ const PasskeyLoginView = ({
 			};
 			const options =
 				parsed.publicKey as unknown as PublicKeyCredentialRequestOptions;
-			// The backend ships `challenge` as a base64 string; convert to
-			// the ArrayBuffer the browser expects.
 			if (typeof options.challenge === 'string') {
 				options.challenge = base64ToArrayBuffer(
 					options.challenge as unknown as string
@@ -82,7 +66,13 @@ const PasskeyLoginView = ({
 
 			const assertionJSON = JSON.stringify(credentialToJSON(credential));
 			await WebAuthApi.passkeyLogin(assertionJSON, opt.session);
-			onLoggedIn();
+
+			try {
+				const me = await WebAuthApi.me();
+				setStage({ kind: 'consent', me });
+			} catch {
+				setStage({ kind: 'login' });
+			}
 		} catch (e) {
 			if (e instanceof ApiError) {
 				toast.error(e.message || t('loginFailed'));
@@ -90,64 +80,28 @@ const PasskeyLoginView = ({
 				e instanceof DOMException &&
 				(e.name === 'NotAllowedError' || e.name === 'AbortError')
 			) {
-				// User cancelled the native prompt — silent fail is fine.
+				// User cancelled — silent fail.
 			} else {
 				toast.error(t('loginFailed'));
 			}
 		} finally {
 			setLoading(false);
 		}
-	}, [onLoggedIn, t]);
+	}, [setStage, t]);
 
-	if (compact) {
-		return (
-			<div className={'flex flex-col items-center gap-2'}>
-				<Button
-					variant={'tertiary'}
-					isDisabled={!supported}
-					isPending={loading}
-					onPress={login}
-				>
-					<span
-						className={'material-icons-round !text-[18px] !leading-none'}
-						aria-hidden={true}
-					>
-						key
-					</span>
-					{t('cta')}
-				</Button>
-				{!supported && (
-					<div className={'text-xs text-danger text-center max-w-sm'}>
-						{t('unsupported')}
-					</div>
-				)}
-			</div>
-		);
-	}
+	// Render nothing until support is confirmed (avoids SSR flash and hides on unsupported browsers)
+	if (!supported) return null;
 
 	return (
-		<div className={'flex flex-col items-center gap-4 py-6'}>
-			<div className={'text-5xl'}>🔑</div>
-			<div className={'text-sm text-muted text-center max-w-sm'}>
-				{t('description')}
-			</div>
-			<Button
-				variant={'tertiary'}
-				isDisabled={!supported}
-				isPending={loading}
-				onPress={login}
+		<Button variant={'tertiary'} isPending={loading} onPress={login}>
+			<span
+				className={'material-icons-round !text-[18px] !leading-none'}
+				aria-hidden={true}
 			>
-				{t('cta')}
-			</Button>
-			{!supported && (
-				<div className={'text-xs text-danger text-center max-w-sm'}>
-					{t('unsupported')}
-				</div>
-			)}
-			<div className={'text-xs text-muted text-center max-w-sm'}>
-				{t('hint')}
-			</div>
-		</div>
+				key
+			</span>
+			{t('cta')}
+		</Button>
 	);
 };
 

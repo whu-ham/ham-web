@@ -1,14 +1,13 @@
 /**
  * @author Claude
- * @version 2.2
- * @date 2026/4/20 19:22:58
+ * @version 2.5
+ * @date 2026/4/21 19:56:00
  */
 'use client';
 
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import { useAtom } from 'jotai';
 import { useLocale, useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
 import { Key, useTransition } from 'react';
 
 import enMessages from '@/messages/en.json';
@@ -95,7 +94,6 @@ const clearLocaleCookie = () => {
 // --- Component ------------------------------------------------------
 
 const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
-	const router = useRouter();
 	const currentLocale = useLocale() as Locale;
 	const [isPending, startTransition] = useTransition();
 	const t = useTranslations('language');
@@ -116,15 +114,20 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 			clearLocaleCookie();
 			setHasOverride(false);
 		} else if (isLocale(key)) {
-			if (!hasOverride && key === currentLocale) return;
+			// Already explicitly set to the same locale — nothing to do.
+			if (hasOverride && key === currentLocale) return;
 			writeLocaleCookie(key);
 			setHasOverride(true);
+			// In auto mode, if the browser locale already matches the chosen
+			// locale the page language is unchanged — just record the override
+			// without reloading.
+			if (!hasOverride && key === browserLocale) return;
 		} else {
 			return;
 		}
 
 		startTransition(() => {
-			router.refresh();
+			window.location.reload();
 		});
 	};
 

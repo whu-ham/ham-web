@@ -105,14 +105,34 @@ export class ApiError extends Error {
 
 // API_BASE can be overridden in tests / preview deployments via a build-time
 // env var; defaults to the current origin which is correct in production.
-const API_BASE = process.env.NEXT_PUBLIC_HAM_BACKEND_ORIGIN ?? '';
+const API_BASE =
+	process.env.NEXT_PUBLIC_HAM_BACKEND_ORIGIN ?? 'https://api.ham.nowcent.cn';
+
+/**
+ * Read the active locale from the NEXT_LOCALE cookie so that every
+ * backend request carries the correct Accept-Language header and the
+ * server returns i18n content in the language the user has selected.
+ * Falls back to the browser's own Accept-Language when no explicit
+ * override cookie is present.
+ */
+function getAcceptLanguage(): string | undefined {
+	if (typeof document === 'undefined') return undefined;
+	const raw = document.cookie
+		.split(';')
+		.map((c) => c.trim())
+		.find((c) => c.startsWith('NEXT_LOCALE='));
+	if (!raw) return undefined;
+	return decodeURIComponent(raw.slice('NEXT_LOCALE='.length)) || undefined;
+}
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+	const acceptLanguage = getAcceptLanguage();
 	const res = await fetch(`${API_BASE}${path}`, {
 		...init,
 		credentials: 'include',
 		headers: {
 			...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+			...(acceptLanguage ? { 'Accept-Language': acceptLanguage } : {}),
 			...(init?.headers ?? {}),
 		},
 	});

@@ -1,7 +1,13 @@
+/**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/4/21 15:29:39
+ */
 import './globals.css';
-import { Providers } from '@/app/providers';
-import React from 'react';
 import '@material-design-icons/font/index.css';
+import React from 'react';
+import type { Metadata } from 'next';
+import { Providers } from '@/app/providers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getMessages } from 'next-intl/server';
 import { cookies } from 'next/headers';
@@ -13,6 +19,12 @@ import {
 	Theme,
 	isTheme,
 } from '@/components/theme/config';
+
+export const metadata: Metadata = {
+	metadataBase: new URL(
+		process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ham.nowcent.cn'
+	),
+};
 
 export default async function RootLayout({
 	children,

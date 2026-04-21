@@ -68,14 +68,15 @@
 	},
 	"sso": {
 		"meta": {
-			"title": "Authorize Ham"
+			"title": "Authorize Ham",
+			"description": "Sign in to Ham and authorize the third-party app to continue."
 		},
 		"invalid": {
 			"title": "Invalid request",
 			"description": "Required authorization parameters are missing. Please go back to the third-party app and try again."
 		},
 		"deepLink": {
-			"title": "Ham app not detected",
+			"title": "Ham not detected",
 			"description": "The app may not be installed. Install Ham first and try again, or continue authorizing in this browser with a passkey.",
 			"download": "Download Ham",
 			"downloadAppStore": "Get it on the App Store",
@@ -117,7 +118,7 @@
 			"switchAccount": "Switch account",
 			"reject": "Reject",
 			"authorize": "Authorize",
-			"autoAuthorize": "Auto-authorizing… tap to cancel",
+			"previouslyAuthorized": "You've previously authorized this app",
 			"fetchFailed": "Failed to load authorization details",
 			"submitFailed": "Authorization failed",
 			"serverError": "Server error, please retry later",

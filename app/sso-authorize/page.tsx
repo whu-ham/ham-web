@@ -1,19 +1,46 @@
 /**
- * @author Codex
- * @version 1.0
- * @date 2026/4/20
+ * @author Claude
+ * @version 1.1
+ * @date 2026/4/21 15:26:00
  */
 import SsoAuthorizePage from '@/app/sso-authorize/page.client';
 import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
-export async function generateMetadata() {
+export async function generateMetadata(): Promise<Metadata> {
 	const t = await getTranslations('sso');
+	const title = t('meta.title');
+	const description = t('meta.description');
+
 	return {
-		title: t('meta.title'),
-		// The browser MUST NOT leak the authorization code back to the
-		// third-party origin or any CDN telemetry. Setting a page-level
-		// referrer policy is the least-privileged way to enforce that.
+		title,
+		description,
+		// Prevent the authorization code from leaking to third-party origins.
 		referrer: 'no-referrer',
+		openGraph: {
+			title,
+			description,
+			type: 'website',
+			images: [
+				{
+					url: '/sso-authorize/opengraph-image',
+					width: 1200,
+					height: 630,
+					alt: title,
+				},
+			],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: ['/sso-authorize/opengraph-image'],
+		},
+		// iMessage / iOS rich link preview
+		appleWebApp: {
+			title,
+			statusBarStyle: 'default',
+		},
 	};
 }
 

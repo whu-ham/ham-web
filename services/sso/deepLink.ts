@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/20
+ * @version 1.2
+ * @date 2026/4/21 16:44:26
  *
  * Deep link helper: tries to hand the user off to the native HAM App via
  * `ham://sso-authorize?...`. If the tab is still visible after a short
