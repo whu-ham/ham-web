@@ -1,0 +1,13 @@
+{
+	"applinks": {
+		"details": [
+			{
+				"appID": "97YACL9S6W.com.nowcent.ham",
+				"paths": ["*"]
+			}
+		]
+	},
+	"webcredentials": {
+		"apps": ["97YACL9S6W.com.nowcent.ham"]
+	}
+}

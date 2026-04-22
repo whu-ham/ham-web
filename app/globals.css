@@ -1,8 +1,14 @@
 @import '@material-design-icons/font';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/*
+ * Tailwind CSS v4 picks up its config from the `@import "tailwindcss"`
+ * directive and the adjacent CSS — no JS-side tailwind.config.ts needed.
+ * The `@heroui/styles` import ships base colors, component primitives
+ * and the layered theme architecture. Import order matters: tailwindcss
+ * first so HeroUI's layer resets can override it cleanly.
+ */
+@import 'tailwindcss';
+@import '@heroui/styles';
 
 /*:root {*/
 /*  --background: #ffffff;*/

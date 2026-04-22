@@ -1,0 +1,132 @@
+{
+	"common": {
+		"appName": "Ham",
+		"forWeb": "for Web",
+		"retry": "重试",
+		"cancel": "取消",
+		"confirm": "确认",
+		"loading": "加载中…"
+	},
+	"language": {
+		"switcher": {
+			"ariaLabel": "切换语言",
+			"label": "语言",
+			"auto": "跟随浏览器",
+			"autoWithDetected": "跟随浏览器（{detected}）",
+			"autoUnsupported": "跟随浏览器（未支持）"
+		}
+	},
+	"theme": {
+		"switcher": {
+			"ariaLabel": "切换主题",
+			"auto": "跟随系统",
+			"light": "浅色",
+			"dark": "深色"
+		}
+	},
+	"login": {
+		"meta": {
+			"title": "登录Ham"
+		},
+		"title": "登录Ham",
+		"subtitle": "for Web",
+		"qr": {
+			"tip": "使用相机或Ham扫描二维码登录",
+			"scanned": "扫码成功，等待确认",
+			"expired": "验证码已失效",
+			"refresh": "刷新二维码",
+			"loginSuccess": "登录成功"
+		},
+		"divider": {
+			"other": "其它登录方式"
+		},
+		"passkey": {
+			"cta": "通过Passkey登录"
+		}
+	},
+	"home": {
+		"meta": {
+			"title": "工具台 | Ham"
+		},
+		"greeting": {
+			"lateNight": "还不睡吗",
+			"dawn": "清晨好",
+			"morning": "早上好",
+			"noon": "中午好",
+			"afternoon": "下午好",
+			"evening": "晚上好",
+			"default": "你好"
+		},
+		"logout": "退出登录",
+		"workbench": "工具台",
+		"card": {
+			"grade": {
+				"title": "给分",
+				"subtitle": "查看给分信息"
+			}
+		}
+	},
+	"sso": {
+		"meta": {
+			"title": "授权Ham",
+			"description": "登录Ham并授权第三方应用以继续。"
+		},
+		"invalid": {
+			"title": "请求无效",
+			"description": "缺少必要的授权参数，请返回第三方应用后重试。"
+		},
+		"deepLink": {
+			"title": "未检测到Ham",
+			"description": "可能是App未安装。请先安装Ham后再次打开，或使用Passkey在当前浏览器中继续授权。",
+			"download": "下载Ham",
+			"downloadAppStore": "前往App Store",
+			"reopen": "我已安装，重新打开Ham",
+			"trying": {
+				"title": "正在Ham中继续",
+				"description": "我们正在尝试打开Ham，请稍候…",
+				"openApp": "手动打开Ham",
+				"opening": "正在打开…"
+			}
+		},
+		"login": {
+			"title": "登录Ham以继续授权",
+			"subtitle": "授权前需要先完成Ham账号登录",
+			"divider": {
+				"other": "或选择以下方式登录"
+			}
+		},
+		"qr": {
+			"tip": "使用Ham扫描二维码登录",
+			"scanned": "扫码成功，等待确认",
+			"expired": "二维码已失效",
+			"refresh": "点击刷新",
+			"loginSuccess": "登录成功",
+			"createFailed": "无法创建二维码，请稍后重试"
+		},
+		"passkey": {
+			"description": "使用你已在Ham中注册的Passkey，无需扫码即可快速登录。",
+			"cta": "使用Passkey登录",
+			"noPick": "未选择可用的Passkey",
+			"loginFailed": "Passkey登录失败",
+			"unsupported": "当前浏览器不支持Passkey，请改用扫码登录。",
+			"hint": "如果你还没有Passkey，请先使用扫码登录，再在Ham中创建Passkey。"
+		},
+		"consent": {
+			"scopeHeader": "将获得以下权限：",
+			"alreadyGranted": "你此前已授予",
+			"required": "必选",
+			"switchAccount": "切换账号",
+			"reject": "拒绝",
+			"authorize": "授权",
+			"previouslyAuthorized": "你此前已授权过此应用",
+			"fetchFailed": "授权信息获取失败",
+			"submitFailed": "授权失败",
+			"serverError": "服务器错误，请稍后重试",
+			"accessDenied": "已取消授权",
+			"rejected": "你已拒绝授权",
+			"authorized": "授权成功",
+			"errorTitle": "授权失败",
+			"backToThirdParty": "返回第三方应用"
+		}
+	}
+}

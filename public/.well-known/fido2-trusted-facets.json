@@ -1,0 +1,25 @@
+[
+	{
+		"relation": ["delegate_permission/common.get_login_creds"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.nowcent.ham",
+			"sha256_cert_fingerprints": [
+				"83:1B:E6:A6:CE:CC:A7:B6:68:1B:19:52:2A:1D:68:63:AE:21:9C:69:1A:6D:09:FD:8A:35:9E:91:DA:F1:F3:F9"
+			]
+		}
+	},
+	{
+		"relation": [
+			"delegate_permission/common.handle_all_urls",
+			"delegate_permission/common.get_login_creds"
+		],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.google.credentialmanager.sample",
+			"sha256_cert_fingerprints": [
+				"4F:20:47:1F:D9:9A:BA:96:47:8D:59:27:C2:C8:A6:EA:8E:D2:8D:14:C0:B6:A2:39:99:9F:A3:4D:47:3D:FA:11"
+			]
+		}
+	}
+]
