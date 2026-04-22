@@ -81,7 +81,7 @@ const ConsentView = () => {
 			setSubmitting(true);
 			try {
 				const resp = await WebAuthApi.consentConfirm({
-					app_id: params.appId,
+					client_id: params.appId,
 					scope: checkedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
@@ -107,7 +107,7 @@ const ConsentView = () => {
 	useEffect(() => {
 		let cancelled = false;
 		WebAuthApi.consentInfo({
-			app_id: params.appId,
+			client_id: params.appId,
 			scope: params.scope,
 			redirect_uri: params.redirectUri,
 			state: params.state,

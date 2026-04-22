@@ -73,7 +73,7 @@ export interface ConsentScopeDetail {
 
 export interface ConsentInfoResponse {
 	app: {
-		app_id: string;
+		client_id: string;
 		name: string;
 		icon_url?: string;
 		description?: string;
@@ -175,7 +175,7 @@ export const WebAuthApi = {
 	refresh: () => request<void>('/web/auth/refresh', { method: 'POST' }),
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
-		app_id: string;
+		client_id: string;
 		scope: string[];
 		redirect_uri: string;
 		state: string;
@@ -185,7 +185,7 @@ export const WebAuthApi = {
 			body: JSON.stringify(payload),
 		}),
 	consentConfirm: (payload: {
-		app_id: string;
+		client_id: string;
 		scope: string[];
 		redirect_uri: string;
 		state: string;

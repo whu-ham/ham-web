@@ -93,7 +93,7 @@ export function buildSsoAuthorizeDeepLink(params: {
 	redirectUri: string;
 }): string {
 	const usp = new URLSearchParams();
-	usp.set('app_id', params.appId);
+	usp.set('client_id', params.appId);
 	if (params.scope.length > 0) {
 		usp.set('scope', params.scope.join(' '));
 	}
