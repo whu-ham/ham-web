@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/21 15:29:39
+ * @version 1.2
+ * @date 2026/4/22 10:32:00
  */
 import './globals.css';
 import '@material-design-icons/font/index.css';
@@ -20,10 +20,16 @@ import {
 	isTheme,
 } from '@/components/theme/config';
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
 	metadataBase: new URL(
 		process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ham.nowcent.cn'
 	),
+	icons: {
+		icon: '/icon.png',
+		apple: '/icon.png',
+	},
 };
 
 export default async function RootLayout({
