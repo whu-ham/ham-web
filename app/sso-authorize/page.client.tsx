@@ -6,7 +6,7 @@
  * Client-side orchestrator for /sso-authorize.
  *
  * Responsibilities (aligned with requirements §1–§5):
- *   - Parse app_id / scope / redirect_uri / state from the URL once on
+ *   - Parse client_id / scope / redirect_uri / state from the URL once on
  *     mount. Invalid params render InvalidRequestView without any backend
  *     call.
  *   - Detect desktop vs mobile.
@@ -98,7 +98,7 @@ function parseParams(): SsoAuthorizeParams | null {
 		return null;
 	}
 	const usp = new URLSearchParams(window.location.search);
-	const appId = usp.get('app_id')?.trim() ?? '';
+	const appId = usp.get('client_id')?.trim() ?? '';
 	const redirectUri = usp.get('redirect_uri')?.trim() ?? '';
 	if (!appId || !redirectUri) {
 		return null;
