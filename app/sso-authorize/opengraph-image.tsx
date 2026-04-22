@@ -1,27 +1,24 @@
 /**
  * @author Claude
- * @version 1.4
- * @date 2026/4/22 14:58:10
+ * @version 1.8
+ * @date 2026/4/22 15:08:00
  *
  * Generates the Open Graph / iMessage link-preview image for the
  * SSO authorize page via Next.js ImageResponse (next/og).
+ *
+ * The icon is inlined as a base64 data URL (see og-icon-b64.ts),
+ * generated at build-prep time from public/icon-1024.png.
+ * No filesystem or network access at request time — fully compatible
+ * with the Cloudflare Workers Edge runtime (@opennextjs/cloudflare).
  */
-import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
+import { ICON_DATA_URL } from './og-icon-b64';
 
 export const alt = 'Authorize Ham';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default async function OgImage() {
-	const headersList = await headers();
-	const host = headersList.get('host') ?? 'ham.nowcent.cn';
-	const proto = host.startsWith('localhost') ? 'http' : 'https';
-	const baseUrl = `${proto}://${host}`;
-	const iconData = await fetch(`${baseUrl}/icon-1024.png`).then((r) =>
-		r.arrayBuffer()
-	);
-
 	return new ImageResponse(
 		(
 			<div
@@ -39,8 +36,7 @@ export default async function OgImage() {
 			>
 				{/* App icon */}
 				<img
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					src={iconData as any}
+					src={ICON_DATA_URL}
 					width={120}
 					height={120}
 					style={{
