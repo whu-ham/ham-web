@@ -1,12 +1,14 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/21 15:26:00
+ * @version 1.1
+ * @date 2026/4/22 12:21:23
  *
  * Generates the Open Graph / iMessage link-preview image for the
  * SSO authorize page via Next.js ImageResponse (next/og).
  * Rendered at build-time (static) — no runtime cost.
  */
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ImageResponse } from 'next/og';
 
 export const alt = 'Authorize Ham';
@@ -14,6 +16,9 @@ export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default function OgImage() {
+	const logoData = readFileSync(join(process.cwd(), 'public/icon-1024.png'));
+	const logoBase64 = `data:image/png;base64,${logoData.toString('base64')}`;
+
 	return new ImageResponse(
 		(
 			<div
@@ -29,31 +34,17 @@ export default function OgImage() {
 						'-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
 				}}
 			>
-				{/* App icon circle */}
-				<div
+				{/* App icon */}
+				<img
+					src={logoBase64}
+					width={120}
+					height={120}
 					style={{
-						width: 120,
-						height: 120,
 						borderRadius: 28,
-						background: 'linear-gradient(145deg, #6366f1 0%, #8b5cf6 100%)',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
 						marginBottom: 32,
 						boxShadow: '0 20px 60px rgba(99,102,241,0.4)',
 					}}
-				>
-					<span
-						style={{
-							fontSize: 64,
-							color: '#ffffff',
-							fontWeight: 700,
-							letterSpacing: -2,
-						}}
-					>
-						H
-					</span>
-				</div>
+				/>
 
 				{/* Title */}
 				<div
