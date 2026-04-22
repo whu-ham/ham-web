@@ -48,3 +48,6 @@ next-env.d.ts
 .claude/logs/
 .claude/history/
 .claude/*.local.*
+
+.open-next
+.wrangler
