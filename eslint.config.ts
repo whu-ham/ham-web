@@ -23,6 +23,6 @@ export default defineConfig([
 			'no-console': ['error', { allow: ['warn', 'error'] }],
 		},
 	},
-	globalIgnores(['out/*', '.next/*']),
+	globalIgnores(['out/*', '.next/*', '.*/']),
 	eslintPluginPrettierRecommended,
 ]);

@@ -80,8 +80,8 @@ const ConsentView = () => {
 		async (nonce: string) => {
 			setSubmitting(true);
 			try {
-		const resp = await WebAuthApi.consentConfirm({
-				client_id: params.appId,
+				const resp = await WebAuthApi.consentConfirm({
+					client_id: params.appId,
 					scope: checkedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
