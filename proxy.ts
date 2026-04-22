@@ -1,8 +1,10 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/22 10:38:02
+ * @version 1.1
+ * @date 2026/4/22 10:44:00
  */
+export const runtime = 'edge';
+
 export const config = {
 	matcher: [
 		/*
