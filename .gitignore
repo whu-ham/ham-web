@@ -51,3 +51,8 @@ next-env.d.ts
 
 .open-next
 .wrangler
+
+# Tencent Cloud EdgeOne
+.env
+.edgeone/
+.tef_dist/
