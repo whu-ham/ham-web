@@ -96,7 +96,7 @@
 			}
 		},
 		"qr": {
-			"tip": "Scan the QR code with Ham",
+			"tip": "Scan the QR code with Ham or your camera",
 			"scanned": "Scanned, waiting for confirmation",
 			"expired": "QR code expired",
 			"refresh": "Click to refresh",
