@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 				{
 					url: '/sso-authorize/opengraph-image',
 					width: 1200,
-					height: 400,
+					height: 680,
 					alt: title,
 				},
 			],
