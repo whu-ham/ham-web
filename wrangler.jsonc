@@ -34,5 +34,9 @@
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
+	},
+	"placement": {
+		"mode": "smart",
+		"hint": "apac"
 	}
 }
