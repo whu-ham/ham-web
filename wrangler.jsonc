@@ -5,8 +5,7 @@
 	"compatibility_date": "2026-04-22",
 	"compatibility_flags": [
 		"nodejs_compat",
-		"global_fetch_strictly_public",
-		"nodejs_compat_populate_process_env"
+		"global_fetch_strictly_public"
 	],
 	"assets": {
 		"directory": ".open-next/assets",
@@ -35,14 +34,5 @@
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
 		"binding": "IMAGES"
-	},
-	"observability": {
-		"logs": {
-			"enabled": true,
-			"invocation_logs": true
-		},
-		"traces": {
-			"enabled": false
-		}
 	}
 }
