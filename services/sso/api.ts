@@ -1,13 +1,14 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 2.1
+ * @date 2026/4/23 17:43:19
  *
- * HTTP client for the backend /web/** endpoints used by the HAM authorization
- * site. Every request carries `credentials: 'include'` so the HttpOnly Web
- * session cookies (`web_token`, `web_refresh_token`) issued by the backend
- * flow with each request. Response bodies are normalized to match the Go
- * handler JSON shapes documented in internal/delivery/http/handler/web/*.go.
+ * HTTP client for the BFF /api/** endpoints.
+ * All requests are sent to the Next.js BFF layer (same origin), which
+ * proxies them server-side to the backend. This keeps backend credentials
+ * and the backend origin out of the browser entirely.
+ * Response bodies are normalized to match the Go handler JSON shapes
+ * documented in internal/delivery/http/handler/web/*.go.
  */
 'use client';
 
@@ -103,11 +104,6 @@ export class ApiError extends Error {
 	}
 }
 
-// API_BASE can be overridden in tests / preview deployments via a build-time
-// env var; defaults to the current origin which is correct in production.
-const API_BASE =
-	process.env.NEXT_PUBLIC_HAM_BACKEND_ORIGIN ?? 'https://api.ham.nowcent.cn';
-
 /**
  * Read the active locale from the NEXT_LOCALE cookie so that every
  * backend request carries the correct Accept-Language header and the
@@ -127,7 +123,8 @@ function getAcceptLanguage(): string | undefined {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	const acceptLanguage = getAcceptLanguage();
-	const res = await fetch(`${API_BASE}${path}`, {
+	// All requests go to the BFF (same origin) — no absolute backend URL needed.
+	const res = await fetch(`/api${path}`, {
 		...init,
 		credentials: 'include',
 		headers: {
@@ -154,25 +151,25 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const WebAuthApi = {
 	// QR login ---------------------------------------------------------
 	createQrTicket: () =>
-		request<CreateTicketResponse>('/web/auth/qr/ticket', { method: 'POST' }),
+		request<CreateTicketResponse>('/auth/qr/ticket', { method: 'POST' }),
 	checkQrTicket: (ticket: string) =>
 		request<CheckTicketResponse>(
-			`/web/auth/qr/ticket/${encodeURIComponent(ticket)}`
+			`/auth/qr/ticket/${encodeURIComponent(ticket)}`
 		),
 	// Passkey ----------------------------------------------------------
 	getPasskeyOption: () =>
-		request<PasskeyOptionResponse>('/web/auth/passkey/option', {
+		request<PasskeyOptionResponse>('/auth/passkey/option', {
 			method: 'POST',
 		}),
 	passkeyLogin: (assertionJSON: string, session: string) =>
-		request<PasskeyLoginResponse>('/web/auth/passkey/login', {
+		request<PasskeyLoginResponse>('/auth/passkey/login', {
 			method: 'POST',
 			body: JSON.stringify({ assertion_json: assertionJSON, session }),
 		}),
 	// Session ----------------------------------------------------------
-	me: () => request<MeResponse>('/web/auth/me'),
-	logout: () => request<void>('/web/auth/logout', { method: 'POST' }),
-	refresh: () => request<void>('/web/auth/refresh', { method: 'POST' }),
+	me: () => request<MeResponse>('/auth/me'),
+	logout: () => request<void>('/auth/logout', { method: 'POST' }),
+	refresh: () => request<void>('/auth/refresh', { method: 'POST' }),
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
 		client_id: string;
@@ -180,7 +177,7 @@ export const WebAuthApi = {
 		redirect_uri: string;
 		state: string;
 	}) =>
-		request<ConsentInfoResponse>('/web/sso/consent/info', {
+		request<ConsentInfoResponse>('/sso/consent/info', {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		}),
@@ -191,7 +188,7 @@ export const WebAuthApi = {
 		state: string;
 		nonce: string;
 	}) =>
-		request<ConsentConfirmResponse>('/web/sso/consent/confirm', {
+		request<ConsentConfirmResponse>('/sso/consent/confirm', {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		}),
