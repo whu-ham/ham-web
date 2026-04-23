@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2026/4/23 17:07:58
  *
- * BFF route: GET /api/web/auth/me
+ * BFF route: GET /api/auth/me
  * Proxies the current-user session check to the backend.
  */
 import { proxyToBackend } from '@/app/api/_proxy';

@@ -1,9 +1,9 @@
 /**
  * @author Claude
- * @version 2.0
- * @date 2026/4/23 17:07:58
+ * @version 2.1
+ * @date 2026/4/23 17:43:19
  *
- * HTTP client for the BFF /api/web/** endpoints.
+ * HTTP client for the BFF /api/** endpoints.
  * All requests are sent to the Next.js BFF layer (same origin), which
  * proxies them server-side to the backend. This keeps backend credentials
  * and the backend origin out of the browser entirely.
@@ -151,25 +151,25 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const WebAuthApi = {
 	// QR login ---------------------------------------------------------
 	createQrTicket: () =>
-		request<CreateTicketResponse>('/web/auth/qr/ticket', { method: 'POST' }),
+		request<CreateTicketResponse>('/auth/qr/ticket', { method: 'POST' }),
 	checkQrTicket: (ticket: string) =>
 		request<CheckTicketResponse>(
-			`/web/auth/qr/ticket/${encodeURIComponent(ticket)}`
+			`/auth/qr/ticket/${encodeURIComponent(ticket)}`
 		),
 	// Passkey ----------------------------------------------------------
 	getPasskeyOption: () =>
-		request<PasskeyOptionResponse>('/web/auth/passkey/option', {
+		request<PasskeyOptionResponse>('/auth/passkey/option', {
 			method: 'POST',
 		}),
 	passkeyLogin: (assertionJSON: string, session: string) =>
-		request<PasskeyLoginResponse>('/web/auth/passkey/login', {
+		request<PasskeyLoginResponse>('/auth/passkey/login', {
 			method: 'POST',
 			body: JSON.stringify({ assertion_json: assertionJSON, session }),
 		}),
 	// Session ----------------------------------------------------------
-	me: () => request<MeResponse>('/web/auth/me'),
-	logout: () => request<void>('/web/auth/logout', { method: 'POST' }),
-	refresh: () => request<void>('/web/auth/refresh', { method: 'POST' }),
+	me: () => request<MeResponse>('/auth/me'),
+	logout: () => request<void>('/auth/logout', { method: 'POST' }),
+	refresh: () => request<void>('/auth/refresh', { method: 'POST' }),
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
 		client_id: string;
@@ -177,7 +177,7 @@ export const WebAuthApi = {
 		redirect_uri: string;
 		state: string;
 	}) =>
-		request<ConsentInfoResponse>('/web/sso/consent/info', {
+		request<ConsentInfoResponse>('/sso/consent/info', {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		}),
@@ -188,7 +188,7 @@ export const WebAuthApi = {
 		state: string;
 		nonce: string;
 	}) =>
-		request<ConsentConfirmResponse>('/web/sso/consent/confirm', {
+		request<ConsentConfirmResponse>('/sso/consent/confirm', {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		}),

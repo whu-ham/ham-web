@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2026/4/23 17:07:58
  *
- * BFF route: GET /api/web/auth/qr/ticket/[ticket]
+ * BFF route: GET /api/auth/qr/ticket/[ticket]
  * Proxies QR ticket status polling to the backend.
  */
 import { proxyToBackend } from '@/app/api/_proxy';
