@@ -92,6 +92,12 @@ export default async function OgImage() {
 				</div>
 			</div>
 		),
-		{ ...size }
+		{
+			...size,
+			headers: {
+				'Cache-Control': 'public, max-age=0, must-revalidate',
+				'Cloudflare-CDN-Cache-Control': 'public, max-age=86400',
+			},
+		}
 	);
 }
