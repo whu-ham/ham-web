@@ -1,13 +1,13 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/23 20:31:47
+ * @version 1.1
+ * @date 2026/4/30 15:27:00
  *
  * EdgeOne Edge Function: GET /api/auth/qr/ticket/[ticket]
  * Proxies QR ticket status polling to the backend.
  * The dynamic segment [ticket] is available via context.params.ticket.
  */
-import { proxyToBackend } from '../../../../_proxy';
+import { handlePreflight, proxyToBackend } from '../../../../_proxy';
 
 export async function onRequestGet(context: {
 	request: Request;
@@ -21,3 +21,5 @@ export async function onRequestGet(context: {
 		context.env
 	);
 }
+
+export const onRequestOptions = handlePreflight;
