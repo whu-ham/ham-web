@@ -1,13 +1,15 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/23 17:07:58
+ * @version 1.1
+ * @date 2026/4/30 15:21:00
  *
  * BFF route: POST /api/auth/passkey/login
  * Proxies passkey assertion verification to the backend.
  */
-import { proxyToBackend } from '@/app/api/_proxy';
+import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
 export async function POST(req: Request): Promise<Response> {
 	return proxyToBackend(req, '/web/auth/passkey/login');
 }
+
+export const OPTIONS = handlePreflight;

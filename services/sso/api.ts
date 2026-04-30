@@ -1,16 +1,33 @@
 /**
  * @author Claude
- * @version 2.1
- * @date 2026/4/23 17:43:19
+ * @version 2.2
+ * @date 2026/4/30 15:16:00
  *
  * HTTP client for the BFF /api/** endpoints.
- * All requests are sent to the Next.js BFF layer (same origin), which
- * proxies them server-side to the backend. This keeps backend credentials
- * and the backend origin out of the browser entirely.
+ *
+ * By default requests are sent to the same origin under `/api`, which is the
+ * Next.js BFF layer that proxies them server-side to the backend. When the
+ * frontend and BFF are deployed to separate origins (e.g. pages on
+ * Cloudflare Workers, BFF on EdgeOne), set `NEXT_PUBLIC_API_BASE` at build
+ * time to the absolute BFF origin (e.g. `https://api.example.com`) — the
+ * value is inlined into the client bundle at build time and used as the
+ * prefix for every request here.
+ *
  * Response bodies are normalized to match the Go handler JSON shapes
  * documented in internal/delivery/http/handler/web/*.go.
  */
 'use client';
+
+/**
+ * Absolute or relative base URL for BFF requests. When
+ * `NEXT_PUBLIC_API_BASE` is empty / unset at build time we fall back to
+ * same-origin `/api` so local development and single-origin deployments
+ * keep working without any env configuration.
+ *
+ * NOTE: `NEXT_PUBLIC_*` values are inlined into the client bundle and are
+ * therefore always visible to end users — never put real secrets here.
+ */
+const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE ?? ''}/api`;
 
 export const QR_TICKET_STATE = {
 	PENDING: 'PENDING',
@@ -123,8 +140,10 @@ function getAcceptLanguage(): string | undefined {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	const acceptLanguage = getAcceptLanguage();
-	// All requests go to the BFF (same origin) — no absolute backend URL needed.
-	const res = await fetch(`/api${path}`, {
+	// All requests go to the BFF. `API_BASE` is either same-origin `/api`
+	// (default) or `<NEXT_PUBLIC_API_BASE>/api` when the BFF lives on a
+	// different origin. See the module header for details.
+	const res = await fetch(`${API_BASE}${path}`, {
 		...init,
 		credentials: 'include',
 		headers: {

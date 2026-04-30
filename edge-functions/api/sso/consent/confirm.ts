@@ -1,12 +1,12 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/23 20:31:47
+ * @version 1.1
+ * @date 2026/4/30 15:27:00
  *
  * EdgeOne Edge Function: POST /api/sso/consent/confirm
  * Proxies consent confirmation to the backend.
  */
-import { proxyToBackend } from '../../../_proxy';
+import { handlePreflight, proxyToBackend } from '../../../_proxy';
 
 export async function onRequestPost(context: {
 	request: Request;
@@ -18,3 +18,5 @@ export async function onRequestPost(context: {
 		context.env
 	);
 }
+
+export const onRequestOptions = handlePreflight;
