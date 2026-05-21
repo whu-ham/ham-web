@@ -65,7 +65,7 @@ const DeepLinkFallback = () => {
 	return (
 		<>
 			<header className={'flex flex-col items-center text-center gap-2'}>
-				<Image src={icon} alt={'logo'} className={'size-16 rounded-3xl'} />
+				<Image src={icon} alt={'logo'} className={'size-16 rounded-[12px]'} />
 				<h1 className={'text-xl font-bold text-foreground'}>
 					{t('deepLink.title')}
 				</h1>

@@ -176,6 +176,9 @@
 			"mcp:read": "MCP read-only access",
 			"mcp:write": "MCP write-only access"
 		},
+		"scopeGroup": {
+			"mcp": "MCP"
+		},
 		"card": {
 			"last4": "Last 4: {last4}",
 			"scopes": "Scopes",

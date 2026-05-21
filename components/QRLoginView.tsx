@@ -178,7 +178,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 
 			<div
 				className={
-					'h-[160px] flex items-center justify-center relative rounded-3xl'
+					'h-[160px] flex items-center justify-center relative rounded-[12px]'
 				}
 			>
 				{createFailed && (
@@ -188,7 +188,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 						disabled={creating}
 						aria-label={t('refresh')}
 						className={
-							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-3xl bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
 						}
 					>
 						<span
@@ -210,7 +210,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 					!refreshing && (
 						<div
 							className={
-								'size-[160px] flex items-center justify-center rounded-3xl bg-white border border-border'
+								'size-[160px] flex items-center justify-center rounded-[12px] bg-white border border-border'
 							}
 						>
 							{ticket && (
@@ -276,7 +276,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 						disabled={creating}
 						aria-label={t('refresh')}
 						className={
-							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-3xl bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
 						}
 					>
 						<span

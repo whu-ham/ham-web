@@ -76,7 +76,10 @@ export default async function RootLayout({
 				 * `<head>` guarantees it executes before any DOM content
 				 * becomes visible.
 				 */}
-				<script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+				<script
+					suppressHydrationWarning
+					dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+				/>
 			</head>
 			<Body locale={locale} messages={messages}>
 				{children}
@@ -105,7 +108,10 @@ const Body = ({
 			 * content is painted — ensures the correct theme is always
 			 * in place after hydration without waiting for useEffect.
 			 */}
-			<script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }} />
+			<script
+					suppressHydrationWarning
+					dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+				/>
 			<NextIntlClientProvider locale={locale} messages={messages}>
 				<Providers>{children}</Providers>
 			</NextIntlClientProvider>

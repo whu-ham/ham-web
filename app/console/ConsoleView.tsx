@@ -87,9 +87,9 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 				{/* API Key Management card */}
 				<button
 					type={'button'}
-					onClick={() => router.push('/console/apikeys')}
+					onClick={() => router.push('/console/tokens')}
 					className={
-						'flex flex-col items-center gap-3 py-6 px-4 rounded-3xl ' +
+						'flex flex-col items-center gap-3 py-6 px-4 rounded-[12px] ' +
 						'bg-default hover:bg-default-hover transition-colors cursor-pointer text-left'
 					}
 				>

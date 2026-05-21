@@ -35,7 +35,7 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 	const t = useTranslations('apikey');
 
 	return (
-		<div className={'flex flex-col gap-3 rounded-3xl bg-default p-4 w-full'}>
+		<div className={'flex flex-col gap-3 rounded-[12px] bg-default p-4 w-full'}>
 			<div className={'flex items-center justify-between'}>
 				<div className={'flex flex-col min-w-0'}>
 					<span className={'text-sm font-medium text-foreground truncate'}>
@@ -71,7 +71,7 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 							</Button>
 						</Popover.Trigger>
 						<Popover.Content>
-							<div className={'flex flex-col gap-3 p-4 max-w-[260px]'}>
+							<div className={'flex flex-col gap-3 p-4 max-w-65'}>
 								<p className={'text-sm text-foreground'}>
 									{t('card.revokeConfirm')}
 								</p>

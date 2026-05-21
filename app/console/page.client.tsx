@@ -26,7 +26,7 @@ import LoginView from '@/components/LoginView';
 import PageFrame from '@/components/PageFrame';
 import { ApiError, WebAuthApi } from '@/services/sso/api';
 import {
-	buildConsoleLoginDeepLink,
+	buildSsoAuthorizeDeepLink,
 	tryLaunchDeepLink,
 } from '@/services/sso/deepLink';
 import { isMobile } from '@/services/sso/ua';
@@ -120,9 +120,11 @@ const ConsolePage = () => {
 		sessionStorage.setItem(APP_CALLBACK_STATE_KEY, state);
 
 		const redirectUrl = window.location.origin + window.location.pathname;
-		const deepLinkUrl = buildConsoleLoginDeepLink({
-			redirectUrl,
+		const deepLinkUrl = buildSsoAuthorizeDeepLink({
+			appId: process.env.NEXT_PUBLIC_CONSOLE_CLIENT_ID ?? '',
+			scope: [],
 			state,
+			redirectUri: redirectUrl,
 		});
 
 		tryLaunchDeepLink({ url: deepLinkUrl });

@@ -14,7 +14,6 @@ import {
 	Label,
 	Modal,
 	Slider,
-	useOverlayState,
 } from '@heroui/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
@@ -24,7 +23,7 @@ import toast from 'react-hot-toast';
 import {
 	newlyCreatedTokenAtom,
 	rotateModalAtom,
-} from '@/app/console/apikeys/store';
+} from '@/app/console/tokens/store';
 import { ApiError, TokenApi } from '@/services/token/api';
 
 const RotateTokenModal = () => {
@@ -39,13 +38,6 @@ const RotateTokenModal = () => {
 		setRotateModal({ visible: false, tokenId: null });
 		setTtl(30);
 	}, [setRotateModal]);
-
-	const state = useOverlayState({
-		isOpen: rotateModal.visible,
-		onOpenChange: (open) => {
-			if (!open) handleClose();
-		},
-	});
 
 	const handleSubmit = useCallback(async () => {
 		if (!rotateModal.tokenId) return;
@@ -70,10 +62,10 @@ const RotateTokenModal = () => {
 	}, [rotateModal.tokenId, ttl, setNewlyCreated, handleClose, t]);
 
 	return (
-		<Modal state={state}>
-			<Modal.Backdrop />
-			<Modal.Container>
-				<Modal.Dialog>
+		<Modal>
+			<Modal.Backdrop isOpen={rotateModal.visible} onOpenChange={(open) => { if (!open) handleClose(); }}>
+				<Modal.Container>
+					<Modal.Dialog>
 					<Modal.Header>
 						<Modal.Heading>{t('rotateModal.title')}</Modal.Heading>
 						<Modal.CloseTrigger />
@@ -102,9 +94,9 @@ const RotateTokenModal = () => {
 						</Slider>
 					</Modal.Body>
 					<Modal.Footer>
-						<Modal.CloseTrigger>
-							<Button variant={'tertiary'}>{tc('cancel')}</Button>
-						</Modal.CloseTrigger>
+						<Button slot="close" variant={'tertiary'}>
+							{tc('cancel')}
+						</Button>
 						<Button
 							variant={'primary'}
 							isPending={submitting}
@@ -115,6 +107,7 @@ const RotateTokenModal = () => {
 					</Modal.Footer>
 				</Modal.Dialog>
 			</Modal.Container>
+		</Modal.Backdrop>
 		</Modal>
 	);
 };

@@ -104,19 +104,4 @@ export const buildSsoAuthorizeDeepLink = (params: {
 	return `ham://sso-authorize?${usp.toString()}`;
 };
 
-/**
- * buildConsoleLoginDeepLink constructs the `ham://console-login?...` URL
- * that the native HAM App understands for console/web login flow.
- * After the user authenticates in the App, it opens redirect_url with
- * `code` and `state` query parameters so the web can exchange the code
- * for a session.
- */
-export const buildConsoleLoginDeepLink = (params: {
-	redirectUrl: string;
-	state: string;
-}): string => {
-	const usp = new URLSearchParams();
-	usp.set('redirect_url', params.redirectUrl);
-	usp.set('state', params.state);
-	return `ham://console-login?${usp.toString()}`;
-};
+

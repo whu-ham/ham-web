@@ -1,10 +1,11 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.1
+ * @date 2026/5/22
  *
  * HTTP client for the /web/tokens/** endpoints (API token management).
  * Uses shared request<T>() and ApiError from services/shared.ts.
+ * Also exports a server-side fetch for SSR preloading.
  */
 'use client';
 
@@ -55,7 +56,7 @@ export interface RotateTokenRequest {
 }
 
 // ---------------------------------------------------------------------------
-// API object
+// API object (client-side)
 // ---------------------------------------------------------------------------
 
 export const TokenApi = {

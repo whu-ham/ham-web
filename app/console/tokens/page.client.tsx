@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2026/5/21
  *
- * Client-side page for /console/apikeys — API Key management.
+ * Client-side page for /console/tokens — Token management.
  * Lists all tokens, with create/rotate/revoke actions.
  */
 'use client';
@@ -11,25 +11,30 @@
 import { Button, Spinner } from '@heroui/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
-import CreateTokenModal from '@/app/console/apikeys/CreateTokenModal';
-import RotateTokenModal from '@/app/console/apikeys/RotateTokenModal';
-import TokenCard from '@/app/console/apikeys/TokenCard';
-import TokenRevealModal from '@/app/console/apikeys/TokenRevealModal';
+import CreateTokenModal from '@/app/console/tokens/CreateTokenModal';
+import RotateTokenModal from '@/app/console/tokens/RotateTokenModal';
+import TokenCard from '@/app/console/tokens/TokenCard';
+import TokenRevealModal from '@/app/console/tokens/TokenRevealModal';
 import {
 	createModalVisibleAtom,
 	newlyCreatedTokenAtom,
 	rotateModalAtom,
 	tokenListAtom,
 	tokenListLoadingAtom,
-} from '@/app/console/apikeys/store';
+} from '@/app/console/tokens/store';
 import PageFrame from '@/components/PageFrame';
+import type { TokenListItem } from '@/services/token/api';
 import { TokenApi } from '@/services/token/api';
 import { useRouter } from 'next/navigation';
 
-const ApiKeysPage = () => {
+interface TokensPageProps {
+	initialTokens?: TokenListItem[];
+}
+
+const TokensPage = ({ initialTokens }: TokensPageProps) => {
 	const t = useTranslations('apikey');
 	const router = useRouter();
 	const [tokens, setTokens] = useAtom(tokenListAtom);
@@ -37,6 +42,7 @@ const ApiKeysPage = () => {
 	const setCreateModalVisible = useSetAtom(createModalVisibleAtom);
 	const setRotateModal = useSetAtom(rotateModalAtom);
 	const newlyCreated = useAtomValue(newlyCreatedTokenAtom);
+	const [hydrated, setHydrated] = useState(false);
 
 	const fetchTokens = useCallback(async () => {
 		setLoading(true);
@@ -50,16 +56,23 @@ const ApiKeysPage = () => {
 		}
 	}, [setTokens, setLoading, t]);
 
+	// Use SSR data on first render, then hydrate
 	useEffect(() => {
-		fetchTokens();
-	}, [fetchTokens]);
-
-	// Refresh list when a new token is created/rotated
-	useEffect(() => {
-		if (newlyCreated) {
+		if (initialTokens && initialTokens.length > 0) {
+			setTokens(initialTokens);
+			setLoading(false);
+		} else {
 			fetchTokens();
 		}
-	}, [newlyCreated, fetchTokens]);
+		setHydrated(true);
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	// Refresh list when a new token is created/rotated (after hydration)
+	useEffect(() => {
+		if (hydrated && newlyCreated) {
+			fetchTokens();
+		}
+	}, [newlyCreated, fetchTokens, hydrated]);
 
 	const handleRevoke = useCallback(
 		async (id: string) => {
@@ -157,4 +170,4 @@ const ApiKeysPage = () => {
 	);
 };
 
-export default ApiKeysPage;
+export default TokensPage;

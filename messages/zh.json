@@ -176,6 +176,9 @@
 			"mcp:read": "仅 MCP 读取权限",
 			"mcp:write": "仅 MCP 写入权限"
 		},
+		"scopeGroup": {
+			"mcp": "MCP"
+		},
 		"card": {
 			"last4": "末4位：{last4}",
 			"scopes": "权限",

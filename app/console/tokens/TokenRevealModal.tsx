@@ -9,12 +9,12 @@
  */
 'use client';
 
-import { Alert, Button, Modal, useOverlayState } from '@heroui/react';
+import { Alert, Button, Modal } from '@heroui/react';
 import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 
-import { newlyCreatedTokenAtom } from '@/app/console/apikeys/store';
+import { newlyCreatedTokenAtom } from '@/app/console/tokens/store';
 
 const TokenRevealModal = () => {
 	const t = useTranslations('apikey');
@@ -25,13 +25,6 @@ const TokenRevealModal = () => {
 		setNewlyCreated(null);
 		setCopied(false);
 	}, [setNewlyCreated]);
-
-	const state = useOverlayState({
-		isOpen: !!newlyCreated,
-		onOpenChange: (open) => {
-			if (!open) handleClose();
-		},
-	});
 
 	const handleCopy = useCallback(async () => {
 		if (!newlyCreated?.token) return;
@@ -52,13 +45,13 @@ const TokenRevealModal = () => {
 	}, [newlyCreated]);
 
 	return (
-		<Modal state={state}>
-			<Modal.Backdrop />
-			<Modal.Container>
-				<Modal.Dialog>
-					<Modal.Header>
-						<Modal.Heading>{t('tokenReveal.title')}</Modal.Heading>
-					</Modal.Header>
+		<Modal>
+			<Modal.Backdrop isOpen={!!newlyCreated} onOpenChange={(open) => { if (!open) handleClose(); }}>
+				<Modal.Container>
+					<Modal.Dialog>
+						<Modal.Header>
+							<Modal.Heading>{t('tokenReveal.title')}</Modal.Heading>
+						</Modal.Header>
 					<Modal.Body className={'flex flex-col gap-4'}>
 						<Alert status={'warning'}>
 							<Alert.Indicator />
@@ -84,12 +77,13 @@ const TokenRevealModal = () => {
 						>
 							{copied ? t('tokenReveal.copied') : t('tokenReveal.copy')}
 						</Button>
-						<Modal.CloseTrigger>
-							<Button variant={'tertiary'}>{t('tokenReveal.close')}</Button>
-						</Modal.CloseTrigger>
+						<Button slot="close" variant={'tertiary'}>
+							{t('tokenReveal.close')}
+						</Button>
 					</Modal.Footer>
 				</Modal.Dialog>
 			</Modal.Container>
+		</Modal.Backdrop>
 		</Modal>
 	);
 };

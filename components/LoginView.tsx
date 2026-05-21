@@ -45,7 +45,7 @@ const LoginView = ({
 					'flex flex-col md:flex-row items-center md:items-start gap-4 md:gap-6'
 				}
 			>
-				<Image src={icon} alt={'logo'} className={'size-16 rounded-3xl'} />
+				<Image src={icon} alt={'logo'} className={'size-16 rounded-[12px]'} />
 				<div className={'flex flex-col items-center md:items-start'}>
 					<h1 className={'text-xl font-bold text-foreground'}>
 						{t('login.title')}

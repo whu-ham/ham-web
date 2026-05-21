@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2026/5/21
  *
- * Jotai atoms for the /console/apikeys page.
+ * Jotai atoms for the /console/tokens page.
  */
 
 import { atom } from 'jotai';

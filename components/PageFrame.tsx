@@ -6,7 +6,7 @@
  * Shared page frame component providing a full-screen centered layout
  * with HeaderBar (theme + language switchers) and a rounded Card container.
  * Extracted from app/sso-authorize/page.client.tsx for reuse across
- * sso-authorize, console, and apikeys pages.
+ * sso-authorize, console, and tokens pages.
  */
 'use client';
 

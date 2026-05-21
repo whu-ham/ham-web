@@ -166,7 +166,7 @@ const ConsentView = () => {
 					<img
 						src={info.app.icon_url}
 						alt={info.app.name}
-						className={'size-14 rounded-3xl shrink-0'}
+						className={'size-14 rounded-[12px] shrink-0'}
 					/>
 				)}
 				{/*
@@ -191,7 +191,7 @@ const ConsentView = () => {
 			{info.can_auto_authorize && (
 				<div
 					className={
-						'w-full flex items-center gap-2 bg-default rounded-3xl px-3 py-2 text-sm text-muted'
+						'w-full flex items-center gap-2 bg-default rounded-[12px] px-3 py-2 text-sm text-muted'
 					}
 				>
 					<span
@@ -228,7 +228,7 @@ const ConsentView = () => {
 							value={s.scope}
 							isDisabled={s.required || s.already_granted}
 							className={
-								'flex items-start gap-3 bg-default rounded-3xl p-3 w-full cursor-pointer'
+								'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
 							}
 						>
 							<Checkbox.Control className={'mt-0.5 shrink-0'}>

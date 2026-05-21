@@ -1,11 +1,13 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.1
+ * @date 2026/5/22
  */
-import ApiKeysPage from '@/app/console/apikeys/page.client';
+import TokensPage from '@/app/console/tokens/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+
+import { fetchTokenList } from '@/services/token/server';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('apikey');
@@ -14,6 +16,9 @@ export const generateMetadata = async (): Promise<Metadata> => {
 	};
 };
 
-const Page = () => <ApiKeysPage />;
+const Page = async () => {
+	const initialTokens = await fetchTokenList();
+	return <TokensPage initialTokens={initialTokens} />;
+};
 
 export default Page;
