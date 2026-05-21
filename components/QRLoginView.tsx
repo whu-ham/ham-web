@@ -40,9 +40,9 @@ interface QRLoginViewProps {
 
 const POLL_INTERVAL_MS = 2000;
 
-function isDocumentHidden(): boolean {
+const isDocumentHidden = (): boolean => {
 	return typeof document !== 'undefined' && document.hidden;
-}
+};
 
 const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 	const t = useTranslations('sso.qr');
@@ -83,7 +83,6 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 	}, [t]);
 
 	useEffect(() => {
-		// eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount
 		refresh();
 		return () => clearTimer();
 	}, [refresh, clearTimer]);
@@ -179,7 +178,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 
 			<div
 				className={
-					'h-[160px] flex items-center justify-center relative rounded-[12px]'
+					'h-[160px] flex items-center justify-center relative rounded-3xl'
 				}
 			>
 				{createFailed && (
@@ -189,12 +188,12 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 						disabled={creating}
 						aria-label={t('refresh')}
 						className={
-							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-3xl bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
 						}
 					>
 						<span
 							className={
-								'material-icons-round text-muted !text-[40px] !leading-none'
+								'material-icons-round text-muted text-[40px]! leading-none!'
 							}
 							aria-hidden={true}
 						>
@@ -211,7 +210,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 					!refreshing && (
 						<div
 							className={
-								'size-[160px] flex items-center justify-center rounded-[12px] bg-white border border-border'
+								'size-[160px] flex items-center justify-center rounded-3xl bg-white border border-border'
 							}
 						>
 							{ticket && (
@@ -258,7 +257,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 						>
 							<span
 								className={
-									'material-icons-round text-accent-foreground !text-3xl'
+									'material-icons-round text-accent-foreground text-3xl!'
 								}
 							>
 								done
@@ -277,12 +276,12 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 						disabled={creating}
 						aria-label={t('refresh')}
 						className={
-							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-[12px] bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
+							'flex flex-col items-center justify-center gap-2 size-[160px] rounded-3xl bg-default hover:bg-default-hover disabled:opacity-60 disabled:cursor-not-allowed transition-colors'
 						}
 					>
 						<span
 							className={
-								'material-icons-round text-muted !text-[40px] !leading-none'
+								'material-icons-round text-muted text-[40px]! leading-none!'
 							}
 							aria-hidden={true}
 						>

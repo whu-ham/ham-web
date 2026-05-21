@@ -92,7 +92,7 @@ const ApiKeysPage = () => {
 						onPress={() => router.push('/console')}
 					>
 						<span
-							className={'material-icons-round !text-[18px] !leading-none'}
+							className={'material-icons-round text-[18px]! leading-none!'}
 							aria-hidden={true}
 						>
 							arrow_back
@@ -106,7 +106,7 @@ const ApiKeysPage = () => {
 					onPress={() => setCreateModalVisible(true)}
 				>
 					<span
-						className={'material-icons-round !text-[18px] !leading-none'}
+						className={'material-icons-round text-[18px]! leading-none!'}
 						aria-hidden={true}
 					>
 						add
@@ -126,7 +126,7 @@ const ApiKeysPage = () => {
 					<div className={'flex flex-col items-center gap-2 py-8 text-center'}>
 						<span
 							className={
-								'material-icons-round text-muted !text-[48px] !leading-none'
+								'material-icons-round text-muted text-[48px]! leading-none!'
 							}
 							aria-hidden={true}
 						>

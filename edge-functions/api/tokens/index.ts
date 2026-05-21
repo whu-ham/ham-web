@@ -8,18 +8,18 @@
  */
 import { handlePreflight, proxyToBackend } from '../../_proxy';
 
-export async function onRequestGet(context: {
+export const onRequestGet = async (context: {
 	request: Request;
 	env: Record<string, string>;
-}): Promise<Response> {
+}): Promise<Response> => {
 	return proxyToBackend(context.request, '/web/tokens', context.env);
-}
+};
 
-export async function onRequestPost(context: {
+export const onRequestPost = async (context: {
 	request: Request;
 	env: Record<string, string>;
-}): Promise<Response> {
+}): Promise<Response> => {
 	return proxyToBackend(context.request, '/web/tokens', context.env);
-}
+};
 
 export const onRequestOptions = handlePreflight;

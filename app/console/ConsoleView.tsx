@@ -20,7 +20,7 @@ interface ConsoleViewProps {
 	onLogout: () => void;
 }
 
-function getGreetingKey(): string {
+const getGreetingKey = (): string => {
 	const hour = new Date().getHours();
 	if (hour >= 0 && hour < 5) return 'lateNight';
 	if (hour >= 5 && hour < 8) return 'dawn';
@@ -29,7 +29,7 @@ function getGreetingKey(): string {
 	if (hour >= 14 && hour < 18) return 'afternoon';
 	if (hour >= 18 && hour < 24) return 'evening';
 	return 'default';
-}
+};
 
 const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 	const t = useTranslations('console');
@@ -70,7 +70,7 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 				</div>
 				<Button variant={'tertiary'} size={'sm'} onPress={handleLogout}>
 					<span
-						className={'material-icons-round !text-[18px] !leading-none'}
+						className={'material-icons-round text-[18px]! leading-none!'}
 						aria-hidden={true}
 					>
 						logout
@@ -89,13 +89,13 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 					type={'button'}
 					onClick={() => router.push('/console/apikeys')}
 					className={
-						'flex flex-col items-center gap-3 py-6 px-4 rounded-[12px] ' +
+						'flex flex-col items-center gap-3 py-6 px-4 rounded-3xl ' +
 						'bg-default hover:bg-default-hover transition-colors cursor-pointer text-left'
 					}
 				>
 					<span
 						className={
-							'material-icons-round text-foreground !text-[48px] !leading-none'
+							'material-icons-round text-foreground text-[48px]! leading-none!'
 						}
 						aria-hidden={true}
 					>

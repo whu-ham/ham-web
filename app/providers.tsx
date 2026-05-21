@@ -10,11 +10,11 @@
 import { ReactNode } from 'react';
 import { Toaster } from 'react-hot-toast';
 
-export function Providers({ children }: { children: ReactNode }) {
+export const Providers = ({ children }: { children: ReactNode }) => {
 	return (
 		<>
 			{children}
 			<Toaster />
 		</>
 	);
-}
+};

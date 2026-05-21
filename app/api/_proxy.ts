@@ -60,19 +60,19 @@ const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
  * be added (single-origin deploy, or request Origin does not match the
  * configured allow-list).
  */
-function resolveAllowedOrigin(req: Request): string | null {
+const resolveAllowedOrigin = (req: Request): string | null => {
 	if (ALLOWED_WEB_ORIGINS.size === 0) return null;
 	const reqOrigin = req.headers.get('origin');
 	if (!reqOrigin) return null;
 	return ALLOWED_WEB_ORIGINS.has(reqOrigin) ? reqOrigin : null;
-}
+};
 
 /**
  * Append CORS headers to an existing Headers object when the request
  * origin is allow-listed. Mutates and returns the same Headers instance
  * for call-site convenience.
  */
-function applyCorsHeaders(headers: Headers, req: Request): Headers {
+const applyCorsHeaders = (headers: Headers, req: Request): Headers => {
 	const allowedOrigin = resolveAllowedOrigin(req);
 	// Always advertise that responses vary by Origin so shared caches
 	// (CDNs / EdgeOne) don't mix cross-origin responses between callers.
@@ -82,14 +82,14 @@ function applyCorsHeaders(headers: Headers, req: Request): Headers {
 		headers.set('Access-Control-Allow-Credentials', 'true');
 	}
 	return headers;
-}
+};
 
 /**
  * Handle a CORS preflight (OPTIONS) request. Route handlers should
  * `export const OPTIONS = handlePreflight;` so browsers get a valid
  * 204 response before firing the real credentialed request.
  */
-export function handlePreflight(req: Request): Response {
+export const handlePreflight = (req: Request): Response => {
 	const headers = new Headers();
 	applyCorsHeaders(headers, req);
 	// Only advertise allowed methods / headers when we actually accept
@@ -103,17 +103,17 @@ export function handlePreflight(req: Request): Response {
 		headers.set('Access-Control-Max-Age', '86400');
 	}
 	return new Response(null, { status: 204, headers });
-}
+};
 
 /**
  * Proxy a Next.js Request to the backend and return the backend Response.
  * @param req  The incoming Next.js Request object.
  * @param path The backend path to forward to (e.g. "/web/auth/me").
  */
-export async function proxyToBackend(
+export const proxyToBackend = async (
 	req: Request,
 	path: string
-): Promise<Response> {
+): Promise<Response> => {
 	const url = `${BACKEND_ORIGIN}${path}`;
 
 	// Forward all original headers except Host (which fetch sets automatically).
@@ -140,4 +140,4 @@ export async function proxyToBackend(
 		status: upstreamRes.status,
 		headers: resHeaders,
 	});
-}
+};

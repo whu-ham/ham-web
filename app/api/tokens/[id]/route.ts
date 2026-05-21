@@ -8,12 +8,12 @@
  */
 import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
-export async function DELETE(
+export const DELETE = async (
 	req: Request,
 	{ params }: { params: Promise<{ id: string }> }
-): Promise<Response> {
+): Promise<Response> => {
 	const { id } = await params;
 	return proxyToBackend(req, `/web/tokens/${encodeURIComponent(id)}`);
-}
+};
 
 export const OPTIONS = handlePreflight;

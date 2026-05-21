@@ -65,7 +65,7 @@ const DeepLinkFallback = () => {
 	return (
 		<>
 			<header className={'flex flex-col items-center text-center gap-2'}>
-				<Image src={icon} alt={'logo'} className={'size-16 rounded-[12px]'} />
+				<Image src={icon} alt={'logo'} className={'size-16 rounded-3xl'} />
 				<h1 className={'text-xl font-bold text-foreground'}>
 					{t('deepLink.title')}
 				</h1>
@@ -84,7 +84,7 @@ const DeepLinkFallback = () => {
 				>
 					<Button variant={'primary'} className={'w-full'}>
 						<span
-							className={'material-icons-round !text-[18px] !leading-none'}
+							className={'material-icons-round text-[18px]! leading-none!'}
 							aria-hidden={true}
 						>
 							get_app

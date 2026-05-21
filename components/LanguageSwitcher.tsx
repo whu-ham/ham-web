@@ -152,7 +152,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 			>
 				<span
 					className={
-						'material-icons-round !text-[18px] !leading-none text-gray-500'
+						'material-icons-round text-[18px]! leading-none! text-gray-500'
 					}
 					aria-hidden={true}
 				>

@@ -21,6 +21,7 @@ export default defineConfig([
 				},
 			],
 			'no-console': ['error', { allow: ['warn', 'error'] }],
+			'func-style': ['error', 'expression', { allowArrowFunctions: true }],
 		},
 	},
 	globalIgnores(['out/*', '.next/*', '.*/']),

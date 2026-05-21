@@ -43,7 +43,7 @@ export class ApiError extends Error {
  * Falls back to the browser's own Accept-Language when no explicit
  * override cookie is present.
  */
-function getAcceptLanguage(): string | undefined {
+const getAcceptLanguage = (): string | undefined => {
 	if (typeof document === 'undefined') return undefined;
 	const raw = document.cookie
 		.split(';')
@@ -51,9 +51,12 @@ function getAcceptLanguage(): string | undefined {
 		.find((c) => c.startsWith('NEXT_LOCALE='));
 	if (!raw) return undefined;
 	return decodeURIComponent(raw.slice('NEXT_LOCALE='.length)) || undefined;
-}
+};
 
-export async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export const request = async <T>(
+	path: string,
+	init?: RequestInit
+): Promise<T> => {
 	const acceptLanguage = getAcceptLanguage();
 	// All requests go to the BFF. `API_BASE` is either same-origin `/api`
 	// (default) or `<NEXT_PUBLIC_API_BASE>/api` when the BFF lives on a
@@ -80,4 +83,4 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
 		return undefined as unknown as T;
 	}
 	return (await res.json()) as T;
-}
+};

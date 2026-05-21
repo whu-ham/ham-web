@@ -19,7 +19,7 @@ interface TokenCardProps {
 	onRevoke: () => void;
 }
 
-function formatDate(iso: string): string {
+const formatDate = (iso: string): string => {
 	try {
 		return new Date(iso).toLocaleDateString(undefined, {
 			year: 'numeric',
@@ -29,13 +29,13 @@ function formatDate(iso: string): string {
 	} catch {
 		return iso;
 	}
-}
+};
 
 const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 	const t = useTranslations('apikey');
 
 	return (
-		<div className={'flex flex-col gap-3 rounded-[12px] bg-default p-4 w-full'}>
+		<div className={'flex flex-col gap-3 rounded-3xl bg-default p-4 w-full'}>
 			<div className={'flex items-center justify-between'}>
 				<div className={'flex flex-col min-w-0'}>
 					<span className={'text-sm font-medium text-foreground truncate'}>
@@ -50,7 +50,7 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 						<Tooltip.Trigger>
 							<Button variant={'tertiary'} size={'sm'} onPress={onRotate}>
 								<span
-									className={'material-icons-round !text-[18px] !leading-none'}
+									className={'material-icons-round text-[18px]! leading-none!'}
 									aria-hidden={true}
 								>
 									autorenew
@@ -63,7 +63,7 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 						<Popover.Trigger>
 							<Button variant={'danger-soft'} size={'sm'}>
 								<span
-									className={'material-icons-round !text-[18px] !leading-none'}
+									className={'material-icons-round text-[18px]! leading-none!'}
 									aria-hidden={true}
 								>
 									delete_outline

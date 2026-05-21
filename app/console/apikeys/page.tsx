@@ -7,12 +7,12 @@ import ApiKeysPage from '@/app/console/apikeys/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-export async function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('apikey');
 	return {
 		title: t('meta.title'),
 	};
-}
+};
 
 const Page = () => <ApiKeysPage />;
 

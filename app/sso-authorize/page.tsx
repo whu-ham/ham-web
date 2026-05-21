@@ -7,7 +7,7 @@ import SsoAuthorizePage from '@/app/sso-authorize/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-export async function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('sso');
 	const title = t('meta.title');
 	const description = t('meta.description');
@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 			statusBarStyle: 'default',
 		},
 	};
-}
+};
 
 const Page = () => <SsoAuthorizePage />;
 

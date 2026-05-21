@@ -8,13 +8,13 @@
  */
 import { handlePreflight, proxyToBackend } from '../../_proxy';
 
-export async function onRequestDelete(context: {
+export const onRequestDelete = async (context: {
 	request: Request;
 	env: Record<string, string>;
 	params: Record<string, string>;
-}): Promise<Response> {
+}): Promise<Response> => {
 	const id = encodeURIComponent(context.params.id ?? '');
 	return proxyToBackend(context.request, `/web/tokens/${id}`, context.env);
-}
+};
 
 export const onRequestOptions = handlePreflight;

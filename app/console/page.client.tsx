@@ -33,13 +33,13 @@ import { isMobile } from '@/services/sso/ua';
 
 const APP_CALLBACK_STATE_KEY = 'console_login_state';
 
-function generateState(): string {
+const generateState = (): string => {
 	const arr = new Uint8Array(16);
 	if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
 		crypto.getRandomValues(arr);
 	}
 	return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
-}
+};
 
 const ConsolePage = () => {
 	const [stage, setStage] = useAtom(consoleStageAtom);

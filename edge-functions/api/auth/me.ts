@@ -8,11 +8,11 @@
  */
 import { handlePreflight, proxyToBackend } from '../../_proxy';
 
-export async function onRequestGet(context: {
+export const onRequestGet = async (context: {
 	request: Request;
 	env: Record<string, string>;
-}): Promise<Response> {
+}): Promise<Response> => {
 	return proxyToBackend(context.request, '/web/auth/me', context.env);
-}
+};
 
 export const onRequestOptions = handlePreflight;

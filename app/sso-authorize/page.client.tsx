@@ -72,7 +72,7 @@ const SESSION_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 // Helpers
 // ---------------------------------------------------------------------------
 
-function parseParams(): SsoAuthorizeParams | null {
+const parseParams = (): SsoAuthorizeParams | null => {
 	if (typeof window === 'undefined') {
 		return null;
 	}
@@ -89,7 +89,7 @@ function parseParams(): SsoAuthorizeParams | null {
 		.filter(Boolean);
 	const state = usp.get('state') ?? '';
 	return { appId, scope, state, redirectUri };
-}
+};
 
 // ---------------------------------------------------------------------------
 // Page component

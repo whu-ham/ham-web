@@ -8,15 +8,15 @@
  */
 import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
-export async function GET(
+export const GET = async (
 	req: Request,
 	{ params }: { params: Promise<{ ticket: string }> }
-): Promise<Response> {
+): Promise<Response> => {
 	const { ticket } = await params;
 	return proxyToBackend(
 		req,
 		`/web/auth/qr/ticket/${encodeURIComponent(ticket)}`
 	);
-}
+};
 
 export const OPTIONS = handlePreflight;

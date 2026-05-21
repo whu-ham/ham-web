@@ -41,7 +41,7 @@ const PasskeyLoginView = ({
 			};
 			const options =
 				parsed.publicKey as unknown as PublicKeyCredentialRequestOptions;
-			if (typeof options.challenge === 'string') {
+			if (typeof (options.challenge as unknown) === 'string') {
 				options.challenge = base64ToArrayBuffer(
 					options.challenge as unknown as string
 				);
@@ -50,7 +50,7 @@ const PasskeyLoginView = ({
 				options.allowCredentials = options.allowCredentials.map((c) => ({
 					...c,
 					id:
-						typeof c.id === 'string'
+						typeof (c.id as unknown) === 'string'
 							? base64ToArrayBuffer(c.id as unknown as string)
 							: c.id,
 				}));
@@ -95,7 +95,7 @@ const PasskeyLoginView = ({
 	return (
 		<Button variant={'tertiary'} isPending={loading} onPress={login}>
 			<span
-				className={'material-icons-round !text-[18px] !leading-none'}
+				className={'material-icons-round text-[18px]! leading-none!'}
 				aria-hidden={true}
 			>
 				key
@@ -105,7 +105,7 @@ const PasskeyLoginView = ({
 	);
 };
 
-function base64ToArrayBuffer(value: string): ArrayBuffer {
+const base64ToArrayBuffer = (value: string): ArrayBuffer => {
 	const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
 	const padded = normalized.padEnd(
 		normalized.length + ((4 - (normalized.length % 4)) % 4),
@@ -118,9 +118,9 @@ function base64ToArrayBuffer(value: string): ArrayBuffer {
 		view[i] = raw.charCodeAt(i);
 	}
 	return buf;
-}
+};
 
-function arrayBufferToBase64URL(buf: ArrayBuffer): string {
+const arrayBufferToBase64URL = (buf: ArrayBuffer): string => {
 	const bytes = new Uint8Array(buf);
 	let binary = '';
 	for (let i = 0; i < bytes.length; i++) {
@@ -130,9 +130,9 @@ function arrayBufferToBase64URL(buf: ArrayBuffer): string {
 		.replace(/\+/g, '-')
 		.replace(/\//g, '_')
 		.replace(/=+$/, '');
-}
+};
 
-function credentialToJSON(credential: PublicKeyCredential) {
+const credentialToJSON = (credential: PublicKeyCredential) => {
 	const response = credential.response as AuthenticatorAssertionResponse;
 	return {
 		id: credential.id,
@@ -148,6 +148,6 @@ function credentialToJSON(credential: PublicKeyCredential) {
 		},
 		clientExtensionResults: credential.getClientExtensionResults(),
 	};
-}
+};
 
 export default PasskeyLoginView;

@@ -121,7 +121,7 @@ const CreateTokenModal = () => {
 									key={scope}
 									value={scope}
 									className={
-										'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
+										'flex items-start gap-3 bg-default rounded-3xl p-3 w-full cursor-pointer'
 									}
 								>
 									<Checkbox.Control className={'mt-0.5 shrink-0'}>

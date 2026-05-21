@@ -7,12 +7,12 @@ import ConsolePage from '@/app/console/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
-export async function generateMetadata(): Promise<Metadata> {
+export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('console');
 	return {
 		title: t('meta.title'),
 	};
-}
+};
 
 const Page = () => <ConsolePage />;
 
