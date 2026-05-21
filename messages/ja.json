@@ -128,5 +128,97 @@
 			"errorTitle": "認可に失敗しました",
 			"backToThirdParty": "サードパーティアプリに戻る"
 		}
+	},
+	"console": {
+		"meta": {
+			"title": "コンソール | Ham"
+		},
+		"login": {
+			"title": "Hamにログイン",
+			"subtitle": "for Web",
+			"divider": {
+				"other": "その他のログイン方法"
+			}
+		},
+		"greeting": {
+			"lateNight": "まだ起きてますか？",
+			"dawn": "おはようございます",
+			"morning": "おはようございます",
+			"noon": "こんにちは",
+			"afternoon": "こんにちは",
+			"evening": "こんばんは",
+			"default": "こんにちは"
+		},
+		"logout": "ログアウト",
+		"card": {
+			"apikey": {
+				"title": "API Key 管理",
+				"subtitle": "API キーの作成と管理"
+			}
+		}
+	},
+	"apikey": {
+		"meta": {
+			"title": "API Key 管理 | Ham"
+		},
+		"title": "API Keys",
+		"backToConsole": "コンソールに戻る",
+		"create": "キーを作成",
+		"empty": {
+			"title": "API Key がありません",
+			"description": "上のボタンをクリックして作成"
+		},
+		"scope": {
+			"mcp": "MCP フルアクセス（読み取り + 書き込み）",
+			"mcp:read": "MCP 読み取り専用",
+			"mcp:write": "MCP 書き込み専用"
+		},
+		"card": {
+			"last4": "末4桁：{last4}",
+			"scopes": "権限",
+			"createdAt": "作成日",
+			"expiresAt": "有効期限",
+			"lastUsedAt": "最終使用",
+			"neverUsed": "未使用",
+			"rotate": "ローテート",
+			"revoke": "取り消し",
+			"revokeConfirm": "このキーを取り消しますか？この操作は取り消せません。"
+		},
+		"createModal": {
+			"title": "API Key を作成",
+			"name": "名前",
+			"namePlaceholder": "例：Cursor IDE",
+			"scopes": "権限スコープ",
+			"ttl": "有効期間（日）",
+			"submit": "作成",
+			"success": "API Key が作成されました"
+		},
+		"rotateModal": {
+			"title": "API Key をローテート",
+			"warning": "古いキーは即座に無効になります！",
+			"ttl": "新しい有効期間（日）",
+			"submit": "ローテート",
+			"success": "API Key がローテートされました"
+		},
+		"tokenReveal": {
+			"title": "あなたの API Key",
+			"warning": "今すぐコピーしてください。再度表示されることはありません。",
+			"copy": "コピー",
+			"copied": "コピーしました",
+			"close": "閉じる"
+		},
+		"validation": {
+			"nameRequired": "名前は必須です",
+			"nameTooLong": "名前は128文字以内で入力してください",
+			"scopesRequired": "少なくとも1つの権限を選択してください",
+			"ttlRange": "有効期間は1〜30日の範囲で指定してください",
+			"tokenLimit": "最大トークン数に達しました（5個）"
+		},
+		"error": {
+			"fetchFailed": "API Key の取得に失敗しました",
+			"createFailed": "作成に失敗しました",
+			"rotateFailed": "ローテートに失敗しました",
+			"revokeFailed": "取り消しに失敗しました"
+		}
 	}
 }

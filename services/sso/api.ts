@@ -1,33 +1,18 @@
 /**
  * @author Claude
- * @version 2.2
- * @date 2026/4/30 15:16:00
+ * @version 2.3
+ * @date 2026/5/21
  *
- * HTTP client for the BFF /api/** endpoints.
+ * HTTP client for the BFF /api/auth/** endpoints (SSO & session).
  *
- * By default requests are sent to the same origin under `/api`, which is the
- * Next.js BFF layer that proxies them server-side to the backend. When the
- * frontend and BFF are deployed to separate origins (e.g. pages on
- * Cloudflare Workers, BFF on EdgeOne), set `NEXT_PUBLIC_API_BASE` at build
- * time to the absolute BFF origin (e.g. `https://api.example.com`) — the
- * value is inlined into the client bundle at build time and used as the
- * prefix for every request here.
- *
- * Response bodies are normalized to match the Go handler JSON shapes
- * documented in internal/delivery/http/handler/web/*.go.
+ * Shared HTTP infrastructure (ApiError, request<T>, API_BASE) has been
+ * extracted to services/shared.ts. This module re-exports ApiError and
+ * ApiErrorBody for backward compatibility with existing consumers.
  */
 'use client';
 
-/**
- * Absolute or relative base URL for BFF requests. When
- * `NEXT_PUBLIC_API_BASE` is empty / unset at build time we fall back to
- * same-origin `/api` so local development and single-origin deployments
- * keep working without any env configuration.
- *
- * NOTE: `NEXT_PUBLIC_*` values are inlined into the client bundle and are
- * therefore always visible to end users — never put real secrets here.
- */
-const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE ?? ''}/api`;
+// Re-export shared HTTP infrastructure for backward compatibility
+export { ApiError, type ApiErrorBody } from '@/services/shared';
 
 export const QR_TICKET_STATE = {
 	PENDING: 'PENDING',
@@ -80,12 +65,6 @@ export interface ConsentScopeDetail {
 	scope: string;
 	description: string;
 	already_granted: boolean;
-	/**
-	 * Required scopes (e.g. "openid") are mandatory — the frontend must render
-	 * them as checked + disabled so the user cannot uncheck them. The backend
-	 * always injects the required set at the head of the list, even when the
-	 * client did not request them, so this flag is authoritative.
-	 */
 	required: boolean;
 }
 
@@ -105,67 +84,7 @@ export interface ConsentConfirmResponse {
 	redirect_url: string;
 }
 
-// Backend error envelope. Code / message follow the shared errorx contract.
-export interface ApiErrorBody {
-	code: string;
-	message?: string;
-}
-
-export class ApiError extends Error {
-	public readonly status: number;
-	public readonly code: string;
-	constructor(status: number, body?: ApiErrorBody) {
-		super(body?.message ?? `request failed: ${status}`);
-		this.status = status;
-		this.code = body?.code ?? String(status);
-	}
-}
-
-/**
- * Read the active locale from the NEXT_LOCALE cookie so that every
- * backend request carries the correct Accept-Language header and the
- * server returns i18n content in the language the user has selected.
- * Falls back to the browser's own Accept-Language when no explicit
- * override cookie is present.
- */
-function getAcceptLanguage(): string | undefined {
-	if (typeof document === 'undefined') return undefined;
-	const raw = document.cookie
-		.split(';')
-		.map((c) => c.trim())
-		.find((c) => c.startsWith('NEXT_LOCALE='));
-	if (!raw) return undefined;
-	return decodeURIComponent(raw.slice('NEXT_LOCALE='.length)) || undefined;
-}
-
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-	const acceptLanguage = getAcceptLanguage();
-	// All requests go to the BFF. `API_BASE` is either same-origin `/api`
-	// (default) or `<NEXT_PUBLIC_API_BASE>/api` when the BFF lives on a
-	// different origin. See the module header for details.
-	const res = await fetch(`${API_BASE}${path}`, {
-		...init,
-		credentials: 'include',
-		headers: {
-			...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-			...(acceptLanguage ? { 'Accept-Language': acceptLanguage } : {}),
-			...(init?.headers ?? {}),
-		},
-	});
-	if (!res.ok) {
-		let body: ApiErrorBody | undefined;
-		try {
-			body = (await res.json()) as ApiErrorBody;
-		} catch {
-			body = undefined;
-		}
-		throw new ApiError(res.status, body);
-	}
-	if (res.status === 204) {
-		return undefined as unknown as T;
-	}
-	return (await res.json()) as T;
-}
+import { request } from '@/services/shared';
 
 export const WebAuthApi = {
 	// QR login ---------------------------------------------------------

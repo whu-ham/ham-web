@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 3.0
- * @date 2026/4/21 19:47:00
+ * @version 3.1
+ * @date 2026/5/21
  *
  * Client-side orchestrator for /sso-authorize.
  *
@@ -44,9 +44,9 @@ import { useCallback, useEffect, useRef } from 'react';
 import ConsentView from '@/app/sso-authorize/ConsentView';
 import DeepLinkFallback from '@/app/sso-authorize/DeepLinkFallback';
 import DeepLinkTrying from '@/app/sso-authorize/DeepLinkTrying';
-import HeaderBar from '@/app/sso-authorize/HeaderBar';
 import InvalidRequestView from '@/app/sso-authorize/InvalidRequestView';
-import LoginView from '@/app/sso-authorize/LoginView';
+import LoginView from '@/components/LoginView';
+import PageFrame from '@/components/PageFrame';
 import {
 	deepLinkUrlAtom,
 	paramsAtom,
@@ -67,27 +67,6 @@ const AUTO_PROBE_TIMEOUT_MS = 1500;
 // call /web/auth/refresh. 5 minutes gives a comfortable buffer even on
 // slow connections.
 const SESSION_REFRESH_BUFFER_MS = 5 * 60 * 1000;
-
-// ---------------------------------------------------------------------------
-// PageFrame
-// ---------------------------------------------------------------------------
-
-const PageFrame = ({ children }: { children: React.ReactNode }) => (
-	<div
-		className={
-			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-1 sm:px-2 md:px-4 py-20'
-		}
-	>
-		<HeaderBar />
-		<div
-			className={
-				'bg-surface rounded-[16px] p-6 md:p-10 w-full max-w-md flex flex-col items-stretch gap-6'
-			}
-		>
-			{children}
-		</div>
-	</div>
-);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -129,10 +108,6 @@ const SsoAuthorizePage = () => {
 	const sessionConfirmedAtRef = useRef<number>(0);
 
 	// Resolve params once (client only — SSR has no window).
-	// We intentionally do NOT call setStage here on success — the stage
-	// stays 'loading' until the second effect (which depends on params)
-	// actually transitions it. This prevents a one-frame flash of an empty
-	// PageFrame card between the two effects.
 	useEffect(() => {
 		const parsed = parseParams();
 		if (!parsed) {
@@ -152,39 +127,28 @@ const SsoAuthorizePage = () => {
 				setStage({ kind: 'login' });
 				return;
 			}
-			// Any other error → treat as not-logged-in so the user can
-			// still retry via the login tabs.
 			setStage({ kind: 'login' });
 		}
 	}, [setStage]);
 
-	// Visibility-aware session refresh: when the consent page is active and
-	// the tab returns to the foreground, silently renew the session cookie.
-	// If the session has expired the user is sent back to login.
+	// Visibility-aware session refresh
 	useEffect(() => {
 		const onVisibilityChange = async () => {
 			if (document.hidden) return;
-			// Only act when the user is on the consent screen.
 			if (stage.kind !== 'consent') return;
 
 			const elapsed = Date.now() - sessionConfirmedAtRef.current;
 			if (elapsed < SESSION_REFRESH_BUFFER_MS) {
-				// Session is still fresh — no refresh needed yet.
 				return;
 			}
 
-			// Session is approaching expiry (or we don't know when it was
-			// last confirmed). Attempt a silent refresh.
 			try {
 				await WebAuthApi.refresh();
 				sessionConfirmedAtRef.current = Date.now();
 			} catch (e) {
 				if (e instanceof ApiError && e.status === 401) {
-					// Session has fully expired — send the user back to login.
 					setStage({ kind: 'login' });
 				}
-				// Other errors (network blip, 5xx) are silently ignored;
-				// the consent submit will surface them if they persist.
 			}
 		};
 
@@ -196,8 +160,6 @@ const SsoAuthorizePage = () => {
 
 	useEffect(() => {
 		if (!params) return;
-		// params is now set — immediately transition away from 'loading'
-		// so there is no frame where stage is not 'loading' but params is null.
 		const deviceKind =
 			typeof navigator === 'undefined'
 				? 'desktop'
@@ -211,22 +173,12 @@ const SsoAuthorizePage = () => {
 		if (autoProbeFiredRef.current) return;
 		autoProbeFiredRef.current = true;
 
-		// Mobile step 0: enter the "trying" screen and auto-fire the deep
-		// link. We flip to the "trying" stage first so that the subsequent
-		// `ham://` navigation (which can briefly hijack the tab) has a
-		// visible context the user understands.
 		setStage({ kind: 'deep-link-trying' });
 		tryLaunchDeepLink({
 			url: deepLinkUrl,
 			timeoutMs: AUTO_PROBE_TIMEOUT_MS,
 		}).then((result) => {
-			// launched=true: the App took focus; we still mount the
-			// trying screen underneath so that if the user bounces back
-			// (e.g. they cancelled the system prompt) they have the
-			// manual retry button ready without any further flicker.
 			if (result.launched) return;
-			// Either synchronous failure or timeout — both mean the App
-			// didn't respond; show the install / passkey fallback.
 			setStage({ kind: 'deep-link-fallback' });
 		});
 	}, [params, deepLinkUrl, probeLoginThenConsent, setStage]);
@@ -266,14 +218,16 @@ const SsoAuthorizePage = () => {
 	if (stage.kind === 'login') {
 		return (
 			<PageFrame>
-				<LoginView />
+				<LoginView
+					onLoggedIn={(me) => setStage({ kind: 'consent', me })}
+					onLoginFailed={() => setStage({ kind: 'login' })}
+					namespace="sso"
+				/>
 			</PageFrame>
 		);
 	}
 
-	// stage.kind === 'consent' — params is guaranteed to be non-null here
-	// because we only transition into `consent` after `setParams(parsed)`.
-	// The 'loading' guard above ensures we never reach here with params=null.
+	// stage.kind === 'consent'
 	return (
 		<PageFrame>
 			<ConsentView />
