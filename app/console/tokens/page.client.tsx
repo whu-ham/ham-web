@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.3
+ * @date 2026/5/22
  *
  * Client-side page for /console/tokens — Token management.
  * Lists all tokens, with create/rotate/revoke actions.
@@ -10,6 +10,7 @@
 
 import { Button, Spinner } from '@heroui/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useHydrateAtoms } from 'jotai/utils';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -25,9 +26,12 @@ import {
 	tokenListAtom,
 	tokenListLoadingAtom,
 } from '@/app/console/tokens/store';
-import PageFrame from '@/components/PageFrame';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
+import UserMenu from '@/components/UserMenu';
 import type { TokenListItem } from '@/services/token/api';
 import { TokenApi } from '@/services/token/api';
+import { WebAuthApi } from '@/services/sso/api';
 import { useRouter } from 'next/navigation';
 
 interface TokensPageProps {
@@ -35,6 +39,12 @@ interface TokensPageProps {
 }
 
 const TokensPage = ({ initialTokens }: TokensPageProps) => {
+	// Hydrate atoms with SSR data before first render — no loading flash
+	useHydrateAtoms([
+		[tokenListAtom, initialTokens ?? []],
+		[tokenListLoadingAtom, !initialTokens],
+	]);
+
 	const t = useTranslations('apikey');
 	const router = useRouter();
 	const [tokens, setTokens] = useAtom(tokenListAtom);
@@ -56,12 +66,9 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 		}
 	}, [setTokens, setLoading, t]);
 
-	// Use SSR data on first render, then hydrate
+	// If no SSR data, fetch on mount
 	useEffect(() => {
-		if (initialTokens && initialTokens.length > 0) {
-			setTokens(initialTokens);
-			setLoading(false);
-		} else {
+		if (!initialTokens) {
 			fetchTokens();
 		}
 		setHydrated(true);
@@ -78,7 +85,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 		async (id: string) => {
 			try {
 				await TokenApi.revoke(id);
-				setTokens((prev) => prev.filter((t) => t.id !== id));
+				setTokens((prev) => prev.filter((tk) => tk.id !== id));
 			} catch {
 				toast.error(t('error.revokeFailed'));
 			}
@@ -93,42 +100,90 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 		[setRotateModal]
 	);
 
+	const handleLogout = useCallback(async () => {
+		try {
+			await WebAuthApi.logout();
+		} finally {
+			router.push('/console');
+		}
+	}, [router]);
+
 	return (
-		<PageFrame maxWidth='max-w-2xl'>
+		<div className={'min-h-screen w-full bg-surface'}>
+			{/* Sticky page header with integrated toolbar */}
 			<header
-				className={'flex flex-row items-center justify-between w-full min-w-0'}
+				className={
+					'sticky top-0 z-40 bg-surface/60 backdrop-blur-md border-b border-border/40'
+				}
 			>
-				<div className={'flex items-center gap-3 min-w-0'}>
-					<Button
-						variant={'tertiary'}
-						size={'sm'}
-						onPress={() => router.push('/console')}
-					>
-						<span
-							className={'material-icons-round text-[18px]! leading-none!'}
-							aria-hidden={true}
-						>
-							arrow_back
-						</span>
-					</Button>
-					<h1 className={'text-lg font-bold text-foreground'}>{t('title')}</h1>
-				</div>
-				<Button
-					variant={'primary'}
-					size={'sm'}
-					onPress={() => setCreateModalVisible(true)}
+				<div
+					className={
+						'mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between'
+					}
 				>
-					<span
-						className={'material-icons-round text-[18px]! leading-none!'}
-						aria-hidden={true}
-					>
-						add
-					</span>
-					{t('create')}
-				</Button>
+					<div className={'flex items-center gap-3 min-w-0'}>
+						<Button
+							variant={'tertiary'}
+							size={'sm'}
+							isIconOnly
+							onPress={() => router.push('/console')}
+							aria-label={t('backToConsole')}
+						>
+							<span
+								className={
+									'material-icons-round text-[18px]! leading-none!'
+								}
+								aria-hidden={true}
+							>
+								arrow_back
+							</span>
+						</Button>
+						<h1 className={'text-lg font-bold text-foreground'}>
+							{t('title')}
+						</h1>
+					</div>
+					<div className={'flex items-center gap-1'}>
+						<div className={'hidden sm:flex items-center gap-1'}>
+							<ThemeSwitcher />
+							<LanguageSwitcher />
+						</div>
+						<div className={'sm:hidden'}>
+							<UserMenu onLogout={handleLogout} compact />
+						</div>
+						<div className={'hidden sm:block'}>
+							<UserMenu onLogout={handleLogout} />
+						</div>
+					</div>
+				</div>
 			</header>
 
-			<section className={'flex flex-col gap-3 w-full'}>
+			{/* Content */}
+			<div
+				className={
+					'mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-3'
+				}
+			>
+				{/* Create button above the list */}
+				{!loading && tokens.length > 0 && (
+					<div className={'flex justify-end'}>
+						<Button
+							variant={'primary'}
+							size={'sm'}
+							onPress={() => setCreateModalVisible(true)}
+						>
+							<span
+								className={
+									'material-icons-round text-[18px]! leading-none!'
+								}
+								aria-hidden={true}
+							>
+								add
+							</span>
+							{t('create')}
+						</Button>
+					</div>
+				)}
+
 				{loading && (
 					<div className={'flex justify-center py-8'}>
 						<Spinner size={'lg'} />
@@ -136,7 +191,11 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 				)}
 
 				{!loading && tokens.length === 0 && (
-					<div className={'flex flex-col items-center gap-2 py-8 text-center'}>
+					<div
+						className={
+							'flex flex-col items-center gap-2 py-8 text-center'
+						}
+					>
 						<span
 							className={
 								'material-icons-round text-muted text-[48px]! leading-none!'
@@ -148,7 +207,9 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 						<h2 className={'text-base font-medium text-foreground'}>
 							{t('empty.title')}
 						</h2>
-						<p className={'text-sm text-muted'}>{t('empty.description')}</p>
+						<p className={'text-sm text-muted'}>
+							{t('empty.description')}
+						</p>
 					</div>
 				)}
 
@@ -161,12 +222,12 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 							onRevoke={() => handleRevoke(token.id)}
 						/>
 					))}
-			</section>
+			</div>
 
 			<CreateTokenModal />
 			<RotateTokenModal />
 			<TokenRevealModal />
-		</PageFrame>
+		</div>
 	);
 };
 

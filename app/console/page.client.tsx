@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/21
+ * @version 1.2
+ * @date 2026/5/22
  *
  * Client-side orchestrator for /console.
  *
@@ -22,8 +22,12 @@ import toast from 'react-hot-toast';
 
 import ConsoleView from '@/app/console/ConsoleView';
 import { consoleStageAtom } from '@/app/console/store';
+import HeaderBar from '@/components/HeaderBar';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import LoginView from '@/components/LoginView';
 import PageFrame from '@/components/PageFrame';
+import ThemeSwitcher from '@/components/ThemeSwitcher';
+import UserMenu from '@/components/UserMenu';
 import { ApiError, WebAuthApi } from '@/services/sso/api';
 import {
 	buildSsoAuthorizeDeepLink,
@@ -130,13 +134,21 @@ const ConsolePage = () => {
 		tryLaunchDeepLink({ url: deepLinkUrl });
 	}, []);
 
+	const handleLogout = useCallback(async () => {
+		try {
+			await WebAuthApi.logout();
+		} finally {
+			setStage({ kind: 'login' });
+		}
+	}, [setStage]);
+
 	if (stage.kind === 'loading') {
 		return <div className={'min-h-screen'} />;
 	}
 
 	if (stage.kind === 'login') {
 		return (
-			<PageFrame>
+			<PageFrame key='login'>
 				<LoginView
 					onLoggedIn={(me) => setStage({ kind: 'console', me })}
 					onLoginFailed={() => setStage({ kind: 'login' })}
@@ -149,9 +161,56 @@ const ConsolePage = () => {
 
 	// stage.kind === 'console'
 	return (
-		<PageFrame maxWidth='max-w-2xl'>
-			<ConsoleView me={stage.me} onLogout={() => setStage({ kind: 'login' })} />
-		</PageFrame>
+		<div key='console' className={'min-h-screen w-full bg-surface'}>
+			{/* Page header with integrated toolbar */}
+			<header
+				className={
+					'sticky top-0 z-40 bg-surface/60 backdrop-blur-md border-b border-border/40'
+				}
+			>
+				<div
+					className={
+						'mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between'
+					}
+				>
+					<div className={'flex items-center gap-2.5 min-w-0'}>
+						<img
+							src={'/icon.png'}
+							alt={''}
+							className={'w-8 h-8 rounded-lg shrink-0'}
+						/>
+						<span
+							className={
+								'text-base font-bold text-foreground tracking-tight'
+							}
+						>
+							Ham Console
+						</span>
+					</div>
+					<div className={'flex items-center gap-1'}>
+						<div className={'hidden sm:flex items-center gap-1'}>
+							<ThemeSwitcher />
+							<LanguageSwitcher />
+						</div>
+						<div className={'sm:hidden'}>
+							<UserMenu onLogout={handleLogout} compact />
+						</div>
+						<div className={'hidden sm:block'}>
+							<UserMenu onLogout={handleLogout} />
+						</div>
+					</div>
+				</div>
+			</header>
+
+			{/* Content */}
+			<div
+				className={
+					'mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6'
+				}
+			>
+				<ConsoleView me={stage.me} />
+			</div>
+		</div>
 	);
 };
 

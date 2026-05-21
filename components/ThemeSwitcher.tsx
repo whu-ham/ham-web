@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/4/20
  *
  * Dark-mode toggle for HeroUI v3 modeled after `LanguageSwitcher`.
@@ -29,10 +29,12 @@
  */
 'use client';
 
+import type { Selection } from '@heroui/react';
+
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { Key, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import {
 	THEMES,
@@ -96,8 +98,9 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 
 	const selectedKey: MenuKey = override ?? AUTO_KEY;
 
-	const onAction = (rawKey: Key) => {
-		const key = String(rawKey);
+	const onSelectionChange = (keys: Selection) => {
+		const key = Array.from(keys)[0]?.toString();
+		if (!key) return;
 		if (key === AUTO_KEY) {
 			setOverride(null);
 		} else if (isTheme(key)) {
@@ -130,13 +133,14 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 					aria-label={t('switcher.ariaLabel')}
 					selectedKeys={new Set([selectedKey])}
 					selectionMode={'single'}
-					onAction={onAction}
+					onSelectionChange={onSelectionChange}
 				>
 					{(['auto', ...THEMES] as const).map((key) => {
 						const label =
 							key === AUTO_KEY ? t('switcher.auto') : t(`switcher.${key}`);
 						return (
 							<Dropdown.Item key={key} id={key} textValue={label}>
+								<Dropdown.ItemIndicator />
 								<Label className={'inline-flex items-center gap-2'}>
 									<span
 										className={
@@ -148,7 +152,6 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 									</span>
 									<span className={'leading-none'}>{label}</span>
 								</Label>
-								<Dropdown.ItemIndicator />
 							</Dropdown.Item>
 						);
 					})}

@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/5/21
  *
  * Single token card displaying name, last4, scopes, timestamps,
@@ -8,8 +8,9 @@
  */
 'use client';
 
-import { Button, Chip, Popover, Tooltip } from '@heroui/react';
-import { useTranslations } from 'next-intl';
+import { Button, Popover, Tooltip } from '@heroui/react';
+import { useLocale, useTranslations } from 'next-intl';
+import { useState } from 'react';
 
 import type { TokenListItem } from '@/services/token/api';
 
@@ -19,9 +20,9 @@ interface TokenCardProps {
 	onRevoke: () => void;
 }
 
-const formatDate = (iso: string): string => {
+const formatDate = (iso: string, locale: string): string => {
 	try {
-		return new Date(iso).toLocaleDateString(undefined, {
+		return new Date(iso).toLocaleDateString(locale, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
@@ -33,16 +34,19 @@ const formatDate = (iso: string): string => {
 
 const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 	const t = useTranslations('apikey');
+	const tc = useTranslations('common');
+	const locale = useLocale();
+	const [revokeOpen, setRevokeOpen] = useState(false);
 
 	return (
 		<div className={'flex flex-col gap-3 rounded-[12px] bg-default p-4 w-full'}>
-			<div className={'flex items-center justify-between'}>
-				<div className={'flex flex-col min-w-0'}>
+			<div className={'flex items-start justify-between'}>
+				<div className={'flex flex-col min-w-0 gap-0.5'}>
 					<span className={'text-sm font-medium text-foreground truncate'}>
 						{token.name}
 					</span>
-					<span className={'text-xs text-muted'}>
-						{t('card.last4', { last4: token.last4 })}
+					<span className={'font-mono text-xs text-muted'}>
+						****{token.last4}
 					</span>
 				</div>
 				<div className={'flex items-center gap-1 shrink-0'}>
@@ -59,7 +63,7 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 						</Tooltip.Trigger>
 						<Tooltip.Content>{t('card.rotate')}</Tooltip.Content>
 					</Tooltip>
-					<Popover>
+					<Popover isOpen={revokeOpen} onOpenChange={setRevokeOpen}>
 						<Popover.Trigger>
 							<Button variant={'danger-soft'} size={'sm'}>
 								<span
@@ -76,12 +80,21 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 									{t('card.revokeConfirm')}
 								</p>
 								<div className={'flex gap-2 justify-end'}>
-									<Popover.Trigger>
-										<Button variant={'tertiary'} size={'sm'}>
-											{t('card.revoke')}
-										</Button>
-									</Popover.Trigger>
-									<Button variant={'danger'} size={'sm'} onPress={onRevoke}>
+									<Button
+										variant={'tertiary'}
+										size={'sm'}
+										onPress={() => setRevokeOpen(false)}
+									>
+										{tc('cancel')}
+									</Button>
+									<Button
+										variant={'danger'}
+										size={'sm'}
+										onPress={() => {
+											setRevokeOpen(false);
+											onRevoke();
+										}}
+									>
 										{t('card.revoke')}
 									</Button>
 								</div>
@@ -91,20 +104,27 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 				</div>
 			</div>
 
-			<div className={'flex flex-wrap gap-1'}>
+			<div className={'flex flex-col gap-0.5'}>
 				{token.scopes.map((scope) => (
-					<Chip key={scope} size={'sm'} variant={'tertiary'}>
+					<span
+						key={scope}
+						className={
+							'text-xs font-mono text-muted'
+						}
+					>
 						{scope}
-					</Chip>
+					</span>
 				))}
 			</div>
 
-			<div className={'text-xs text-muted'}>
-				{t('card.createdAt')} {formatDate(token.created_at)} ·{' '}
-				{t('card.expiresAt')} {formatDate(token.expires_at)}
-				{token.last_used_at
-					? ` · ${t('card.lastUsedAt')} ${formatDate(token.last_used_at)}`
-					: ` · ${t('card.neverUsed')}`}
+			<div className={'flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted'}>
+				<span>{t('card.createdAt')} {formatDate(token.created_at, locale)}</span>
+				<span>{t('card.expiresAt')} {formatDate(token.expires_at, locale)}</span>
+				<span>
+					{token.last_used_at
+						? `${t('card.lastUsedAt')} ${formatDate(token.last_used_at, locale)}`
+						: t('card.neverUsed')}
+				</span>
 			</div>
 		</div>
 	);

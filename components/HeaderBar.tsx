@@ -1,25 +1,13 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/5/21
+ * @version 1.4
+ * @date 2026/5/22
  *
- * Shared top-right header bar used by every page view.
+ * Shared top-right header bar — floating pill variant.
+ * Only used on pages without a page-level header (e.g. login views).
  *
- * Why a dedicated component:
- *   - All page views need the same pair of switchers in the same
- *     spot, and previously each inlined an identical `absolute` wrapper.
- *   - When the viewport is short the card content sits right under the
- *     switchers; without a backdrop they become unreadable. A frosted
- *     pill (backdrop-blur + translucent surface + hairline border)
- *     solves both cases — it's invisible-ish over solid backgrounds and
- *     becomes a readable glass layer when card content scrolls behind.
- *
- * Positioning:
- *   - `fixed` (not `absolute`) so the bar stays put even when the card
- *     pushes the page taller than the viewport. The safe-area env()
- *     offsets keep it clear of iOS notches / dynamic islands.
- *   - z-50 keeps it above HeroUI dropdowns / dialogs on the card
- *     (which are portaled at z-40 or below).
+ * For authenticated pages, toolbar items are integrated directly
+ * into the page header instead of using this floating component.
  */
 'use client';
 

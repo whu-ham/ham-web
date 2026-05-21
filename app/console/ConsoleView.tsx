@@ -1,23 +1,20 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.1
+ * @date 2026/5/22
  *
  * Console view shown when the user is authenticated.
- * Displays a greeting, user avatar, logout button, and feature cards.
+ * Displays a large greeting and feature cards.
  */
 'use client';
 
-import { Avatar, Button } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { MeResponse, WebAuthApi } from '@/services/sso/api';
+import { MeResponse } from '@/services/sso/api';
 
 interface ConsoleViewProps {
 	me: MeResponse;
-	onLogout: () => void;
 }
 
 const getGreetingKey = (): string => {
@@ -31,53 +28,17 @@ const getGreetingKey = (): string => {
 	return 'default';
 };
 
-const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
+const ConsoleView = ({ me }: ConsoleViewProps) => {
 	const t = useTranslations('console');
 	const router = useRouter();
-
-	const handleLogout = useCallback(async () => {
-		try {
-			await WebAuthApi.logout();
-		} finally {
-			onLogout();
-		}
-	}, [onLogout]);
 
 	const greetingKey = getGreetingKey();
 
 	return (
 		<>
-			<header className={'flex items-center justify-between w-full min-w-0'}>
-				<div className={'flex items-center gap-3 min-w-0'}>
-					<Avatar>
-						{me.avatar_url ? (
-							<Avatar.Image src={me.avatar_url} alt={me.nickname ?? ''} />
-						) : null}
-						<Avatar.Fallback>
-							{(me.nickname ?? me.user_id ?? '?').slice(0, 1)}
-						</Avatar.Fallback>
-					</Avatar>
-					<div className={'flex flex-col min-w-0'}>
-						<span className={'text-sm text-muted'}>
-							{t(`greeting.${greetingKey}`)}
-						</span>
-						<span
-							className={'text-base font-semibold text-foreground truncate'}
-						>
-							{me.nickname ?? me.user_id}
-						</span>
-					</div>
-				</div>
-				<Button variant={'tertiary'} size={'sm'} onPress={handleLogout}>
-					<span
-						className={'material-icons-round text-[18px]! leading-none!'}
-						aria-hidden={true}
-					>
-						logout
-					</span>
-					{t('logout')}
-				</Button>
-			</header>
+			<h1 className={'text-2xl font-bold text-foreground'}>
+				{t(`greeting.${greetingKey}`, { name: me.nickname ?? me.user_id })}
+			</h1>
 
 			<section
 				className={

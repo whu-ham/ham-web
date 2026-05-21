@@ -16,12 +16,15 @@ interface PageFrameProps {
 	children: React.ReactNode;
 	/** Card maximum width class, default 'max-w-md' */
 	maxWidth?: string;
+	/** Additional class names for the outer wrapper */
+	className?: string;
 }
 
-const PageFrame = ({ children, maxWidth = 'max-w-md' }: PageFrameProps) => (
+const PageFrame = ({ children, maxWidth = 'max-w-md', className }: PageFrameProps) => (
 	<div
 		className={
-			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-1 sm:px-2 md:px-4 py-20'
+			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-1 sm:px-2 md:px-4 py-20 ' +
+			(className ?? '')
 		}
 	>
 		<HeaderBar />

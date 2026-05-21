@@ -6,9 +6,10 @@
 'use client';
 
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
+import type { Selection } from '@heroui/react';
 import { useAtom } from 'jotai';
 import { useLocale, useTranslations } from 'next-intl';
-import { Key, useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import enMessages from '@/messages/en.json';
 import jaMessages from '@/messages/ja.json';
@@ -28,6 +29,13 @@ interface LanguageSwitcherProps {
 
 const AUTO_KEY = 'auto' as const;
 type MenuKey = typeof AUTO_KEY | Locale;
+
+const LOCALE_ICON: Record<Locale | 'auto', string> = {
+	auto: 'language',
+	zh: '文',
+	en: 'A',
+	ja: 'あ',
+};
 
 const LOCALE_MESSAGES: Record<Locale, typeof enMessages> = {
 	zh: zhMessages,
@@ -108,22 +116,23 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 
 	const selectedKey: MenuKey = hasOverride ? currentLocale : AUTO_KEY;
 
-	const onAction = (rawKey: Key) => {
-		const key = String(rawKey);
+	const onSelectionChange = (keys: Selection) => {
+		const rawKey = Array.from(keys)[0]?.toString();
+		if (!rawKey) return;
 
-		if (key === AUTO_KEY) {
+		if (rawKey === AUTO_KEY) {
 			if (!hasOverride) return;
 			clearLocaleCookie();
 			setHasOverride(false);
-		} else if (isLocale(key)) {
+		} else if (isLocale(rawKey)) {
 			// Already explicitly set to the same locale — nothing to do.
-			if (hasOverride && key === currentLocale) return;
-			writeLocaleCookie(key);
+			if (hasOverride && rawKey === currentLocale) return;
+			writeLocaleCookie(rawKey);
 			setHasOverride(true);
 			// In auto mode, if the browser locale already matches the chosen
 			// locale the page language is unchanged — just record the override
 			// without reloading.
-			if (!hasOverride && key === browserLocale) return;
+			if (!hasOverride && rawKey === browserLocale) return;
 		} else {
 			return;
 		}
@@ -167,16 +176,36 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 					aria-label={t('switcher.ariaLabel')}
 					selectedKeys={new Set([selectedKey])}
 					selectionMode={'single'}
-					onAction={onAction}
+					onSelectionChange={onSelectionChange}
 				>
 					<Dropdown.Item id={AUTO_KEY} textValue={autoTriggerLabel}>
-						<Label>{autoTriggerLabel}</Label>
 						<Dropdown.ItemIndicator />
+						<Label className={'inline-flex items-center gap-2'}>
+							<span
+								className={
+									'material-icons-round text-[18px]! leading-none! text-gray-500'
+								}
+								aria-hidden={true}
+							>
+								{LOCALE_ICON.auto}
+							</span>
+							<span className={'leading-none'}>{autoTriggerLabel}</span>
+						</Label>
 					</Dropdown.Item>
 					{LOCALES.map((l) => (
 						<Dropdown.Item key={l} id={l} textValue={LOCALE_LABELS[l]}>
-							<Label>{LOCALE_LABELS[l]}</Label>
 							<Dropdown.ItemIndicator />
+							<Label className={'inline-flex items-center gap-2'}>
+								<span
+									className={
+										'text-[14px] font-medium leading-none! text-gray-500 w-[18px] text-center shrink-0'
+									}
+									aria-hidden={true}
+								>
+									{LOCALE_ICON[l]}
+								</span>
+								<span className={'leading-none'}>{LOCALE_LABELS[l]}</span>
+							</Label>
 						</Dropdown.Item>
 					))}
 				</Dropdown.Menu>

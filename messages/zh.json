@@ -5,7 +5,9 @@
 		"retry": "重试",
 		"cancel": "取消",
 		"confirm": "确认",
-		"loading": "加载中…"
+		"loading": "加载中…",
+		"logout": "退出登录",
+		"menu": "菜单"
 	},
 	"language": {
 		"switcher": {
@@ -49,13 +51,13 @@
 			"title": "工具台 | Ham"
 		},
 		"greeting": {
-			"lateNight": "还不睡吗",
-			"dawn": "清晨好",
-			"morning": "早上好",
-			"noon": "中午好",
-			"afternoon": "下午好",
-			"evening": "晚上好",
-			"default": "你好"
+			"lateNight": "还不睡吗，{name}",
+			"dawn": "清晨好，{name}",
+			"morning": "早上好，{name}",
+			"noon": "中午好，{name}",
+			"afternoon": "下午好，{name}",
+			"evening": "晚上好，{name}",
+			"default": "你好，{name}"
 		},
 		"logout": "退出登录",
 		"workbench": "工具台",
@@ -144,13 +146,13 @@
 			"appCallbackProcessing": "正在完成登录…"
 		},
 		"greeting": {
-			"lateNight": "还不睡吗",
-			"dawn": "清晨好",
-			"morning": "早上好",
-			"noon": "中午好",
-			"afternoon": "下午好",
-			"evening": "晚上好",
-			"default": "你好"
+			"lateNight": "还不睡吗，{name}",
+			"dawn": "清晨好，{name}",
+			"morning": "早上好，{name}",
+			"noon": "中午好，{name}",
+			"afternoon": "下午好，{name}",
+			"evening": "晚上好，{name}",
+			"default": "你好，{name}"
 		},
 		"logout": "退出登录",
 		"card": {
@@ -180,15 +182,14 @@
 			"mcp": "MCP"
 		},
 		"card": {
-			"last4": "末4位：{last4}",
 			"scopes": "权限",
 			"createdAt": "创建于",
 			"expiresAt": "过期于",
 			"lastUsedAt": "最后使用",
 			"neverUsed": "从未使用",
 			"rotate": "轮换",
-			"revoke": "撤销",
-			"revokeConfirm": "确定要撤销此 Key 吗？此操作不可撤销。"
+			"revoke": "吊销",
+			"revokeConfirm": "确定要吊销此 Key 吗？此操作不可恢复。"
 		},
 		"createModal": {
 			"title": "创建 API Key",
@@ -208,6 +209,7 @@
 		},
 		"tokenReveal": {
 			"title": "你的 API Key",
+			"label": "API Key",
 			"warning": "请立即复制，此 Key 不会再显示。",
 			"copy": "复制",
 			"copied": "已复制",
@@ -224,7 +226,7 @@
 			"fetchFailed": "获取 API Key 列表失败",
 			"createFailed": "创建失败",
 			"rotateFailed": "轮换失败",
-			"revokeFailed": "撤销失败"
+			"revokeFailed": "吊销失败"
 		}
 	}
 }

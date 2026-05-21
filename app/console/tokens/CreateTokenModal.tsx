@@ -198,7 +198,9 @@ const CreateTokenModal = () => {
 												key={scope}
 												isSelected={scopes.includes(scope)}
 												onChange={(v) => handleScopeChange(scope, v)}
-												className={'flex items-start gap-3 rounded-[12px] p-3 w-full cursor-pointer'}
+												className={
+													'flex items-start gap-3 rounded-[12px] p-3 w-full cursor-pointer'
+												}
 											>
 												<Checkbox.Control className={'mt-0.5 shrink-0'}>
 													<Checkbox.Indicator />
@@ -236,9 +238,6 @@ const CreateTokenModal = () => {
 							</Form>
 						</Modal.Body>
 						<Modal.Footer>
-							<Button slot='close' variant={'tertiary'}>
-								{tc('cancel')}
-							</Button>
 							<Button
 								variant={'primary'}
 								isPending={submitting}

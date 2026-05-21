@@ -5,7 +5,9 @@
 		"retry": "再試行",
 		"cancel": "キャンセル",
 		"confirm": "確認",
-		"loading": "読み込み中…"
+		"loading": "読み込み中…",
+		"logout": "ログアウト",
+		"menu": "メニュー"
 	},
 	"language": {
 		"switcher": {
@@ -49,13 +51,13 @@
 			"title": "ワークベンチ | Ham"
 		},
 		"greeting": {
-			"lateNight": "まだ起きていますか",
-			"dawn": "おはようございます（早朝）",
-			"morning": "おはようございます",
-			"noon": "お昼です",
-			"afternoon": "こんにちは",
-			"evening": "こんばんは",
-			"default": "こんにちは"
+			"lateNight": "まだ起きていますか、{name}",
+			"dawn": "早朝ですね、{name}",
+			"morning": "おはようございます、{name}",
+			"noon": "お昼です、{name}",
+			"afternoon": "こんにちは、{name}",
+			"evening": "こんばんは、{name}",
+			"default": "こんにちは、{name}"
 		},
 		"logout": "ログアウト",
 		"workbench": "ワークベンチ",
@@ -176,16 +178,18 @@
 			"mcp:read": "MCP 読み取り専用",
 			"mcp:write": "MCP 書き込み専用"
 		},
+		"scopeGroup": {
+			"mcp": "MCP"
+		},
 		"card": {
-			"last4": "末4桁：{last4}",
 			"scopes": "権限",
 			"createdAt": "作成日",
 			"expiresAt": "有効期限",
 			"lastUsedAt": "最終使用",
 			"neverUsed": "未使用",
 			"rotate": "ローテート",
-			"revoke": "取り消し",
-			"revokeConfirm": "このキーを取り消しますか？この操作は取り消せません。"
+			"revoke": "無効化",
+			"revokeConfirm": "このキーを無効化しますか？この操作は元に戻せません。"
 		},
 		"createModal": {
 			"title": "API Key を作成",
@@ -205,6 +209,7 @@
 		},
 		"tokenReveal": {
 			"title": "あなたの API Key",
+			"label": "API Key",
 			"warning": "今すぐコピーしてください。再度表示されることはありません。",
 			"copy": "コピー",
 			"copied": "コピーしました",
@@ -221,7 +226,7 @@
 			"fetchFailed": "API Key の取得に失敗しました",
 			"createFailed": "作成に失敗しました",
 			"rotateFailed": "ローテートに失敗しました",
-			"revokeFailed": "取り消しに失敗しました"
+			"revokeFailed": "無効化に失敗しました"
 		}
 	}
 }
