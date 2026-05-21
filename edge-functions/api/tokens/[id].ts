@@ -4,7 +4,7 @@
  * @date 2026/5/21
  *
  * EdgeOne Edge Function: DELETE /api/tokens/:id
- * Proxies token revocation to the backend.
+ * Proxies token revocation to the backend at /web/tokens/:id.
  */
 import { handlePreflight, proxyToBackend } from '../../_proxy';
 
@@ -14,7 +14,7 @@ export async function onRequestDelete(context: {
 	params: Record<string, string>;
 }): Promise<Response> {
 	const id = encodeURIComponent(context.params.id ?? '');
-	return proxyToBackend(context.request, `/api/tokens/${id}`, context.env);
+	return proxyToBackend(context.request, `/web/tokens/${id}`, context.env);
 }
 
 export const onRequestOptions = handlePreflight;

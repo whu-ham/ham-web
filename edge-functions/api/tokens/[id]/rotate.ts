@@ -4,7 +4,7 @@
  * @date 2026/5/21
  *
  * EdgeOne Edge Function: POST /api/tokens/:id/rotate
- * Proxies token rotation to the backend.
+ * Proxies token rotation to the backend at /web/tokens/:id/rotate.
  */
 import { handlePreflight, proxyToBackend } from '../../../_proxy';
 
@@ -16,7 +16,7 @@ export async function onRequestPost(context: {
 	const id = encodeURIComponent(context.params.id ?? '');
 	return proxyToBackend(
 		context.request,
-		`/api/tokens/${id}/rotate`,
+		`/web/tokens/${id}/rotate`,
 		context.env
 	);
 }

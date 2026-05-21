@@ -4,7 +4,7 @@
  * @date 2026/5/21
  *
  * EdgeOne Edge Function: GET /api/tokens, POST /api/tokens
- * Proxies token list and creation to the backend.
+ * Proxies token list and creation to the backend at /web/tokens.
  */
 import { handlePreflight, proxyToBackend } from '../../_proxy';
 
@@ -12,14 +12,14 @@ export async function onRequestGet(context: {
 	request: Request;
 	env: Record<string, string>;
 }): Promise<Response> {
-	return proxyToBackend(context.request, '/api/tokens', context.env);
+	return proxyToBackend(context.request, '/web/tokens', context.env);
 }
 
 export async function onRequestPost(context: {
 	request: Request;
 	env: Record<string, string>;
 }): Promise<Response> {
-	return proxyToBackend(context.request, '/api/tokens', context.env);
+	return proxyToBackend(context.request, '/web/tokens', context.env);
 }
 
 export const onRequestOptions = handlePreflight;

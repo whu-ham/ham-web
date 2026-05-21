@@ -4,7 +4,7 @@
  * @date 2026/5/21
  *
  * BFF route: DELETE /api/tokens/:id
- * Proxies token revocation to the backend.
+ * Proxies token revocation to the backend at /web/tokens/:id.
  */
 import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
@@ -13,7 +13,7 @@ export async function DELETE(
 	{ params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
 	const { id } = await params;
-	return proxyToBackend(req, `/api/tokens/${encodeURIComponent(id)}`);
+	return proxyToBackend(req, `/web/tokens/${encodeURIComponent(id)}`);
 }
 
 export const OPTIONS = handlePreflight;

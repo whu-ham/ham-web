@@ -3,7 +3,7 @@
  * @version 1.0
  * @date 2026/5/21
  *
- * HTTP client for the /api/tokens/** endpoints (API token management).
+ * HTTP client for the /web/tokens/** endpoints (API token management).
  * Uses shared request<T>() and ApiError from services/shared.ts.
  */
 'use client';
