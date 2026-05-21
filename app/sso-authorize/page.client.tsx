@@ -221,7 +221,7 @@ const SsoAuthorizePage = () => {
 				<LoginView
 					onLoggedIn={(me) => setStage({ kind: 'consent', me })}
 					onLoginFailed={() => setStage({ kind: 'login' })}
-					namespace="sso"
+					namespace='sso'
 				/>
 			</PageFrame>
 		);

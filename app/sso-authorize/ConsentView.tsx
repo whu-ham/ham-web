@@ -47,6 +47,7 @@ const ConsentView = () => {
 	// Initialise checkedScopes whenever info loads.
 	useEffect(() => {
 		if (!info) return;
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- deriving state from async fetch result
 		setCheckedScopes(info.scopes.map((s) => s.scope));
 	}, [info]);
 

@@ -8,10 +8,7 @@
 
 import { atom } from 'jotai';
 
-import type {
-	CreateTokenResponse,
-	TokenListItem,
-} from '@/services/token/api';
+import type { CreateTokenResponse, TokenListItem } from '@/services/token/api';
 
 // ---------------------------------------------------------------------------
 // Atoms

@@ -14,7 +14,7 @@
 import { Button } from '@heroui/react';
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { ApiError, MeResponse, WebAuthApi } from '@/services/sso/api';
 import { isPasskeySupported } from '@/services/sso/ua';
@@ -30,11 +30,7 @@ const PasskeyLoginView = ({
 }: PasskeyLoginViewProps) => {
 	const t = useTranslations('sso.passkey');
 	const [loading, setLoading] = useState(false);
-	const [supported, setSupported] = useState<boolean | null>(null);
-
-	useEffect(() => {
-		setSupported(isPasskeySupported());
-	}, []);
+	const [supported] = useState<boolean | null>(isPasskeySupported);
 
 	const login = useCallback(async () => {
 		setLoading(true);

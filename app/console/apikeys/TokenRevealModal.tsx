@@ -60,8 +60,13 @@ const TokenRevealModal = () => {
 						<Modal.Heading>{t('tokenReveal.title')}</Modal.Heading>
 					</Modal.Header>
 					<Modal.Body className={'flex flex-col gap-4'}>
-						<Alert variant={'warning'}>
-							{t('tokenReveal.warning')}
+						<Alert status={'warning'}>
+							<Alert.Indicator />
+							<Alert.Content>
+								<Alert.Description>
+									{t('tokenReveal.warning')}
+								</Alert.Description>
+							</Alert.Content>
 						</Alert>
 						<div
 							className={
@@ -77,14 +82,10 @@ const TokenRevealModal = () => {
 							onPress={handleCopy}
 							isDisabled={copied}
 						>
-							{copied
-								? t('tokenReveal.copied')
-								: t('tokenReveal.copy')}
+							{copied ? t('tokenReveal.copied') : t('tokenReveal.copy')}
 						</Button>
 						<Modal.CloseTrigger>
-							<Button variant={'tertiary'}>
-								{t('tokenReveal.close')}
-							</Button>
+							<Button variant={'tertiary'}>{t('tokenReveal.close')}</Button>
 						</Modal.CloseTrigger>
 					</Modal.Footer>
 				</Modal.Dialog>

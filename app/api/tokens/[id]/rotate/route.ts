@@ -13,10 +13,7 @@ export async function POST(
 	{ params }: { params: Promise<{ id: string }> }
 ): Promise<Response> {
 	const { id } = await params;
-	return proxyToBackend(
-		req,
-		`/api/tokens/${encodeURIComponent(id)}/rotate`
-	);
+	return proxyToBackend(req, `/api/tokens/${encodeURIComponent(id)}/rotate`);
 }
 
 export const OPTIONS = handlePreflight;

@@ -3,7 +3,7 @@
 		"details": [
 			{
 				"appID": "97YACL9S6W.com.nowcent.ham",
-				"paths": ["*"]
+				"paths": ["/sso-authorize/*"]
 			}
 		]
 	},

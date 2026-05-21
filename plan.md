@@ -1047,3 +1047,147 @@ Scopes 仅 3 种：`mcp` / `mcp:read` / `mcp:write`
 9. **控制台页面**：`app/console/` 全套文件（PageFrame + ConsoleView + LoginView）
 10. **API Key 页面**：`app/console/apikeys/` 全套文件
 11. **验证**：`pnpm lint` + `pnpm build`
+
+---
+
+## 12. 移动端"跳转到APP登录"功能
+
+### 12.0 背景
+
+当前控制台 `/console` 登录页仅支持 QR 码和 Passkey 登录。在移动端，用户更习惯通过 App 完成登录。需要新增"跳转到APP登录"按钮，利用 `ham://` 自定义 URL Scheme 跳转到 Ham App 完成认证，再通过 `redirect_url` 携带 `code` 回调到 Web。
+
+同时需修改 `.well-known` 配置，将 Universal Link / App Link 限定为仅 `sso-authorize/*` 路径生效，避免其他页面（如 `/console`）被系统误拦截打开 App。
+
+> `ham://sso-authorize` 和 `ham.nowcent.cn/sso-authorize` 均可跳转到 App。前者是自定义 URL Scheme，后者是 iOS Universal Link / Android App Link。
+
+### 12.1 流程设计
+
+```
+用户在 /console（未登录，移动端）→ 点击"跳转到APP登录"
+  → 生成 state（随机字符串，存入 sessionStorage）
+  → 构造 redirect_url = 当前页面 URL（https://ham.nowcent.cn/console）
+  → 打开 ham://console-login?redirect_url=${redirect_url}&state=${state}
+  → Ham App 处理认证
+  → App 完成认证后，打开 redirect_url?code=xxx&state=yyy
+  → Web 页面加载，检测 URL 中的 code + state
+  → 校验 state 与 sessionStorage 中的一致
+  → POST /api/auth/app-callback { code }
+  → 后端验证 code，设置 web_token / web_refresh_token cookies
+  → 清理 URL 参数，调用 /api/auth/me 获取用户信息，进入控制台
+```
+
+### 12.2 DeepLink URL 构造
+
+在 `services/sso/deepLink.ts` 中新增：
+
+```typescript
+export function buildConsoleLoginDeepLink(params: {
+  redirectUrl: string;
+  state: string;
+}): string {
+  const usp = new URLSearchParams();
+  usp.set('redirect_url', params.redirectUrl);
+  usp.set('state', params.state);
+  return `ham://console-login?${usp.toString()}`;
+}
+```
+
+### 12.3 后端接口
+
+需要后端新增接口：
+
+```
+POST /api/auth/app-callback
+Request: { code: string }
+Response: 设置 web_token + web_refresh_token cookies（同 /api/auth/me 的认证方式）
+```
+
+BFF 代理需新增：
+- `app/api/auth/app-callback/route.ts` → POST
+- `edge-functions/api/auth/app-callback.ts` → onRequestPost
+
+> 后端路径暂定 `/api/auth/app-callback`，BFF 代理到同路径。
+
+### 12.4 LoginView 改造
+
+`components/LoginView.tsx` 新增可选 `onOpenApp` prop。当 `onOpenApp` 存在时，在 Passkey 按钮下方额外渲染一个"跳转到APP登录"按钮。
+
+```tsx
+interface LoginViewProps {
+  onLoggedIn: (me: MeResponse) => void;
+  onLoginFailed?: () => void;
+  namespace?: string;
+  /** Mobile: open native app to complete login. When provided, shows "Open App" button */
+  onOpenApp?: () => void;
+}
+```
+
+按钮仅在 `onOpenApp` 不为 `undefined` 时显示，由父组件（console page）控制何时传入。
+
+### 12.5 控制台页面改造
+
+`app/console/page.client.tsx` 增加：
+
+1. **移动端检测**：复用 `isMobile()` from `services/sso/ua`
+2. **App 回调处理**：页面加载时检测 URL 中 `code` + `state` 参数
+   - `state` 校验：与 sessionStorage 中存储的 `console_login_state` 比较
+   - 调用 `POST /api/auth/app-callback` 交换 session
+   - 成功后清理 URL 参数，调用 `me()` 获取用户信息
+3. **"跳转到APP登录"按钮**：移动端传入 `onOpenApp` 给 LoginView
+   - 生成随机 `state`，存入 sessionStorage
+   - 构造 `ham://console-login?redirect_url=...&state=...`
+   - 调用 `tryLaunchDeepLink()` 打开 App
+
+### 12.6 SSO API 扩展
+
+`services/sso/api.ts` 的 `WebAuthApi` 新增：
+
+```typescript
+appCallback: (code: string) =>
+  request<void>('/auth/app-callback', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  }),
+```
+
+### 12.7 .well-known 修改
+
+#### `public/.well-known/apple-app-site-association`
+
+将 `"paths": ["*"]` 改为 `"paths": ["/sso-authorize/*"]`，仅允许 `/sso-authorize/` 路径触发 iOS Universal Link。
+
+#### `public/.well-known/assetlinks.json`
+
+Android App Links 的路径过滤在 `AndroidManifest.xml` 的 intent-filter 中配置，`assetlinks.json` 仅负责域名验证关系，不支持路径过滤。保持不变，但建议 Android 端同步修改 intent-filter 仅匹配 `/sso-authorize/` 路径。
+
+### 12.8 i18n
+
+在 `console.login` 命名空间中新增：
+
+| Key | zh | en | ja |
+|-----|-----|-----|-----|
+| `openApp` | 跳转到APP登录 | Sign in with App | アプリでログイン |
+| `appCallbackFailed` | App登录失败，请重试 | App sign-in failed, please retry | アプリログインに失敗しました。再試行してください |
+| `appCallbackProcessing` | 正在完成登录… | Completing sign-in… | ログインを完了しています… |
+
+### 12.9 文件变更
+
+#### 新建文件
+
+| 文件 | 说明 |
+|------|------|
+| `app/api/auth/app-callback/route.ts` | Next.js BFF: POST /api/auth/app-callback |
+| `edge-functions/api/auth/app-callback.ts` | EdgeOne BFF: POST /api/auth/app-callback |
+
+#### 修改文件
+
+| 文件 | 变更 |
+|------|------|
+| `services/sso/deepLink.ts` | 新增 `buildConsoleLoginDeepLink()` |
+| `services/sso/api.ts` | `WebAuthApi` 新增 `appCallback()` |
+| `components/LoginView.tsx` | 新增可选 `onOpenApp` prop，显示"跳转到APP登录"按钮 |
+| `app/console/page.client.tsx` | 移动端检测 + App 回调 code 处理 + onOpenApp 传入 |
+| `public/.well-known/apple-app-site-association` | paths 从 `*` 改为 `/sso-authorize/*` |
+| `messages/zh.json` | 新增 console.login.openApp / appCallbackFailed / appCallbackProcessing |
+| `messages/en.json` | 同上 |
+| `messages/ja.json` | 同上 |

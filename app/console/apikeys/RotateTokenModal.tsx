@@ -8,7 +8,14 @@
  */
 'use client';
 
-import { Alert, Button, Modal, Slider, useOverlayState } from '@heroui/react';
+import {
+	Alert,
+	Button,
+	Label,
+	Modal,
+	Slider,
+	useOverlayState,
+} from '@heroui/react';
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
@@ -72,16 +79,27 @@ const RotateTokenModal = () => {
 						<Modal.CloseTrigger />
 					</Modal.Header>
 					<Modal.Body className={'flex flex-col gap-4'}>
-						<Alert variant={'danger'}>
-							{t('rotateModal.warning')}
+						<Alert status={'danger'}>
+							<Alert.Indicator />
+							<Alert.Content>
+								<Alert.Description>
+									{t('rotateModal.warning')}
+								</Alert.Description>
+							</Alert.Content>
 						</Alert>
 						<Slider
-							label={t('rotateModal.ttl')}
 							minValue={1}
 							maxValue={30}
 							value={ttl}
 							onChange={(v) => setTtl(v as number)}
-						/>
+						>
+							<Label>{t('rotateModal.ttl')}</Label>
+							<Slider.Output />
+							<Slider.Track>
+								<Slider.Fill />
+								<Slider.Thumb />
+							</Slider.Track>
+						</Slider>
 					</Modal.Body>
 					<Modal.Footer>
 						<Modal.CloseTrigger>

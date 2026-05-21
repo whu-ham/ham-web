@@ -8,7 +8,7 @@
  */
 'use client';
 
-import { Avatar, Button, Link } from '@heroui/react';
+import { Avatar, Button } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -47,11 +47,7 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 
 	return (
 		<>
-			<header
-				className={
-					'flex items-center justify-between w-full min-w-0'
-				}
-			>
+			<header className={'flex items-center justify-between w-full min-w-0'}>
 				<div className={'flex items-center gap-3 min-w-0'}>
 					<Avatar>
 						{me.avatar_url ? (
@@ -62,17 +58,11 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 						</Avatar.Fallback>
 					</Avatar>
 					<div className={'flex flex-col min-w-0'}>
-						<span
-							className={
-								'text-sm text-muted'
-							}
-						>
+						<span className={'text-sm text-muted'}>
 							{t(`greeting.${greetingKey}`)}
 						</span>
 						<span
-							className={
-								'text-base font-semibold text-foreground truncate'
-							}
+							className={'text-base font-semibold text-foreground truncate'}
 						>
 							{me.nickname ?? me.user_id}
 						</span>
@@ -80,9 +70,7 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 				</div>
 				<Button variant={'tertiary'} size={'sm'} onPress={handleLogout}>
 					<span
-						className={
-							'material-icons-round !text-[18px] !leading-none'
-						}
+						className={'material-icons-round !text-[18px] !leading-none'}
 						aria-hidden={true}
 					>
 						logout
@@ -113,18 +101,10 @@ const ConsoleView = ({ me, onLogout }: ConsoleViewProps) => {
 					>
 						key
 					</span>
-					<span
-						className={
-							'text-sm font-medium text-foreground'
-						}
-					>
+					<span className={'text-sm font-medium text-foreground'}>
 						{t('card.apikey.title')}
 					</span>
-					<span
-						className={
-							'text-xs text-muted text-center'
-						}
-					>
+					<span className={'text-xs text-muted text-center'}>
 						{t('card.apikey.subtitle')}
 					</span>
 				</button>

@@ -12,11 +12,13 @@ import {
 	Checkbox,
 	CheckboxGroup,
 	Input,
+	Label,
 	Modal,
 	Slider,
+	TextField,
 	useOverlayState,
 } from '@heroui/react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -104,18 +106,16 @@ const CreateTokenModal = () => {
 						<Modal.CloseTrigger />
 					</Modal.Header>
 					<Modal.Body className={'flex flex-col gap-4'}>
-						<Input
-							label={t('createModal.name')}
-							placeholder={t('createModal.namePlaceholder')}
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-						/>
+						<TextField value={name} onChange={(v) => setName(v as string)}>
+							<Label>{t('createModal.name')}</Label>
+							<Input placeholder={t('createModal.namePlaceholder')} />
+						</TextField>
 						<CheckboxGroup
-							label={t('createModal.scopes')}
 							value={scopes}
 							onChange={(v) => setScopes(v as string[])}
 							className={'flex flex-col gap-0'}
 						>
+							<Label>{t('createModal.scopes')}</Label>
 							{VALID_SCOPES.map((scope) => (
 								<Checkbox
 									key={scope}
@@ -128,15 +128,9 @@ const CreateTokenModal = () => {
 										<Checkbox.Indicator />
 									</Checkbox.Control>
 									<Checkbox.Content
-										className={
-											'flex flex-col min-w-0 text-left'
-										}
+										className={'flex flex-col min-w-0 text-left'}
 									>
-										<span
-											className={
-												'text-sm font-medium text-foreground'
-											}
-										>
+										<span className={'text-sm font-medium text-foreground'}>
 											{scope}
 										</span>
 										<span className={'text-xs text-muted'}>
@@ -147,12 +141,18 @@ const CreateTokenModal = () => {
 							))}
 						</CheckboxGroup>
 						<Slider
-							label={t('createModal.ttl')}
 							minValue={1}
 							maxValue={30}
 							value={ttl}
 							onChange={(v) => setTtl(v as number)}
-						/>
+						>
+							<Label>{t('createModal.ttl')}</Label>
+							<Slider.Output />
+							<Slider.Track>
+								<Slider.Fill />
+								<Slider.Thumb />
+							</Slider.Track>
+						</Slider>
 					</Modal.Body>
 					<Modal.Footer>
 						<Modal.CloseTrigger>

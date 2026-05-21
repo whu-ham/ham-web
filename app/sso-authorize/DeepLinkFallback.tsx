@@ -18,7 +18,7 @@
 
 import Image from 'next/image';
 import { Button, Link, Separator } from '@heroui/react';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useMemo, useSyncExternalStore } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -28,8 +28,8 @@ import {
 	getAppStoreURL,
 	isPasskeySupported,
 } from '@/services/sso/ua';
-import PasskeyLoginView from '@/app/sso-authorize/PasskeyLoginView';
-import { deepLinkUrlAtom } from '@/app/sso-authorize/store';
+import PasskeyLoginView from '@/components/PasskeyLoginView';
+import { deepLinkUrlAtom, stageAtom } from '@/app/sso-authorize/store';
 
 // Passkey support never changes at runtime, so subscribe() is a no-op —
 // useSyncExternalStore gives us an SSR-safe client-only boolean without
@@ -41,6 +41,7 @@ const getPasskeyServer = () => false;
 const DeepLinkFallback = () => {
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
+	const setStage = useSetAtom(stageAtom);
 
 	const deviceKind = useMemo(() => {
 		if (typeof navigator === 'undefined') return 'desktop' as const;
@@ -129,7 +130,10 @@ const DeepLinkFallback = () => {
 						<Separator className={'w-16 shrink'} />
 					</div>
 					<div className={'w-full flex justify-center'}>
-						<PasskeyLoginView />
+						<PasskeyLoginView
+							onLoggedIn={(me) => setStage({ kind: 'consent', me })}
+							onLoginFailed={() => setStage({ kind: 'login' })}
+						/>
 					</div>
 				</>
 			)}

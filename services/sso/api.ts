@@ -108,6 +108,12 @@ export const WebAuthApi = {
 	me: () => request<MeResponse>('/auth/me'),
 	logout: () => request<void>('/auth/logout', { method: 'POST' }),
 	refresh: () => request<void>('/auth/refresh', { method: 'POST' }),
+	// App callback -----------------------------------------------------
+	appCallback: (code: string) =>
+		request<void>('/auth/app-callback', {
+			method: 'POST',
+			body: JSON.stringify({ code }),
+		}),
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
 		client_id: string;

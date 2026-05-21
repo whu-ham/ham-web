@@ -66,13 +66,10 @@ export const TokenApi = {
 			body: JSON.stringify(body),
 		}),
 	rotate: (id: string, body: RotateTokenRequest) =>
-		request<CreateTokenResponse>(
-			`/tokens/${encodeURIComponent(id)}/rotate`,
-			{
-				method: 'POST',
-				body: JSON.stringify(body),
-			}
-		),
+		request<CreateTokenResponse>(`/tokens/${encodeURIComponent(id)}/rotate`, {
+			method: 'POST',
+			body: JSON.stringify(body),
+		}),
 	revoke: (id: string) =>
 		request<void>(`/tokens/${encodeURIComponent(id)}`, {
 			method: 'DELETE',

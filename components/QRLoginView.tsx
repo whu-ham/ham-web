@@ -83,6 +83,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 	}, [t]);
 
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- initial data fetch on mount
 		refresh();
 		return () => clearTimer();
 	}, [refresh, clearTimer]);

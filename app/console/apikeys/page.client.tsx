@@ -35,7 +35,7 @@ const ApiKeysPage = () => {
 	const [tokens, setTokens] = useAtom(tokenListAtom);
 	const [loading, setLoading] = useAtom(tokenListLoadingAtom);
 	const setCreateModalVisible = useSetAtom(createModalVisibleAtom);
-	const [rotateModal, setRotateModal] = useAtom(rotateModalAtom);
+	const setRotateModal = useSetAtom(rotateModalAtom);
 	const newlyCreated = useAtomValue(newlyCreatedTokenAtom);
 
 	const fetchTokens = useCallback(async () => {
@@ -81,11 +81,9 @@ const ApiKeysPage = () => {
 	);
 
 	return (
-		<PageFrame maxWidth="max-w-2xl">
+		<PageFrame maxWidth='max-w-2xl'>
 			<header
-				className={
-					'flex flex-row items-center justify-between w-full min-w-0'
-				}
+				className={'flex flex-row items-center justify-between w-full min-w-0'}
 			>
 				<div className={'flex items-center gap-3 min-w-0'}>
 					<Button
@@ -94,17 +92,13 @@ const ApiKeysPage = () => {
 						onPress={() => router.push('/console')}
 					>
 						<span
-							className={
-								'material-icons-round !text-[18px] !leading-none'
-							}
+							className={'material-icons-round !text-[18px] !leading-none'}
 							aria-hidden={true}
 						>
 							arrow_back
 						</span>
 					</Button>
-					<h1 className={'text-lg font-bold text-foreground'}>
-						{t('title')}
-					</h1>
+					<h1 className={'text-lg font-bold text-foreground'}>{t('title')}</h1>
 				</div>
 				<Button
 					variant={'primary'}
@@ -112,9 +106,7 @@ const ApiKeysPage = () => {
 					onPress={() => setCreateModalVisible(true)}
 				>
 					<span
-						className={
-							'material-icons-round !text-[18px] !leading-none'
-						}
+						className={'material-icons-round !text-[18px] !leading-none'}
 						aria-hidden={true}
 					>
 						add
@@ -131,11 +123,7 @@ const ApiKeysPage = () => {
 				)}
 
 				{!loading && tokens.length === 0 && (
-					<div
-						className={
-							'flex flex-col items-center gap-2 py-8 text-center'
-						}
-					>
+					<div className={'flex flex-col items-center gap-2 py-8 text-center'}>
 						<span
 							className={
 								'material-icons-round text-muted !text-[48px] !leading-none'
@@ -144,16 +132,10 @@ const ApiKeysPage = () => {
 						>
 							vpn_key
 						</span>
-						<h2
-							className={
-								'text-base font-medium text-foreground'
-							}
-						>
+						<h2 className={'text-base font-medium text-foreground'}>
 							{t('empty.title')}
 						</h2>
-						<p className={'text-sm text-muted'}>
-							{t('empty.description')}
-						</p>
+						<p className={'text-sm text-muted'}>{t('empty.description')}</p>
 					</div>
 				)}
 

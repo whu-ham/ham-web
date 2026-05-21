@@ -138,7 +138,10 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "Or sign in with"
-			}
+			},
+			"openApp": "Sign in with App",
+			"appCallbackFailed": "App sign-in failed, please retry",
+			"appCallbackProcessing": "Completing sign-in…"
 		},
 		"greeting": {
 			"lateNight": "Still up?",

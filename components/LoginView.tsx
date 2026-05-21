@@ -13,7 +13,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Separator } from '@heroui/react';
+import { Button, Separator } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
 import icon from '@/public/icon-1024.png';
@@ -26,12 +26,15 @@ interface LoginViewProps {
 	onLoginFailed?: () => void;
 	/** i18n namespace for title/subtitle, default 'sso' */
 	namespace?: string;
+	/** Mobile: open native app to complete login. When provided, shows "Open App" button */
+	onOpenApp?: () => void;
 }
 
 const LoginView = ({
 	onLoggedIn,
 	onLoginFailed,
 	namespace = 'sso',
+	onOpenApp,
 }: LoginViewProps) => {
 	const t = useTranslations(namespace);
 
@@ -64,6 +67,30 @@ const LoginView = ({
 					onLoggedIn={onLoggedIn}
 					onLoginFailed={onLoginFailed}
 				/>
+				{onOpenApp && (
+					<>
+						<div className={'w-full flex items-center justify-center gap-4'}>
+							<Separator className={'w-16 shrink'} />
+							<span className={'shrink-0 text-sm text-muted'}>
+								{t('login.divider.other')}
+							</span>
+							<Separator className={'w-16 shrink'} />
+						</div>
+						<Button
+							variant={'primary'}
+							className={'w-full'}
+							onPress={onOpenApp}
+						>
+							<span
+								className={'material-icons-round !text-[18px] !leading-none'}
+								aria-hidden={true}
+							>
+								smartphone
+							</span>
+							{t('login.openApp')}
+						</Button>
+					</>
+				)}
 			</section>
 		</>
 	);
