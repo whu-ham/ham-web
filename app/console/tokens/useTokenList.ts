@@ -16,7 +16,7 @@
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
@@ -51,10 +51,18 @@ export const useTokenList = (
 	const setRotateModal = useSetAtom(rotateModalAtom);
 	const tokenListVersion = useAtomValue(tokenListVersionAtom);
 
+	// Track whether client-side atom initialization has completed.
+	// Before mounted, we return `initialTokens` directly so the first
+	// client render always matches the server (avoids hydration mismatch
+	// caused by stale atom values from a previous page visit).
+	const [mounted, setMounted] = useState(false);
+
 	// M2: Request version counter to discard stale responses
 	const reqIdRef = useRef(0);
 	// M2: Cancel guard for unmount
 	const cancelledRef = useRef(false);
+	// Guard: only initialize atoms once per mount
+	const initRef = useRef(false);
 
 	useEffect(() => {
 		return () => {
@@ -69,7 +77,7 @@ export const useTokenList = (
 		try {
 			const resp = await TokenApi.list();
 			if (cancelledRef.current || myId !== reqIdRef.current) return;
-			setTokens(resp.tokens);
+			setTokens(resp);
 		} catch {
 			if (cancelledRef.current || myId !== reqIdRef.current) return;
 			toast.error(t('error.fetchFailed'));
@@ -81,12 +89,21 @@ export const useTokenList = (
 		}
 	}, [setTokens, setLoading, setFetchError, t]);
 
-	// Hydrate from SSR data or fetch on mount
+	// Initialize atoms from SSR data or fetch on mount.
+	// Runs once; sets `mounted` so subsequent renders use atom values.
 	useEffect(() => {
-		if (!initialTokens) {
+		if (initRef.current) return;
+		initRef.current = true;
+
+		if (initialTokens) {
+			setTokens(Array.isArray(initialTokens) ? initialTokens : []);
+			setLoading(false);
+		} else {
 			fetchTokens();
 		}
-	}, [initialTokens, fetchTokens]);
+		setFetchError(false);
+		setMounted(true);
+	}, [initialTokens, setTokens, setLoading, setFetchError, fetchTokens]);
 
 	// Refetch when version changes (create/rotate success)
 	useEffect(() => {
@@ -94,6 +111,13 @@ export const useTokenList = (
 			fetchTokens();
 		}
 	}, [tokenListVersion, fetchTokens]);
+
+	// Before atoms are initialized, use initialTokens directly so the
+	// first client render matches the server HTML exactly.
+	const safeInitial = Array.isArray(initialTokens) ? initialTokens : [];
+	const displayTokens = mounted ? tokens : safeInitial;
+	const displayLoading = mounted ? loading : !initialTokens;
+	const displayFetchError = mounted ? fetchError : false;
 
 	const handleRevoke = useCallback(
 		async (id: string) => {
@@ -115,9 +139,9 @@ export const useTokenList = (
 	);
 
 	return {
-		tokens,
-		loading,
-		fetchError,
+		tokens: displayTokens,
+		loading: displayLoading,
+		fetchError: displayFetchError,
 		fetchTokens,
 		handleRevoke,
 		handleRotate,

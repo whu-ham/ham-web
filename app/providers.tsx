@@ -17,6 +17,7 @@
  * accidentally being included in production bundles.
  */
 import { ReactNode, useEffect, useState } from 'react';
+import { SSRProvider } from 'react-aria';
 import { Toaster } from 'react-hot-toast';
 
 const isMswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === 'true';
@@ -38,9 +39,9 @@ export const Providers = ({ children }: { children: ReactNode }) => {
 	}
 
 	return (
-		<>
+		<SSRProvider>
 			{children}
 			<Toaster />
-		</>
+		</SSRProvider>
 	);
 };

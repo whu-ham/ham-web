@@ -7,21 +7,6 @@
 
 import { atom } from 'jotai';
 
-import { LOCALE_COOKIE, Locale, isLocale } from '@/i18n/config';
-
-// --- Cookie helper --------------------------------------------------
-
-const readLocaleCookie = (): Locale | null => {
-	if (typeof document === 'undefined') return null;
-	const raw = document.cookie
-		.split(';')
-		.map((c) => c.trim())
-		.find((c) => c.startsWith(`${LOCALE_COOKIE}=`));
-	if (!raw) return null;
-	const value = decodeURIComponent(raw.slice(LOCALE_COOKIE.length + 1));
-	return isLocale(value) ? value : null;
-};
-
 // --- Atom -----------------------------------------------------------
 
 /**
@@ -39,7 +24,8 @@ const readLocaleCookie = (): Locale | null => {
  * Write `false` to signal that the cookie was just cleared.
  *
  * Uses a primitive atom so that `useAtom` writes work correctly.
- * The initial value is lazily read from the cookie on first render.
+ * Always initialised to `false` to match the server render; the real
+ * cookie value is read in a `useEffect` after hydration.
  */
-export const localeOverrideAtom = atom<boolean>(readLocaleCookie() !== null);
+export const localeOverrideAtom = atom<boolean>(false);
 localeOverrideAtom.debugLabel = 'localeOverride';

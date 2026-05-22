@@ -28,8 +28,15 @@ export const usePasskeyLogin = (
 ): UsePasskeyLoginReturn => {
 	const t = useTranslations('sso.passkey');
 	const [loading, setLoading] = useState(false);
-	const [supported] = useState<boolean | null>(isPasskeySupported);
+	// Start as null to avoid hydration mismatch — isPasskeySupported()
+	// returns false on the server but may return true on the client.
+	// We detect the real value in useEffect (client-only).
+	const [supported, setSupported] = useState<boolean | null>(null);
 	const cancelledRef = useRef(false);
+
+	useEffect(() => {
+		setSupported(isPasskeySupported());
+	}, []);
 
 	useEffect(() => {
 		return () => {

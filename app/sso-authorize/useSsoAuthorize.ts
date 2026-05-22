@@ -127,18 +127,36 @@ export const useSsoAuthorize = (me: MeResponse | null) => {
 			return;
 		}
 
-		// Mobile: always try deep link first, regardless of auth state
+		// Mobile + authenticated: deep link is a convenience shortcut,
+		// but if it fails the user can proceed with browser consent.
+		// Mobile + unauthenticated: deep link is the primary login
+		// method; if it fails, show the fallback with login options.
 		if (autoProbeFiredRef.current) return;
 		autoProbeFiredRef.current = true;
 
-		setStage({ kind: 'deep-link-trying' });
-		tryLaunchDeepLink({
-			url: deepLinkUrl,
-			timeoutMs: AUTO_PROBE_TIMEOUT_MS,
-		}).then((result) => {
-			if (result.launched) return;
-			setStage({ kind: 'deep-link-fallback', authenticated: !!me });
-		});
+		if (me) {
+			// Already authenticated — try deep link as a shortcut, but
+			// fall back to consent directly (not to a login page).
+			setStage({ kind: 'deep-link-trying' });
+			tryLaunchDeepLink({
+				url: deepLinkUrl,
+				timeoutMs: AUTO_PROBE_TIMEOUT_MS,
+			}).then((result) => {
+				if (result.launched) return;
+				// Deep link failed — skip fallback, go straight to consent
+				setStage({ kind: 'consent', me });
+			});
+		} else {
+			// Not authenticated — deep link is the primary login method
+			setStage({ kind: 'deep-link-trying' });
+			tryLaunchDeepLink({
+				url: deepLinkUrl,
+				timeoutMs: AUTO_PROBE_TIMEOUT_MS,
+			}).then((result) => {
+				if (result.launched) return;
+				setStage({ kind: 'deep-link-fallback', authenticated: false });
+			});
+		}
 	}, [params, deepLinkUrl, me, setStage, redirectToLogin]);
 
 	return { stage };
