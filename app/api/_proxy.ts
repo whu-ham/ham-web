@@ -24,14 +24,6 @@
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 
-// M6: Validate at module load to catch deployment misconfig early
-if (!BACKEND_ORIGIN && process.env.NODE_ENV !== 'test') {
-	throw new Error(
-		'[_proxy] HAM_BACKEND_ORIGIN env var is required. ' +
-			'The BFF cannot function without a backend origin to proxy to.'
-	);
-}
-
 /**
  * Absolute frontend origins that are allowed to call this BFF cross-origin.
  * Parsed once at module load from the comma-separated `WEB_BASE_URL` env.
