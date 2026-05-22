@@ -29,7 +29,7 @@ import { forwardSetCookies, serverFetch } from '@/services/server-fetch';
  */
 export const fetchMe = async (): Promise<MeResponse | null> => {
 	const res = await serverFetch('/web/auth/me');
-	if (res.status === 401) return null;
+	if (res.status === 401 || res.status === 403) return null;
 	if (!res.ok) throw new Error(`fetchMe failed: ${res.status}`);
 	return (await res.json()) as MeResponse;
 };
@@ -73,7 +73,7 @@ export const processAppCallback = async (
 	code: string
 ): Promise<AppCallbackResult> => {
 	try {
-		const res = await serverFetch('/api/auth/app-callback', {
+		const res = await serverFetch('/web/auth/app-callback', {
 			method: 'POST',
 			body: JSON.stringify({ code }),
 		});
