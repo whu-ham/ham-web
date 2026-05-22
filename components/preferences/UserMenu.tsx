@@ -21,6 +21,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useState, useTransition } from 'react';
 
+import { useLogout } from '@/hooks/useLogout';
 import {
 	LOCALES,
 	LOCALE_COOKIE,
@@ -124,12 +125,15 @@ const applyThemeToDocument = (resolved: Theme) => {
 };
 
 interface UserMenuProps {
-	onLogout: () => void;
+	/** Override the default logout handler */
+	onLogout?: () => void;
 	/** When true, includes theme & language options in the dropdown */
 	compact?: boolean;
 }
 
 const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
+	const defaultLogout = useLogout();
+	const handleLogout = onLogout ?? defaultLogout;
 	const tCommon = useTranslations('common');
 	const tTheme = useTranslations('theme');
 	const tLang = useTranslations('language');
@@ -216,7 +220,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 				</span>
 			</Dropdown.Trigger>
 			<Dropdown.Popover placement='bottom end'>
-				<Dropdown.Menu onAction={(key) => key === 'logout' && onLogout()}>
+				<Dropdown.Menu onAction={(key) => key === 'logout' && handleLogout()}>
 					{compact && (
 						<>
 							{/* Theme section */}

@@ -14,7 +14,7 @@ import type { Metadata } from 'next';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import { fetchMe } from '@/services/sso/server';
+import { fetchMe } from '@/app/lib/auth';
 import { safeRedirect } from '@/services/redirect';
 
 export const generateMetadata = async (): Promise<Metadata> => {

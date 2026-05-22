@@ -6,9 +6,11 @@
 import SsoAuthorizePage from '@/app/sso-authorize/page.client';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import InvalidRequestView from '@/app/sso-authorize/InvalidRequestView';
 import PageFrame from '@/components/layout/PageFrame';
+import { fetchMe } from '@/app/lib/auth';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('sso');
@@ -57,7 +59,7 @@ interface PageProps {
 }
 
 const Page = async ({ searchParams }: PageProps) => {
-	const { client_id, redirect_uri } = await searchParams;
+	const { client_id, redirect_uri, scope, state } = await searchParams;
 
 	if (!client_id?.trim() || !redirect_uri?.trim()) {
 		return (
@@ -67,7 +69,15 @@ const Page = async ({ searchParams }: PageProps) => {
 		);
 	}
 
-	return <SsoAuthorizePage />;
+	const me = await fetchMe();
+	if (!me) {
+		const qs = new URLSearchParams({ client_id, redirect_uri });
+		if (scope) qs.set('scope', scope);
+		if (state) qs.set('state', state);
+		redirect(`/login?from=${encodeURIComponent(`/sso-authorize?${qs}`)}`);
+	}
+
+	return <SsoAuthorizePage me={me} />;
 };
 
 export default Page;

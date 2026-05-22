@@ -4,14 +4,12 @@
  * @date 2026/5/22
  *
  * Server-side data fetching for token endpoints.
- * Calls the backend directly via HAM_BACKEND_ORIGIN.
+ * Calls the backend directly via serverFetch.
  */
-import { cookies } from 'next/headers';
+import { serverFetch } from '@/services/server-fetch';
 
-import { LOCALE_COOKIE } from '@/i18n/config';
 import type { ListTokensResponse, TokenListItem } from '@/services/token/api';
 
-const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
@@ -27,20 +25,7 @@ export const fetchTokenList = async (): Promise<TokenListItem[]> => {
 	}
 
 	try {
-		const cookieStore = await cookies();
-		const locale = cookieStore.get(LOCALE_COOKIE)?.value;
-		const allCookies = cookieStore
-			.getAll()
-			.map((c) => `${c.name}=${c.value}`)
-			.join('; ');
-
-		const res = await fetch(`${BACKEND_ORIGIN}/web/tokens`, {
-			headers: {
-				...(locale ? { 'Accept-Language': locale } : {}),
-				Cookie: allCookies,
-			},
-		});
-
+		const res = await serverFetch('/web/tokens');
 		if (!res.ok) return [];
 		const data = (await res.json()) as ListTokensResponse;
 		return data.tokens ?? [];

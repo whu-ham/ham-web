@@ -1,24 +1,20 @@
 /**
  * @author Claude
- * @version 3.0
+ * @version 4.0
  * @date 2026/5/22
  *
  * Generic Passkey login button for the /login page.
- * Writes to `loginMeAtom` on success instead of calling a callback prop.
+ * Rendering-only — all logic lives in usePasskeyLogin.
  *
  * Renders nothing when the browser does not support WebAuthn / Passkeys.
  */
+
 'use client';
 
 import { Button } from '@heroui/react';
-import toast from 'react-hot-toast';
-import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
 
-import { loginMeAtom } from '@/app/login/store';
-import { ApiError, WebAuthApi } from '@/services/sso/api';
-import { isPasskeySupported } from '@/services/sso/ua';
+import { usePasskeyLogin } from '@/app/login/usePasskeyLogin';
 
 interface PasskeyLoginViewProps {
 	onLoginFailed?: () => void;
@@ -26,67 +22,7 @@ interface PasskeyLoginViewProps {
 
 const PasskeyLoginView = ({ onLoginFailed }: PasskeyLoginViewProps) => {
 	const t = useTranslations('sso.passkey');
-	const setLoginMe = useSetAtom(loginMeAtom);
-	const [loading, setLoading] = useState(false);
-	const [supported] = useState<boolean | null>(isPasskeySupported);
-
-	const login = useCallback(async () => {
-		setLoading(true);
-		try {
-			const opt = await WebAuthApi.getPasskeyOption();
-			const parsed = JSON.parse(opt.json) as {
-				publicKey: PublicKeyCredentialRequestOptions;
-			};
-			const options =
-				parsed.publicKey as unknown as PublicKeyCredentialRequestOptions;
-			if (typeof (options.challenge as unknown) === 'string') {
-				options.challenge = base64ToArrayBuffer(
-					options.challenge as unknown as string
-				);
-			}
-			if (Array.isArray(options.allowCredentials)) {
-				options.allowCredentials = options.allowCredentials.map((c) => ({
-					...c,
-					id:
-						typeof (c.id as unknown) === 'string'
-							? base64ToArrayBuffer(c.id as unknown as string)
-							: c.id,
-				}));
-			}
-
-			const credential = (await navigator.credentials.get({
-				publicKey: options,
-				mediation: 'optional',
-			})) as PublicKeyCredential | null;
-			if (!credential) {
-				toast.error(t('noPick'));
-				return;
-			}
-
-			const assertionJSON = JSON.stringify(credentialToJSON(credential));
-			await WebAuthApi.passkeyLogin(assertionJSON, opt.session);
-
-			try {
-				const me = await WebAuthApi.me();
-				setLoginMe(me);
-			} catch {
-				onLoginFailed?.();
-			}
-		} catch (e) {
-			if (e instanceof ApiError) {
-				toast.error(e.message || t('loginFailed'));
-			} else if (
-				e instanceof DOMException &&
-				(e.name === 'NotAllowedError' || e.name === 'AbortError')
-			) {
-				// User cancelled — silent fail.
-			} else {
-				toast.error(t('loginFailed'));
-			}
-		} finally {
-			setLoading(false);
-		}
-	}, [setLoginMe, onLoginFailed, t]);
+	const { loading, login, supported } = usePasskeyLogin(onLoginFailed);
 
 	if (!supported) return null;
 
@@ -101,51 +37,6 @@ const PasskeyLoginView = ({ onLoginFailed }: PasskeyLoginViewProps) => {
 			{t('cta')}
 		</Button>
 	);
-};
-
-const base64ToArrayBuffer = (value: string): ArrayBuffer => {
-	const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
-	const padded = normalized.padEnd(
-		normalized.length + ((4 - (normalized.length % 4)) % 4),
-		'='
-	);
-	const raw = atob(padded);
-	const buf = new ArrayBuffer(raw.length);
-	const view = new Uint8Array(buf);
-	for (let i = 0; i < raw.length; i++) {
-		view[i] = raw.charCodeAt(i);
-	}
-	return buf;
-};
-
-const arrayBufferToBase64URL = (buf: ArrayBuffer): string => {
-	const bytes = new Uint8Array(buf);
-	let binary = '';
-	for (let i = 0; i < bytes.length; i++) {
-		binary += String.fromCharCode(bytes[i]);
-	}
-	return btoa(binary)
-		.replace(/\+/g, '-')
-		.replace(/\//g, '_')
-		.replace(/=+$/, '');
-};
-
-const credentialToJSON = (credential: PublicKeyCredential) => {
-	const response = credential.response as AuthenticatorAssertionResponse;
-	return {
-		id: credential.id,
-		rawId: arrayBufferToBase64URL(credential.rawId),
-		type: credential.type,
-		response: {
-			authenticatorData: arrayBufferToBase64URL(response.authenticatorData),
-			clientDataJSON: arrayBufferToBase64URL(response.clientDataJSON),
-			signature: arrayBufferToBase64URL(response.signature),
-			userHandle: response.userHandle
-				? arrayBufferToBase64URL(response.userHandle)
-				: null,
-		},
-		clientExtensionResults: credential.getClientExtensionResults(),
-	};
 };
 
 export default PasskeyLoginView;

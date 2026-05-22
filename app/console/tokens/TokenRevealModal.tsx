@@ -1,12 +1,12 @@
 /**
  * @author Claude
- * @version 2.0
+ * @version 3.0
  * @date 2026/5/22
  *
  * Modal that reveals a newly created / rotated API token.
- * Shows the raw token value with an inline copy button and a warning
- * that it won't be shown again.
+ * Rendering-only — copy logic in useCopyToken.
  */
+
 'use client';
 
 import {
@@ -19,37 +19,20 @@ import {
 } from '@heroui/react';
 import { useAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 
 import { newlyCreatedTokenAtom } from '@/app/console/tokens/store';
+import { useCopyToken } from '@/app/console/tokens/useCopyToken';
 
 const TokenRevealModal = () => {
 	const t = useTranslations('apikey');
 	const [newlyCreated, setNewlyCreated] = useAtom(newlyCreatedTokenAtom);
-	const [copied, setCopied] = useState(false);
+	const { copied, handleCopy, reset } = useCopyToken(newlyCreated?.token);
 
 	const handleClose = useCallback(() => {
 		setNewlyCreated(null);
-		setCopied(false);
-	}, [setNewlyCreated]);
-
-	const handleCopy = useCallback(async () => {
-		if (!newlyCreated?.token || copied) return;
-		try {
-			await navigator.clipboard.writeText(newlyCreated.token);
-			setCopied(true);
-		} catch {
-			const textarea = document.createElement('textarea');
-			textarea.value = newlyCreated.token;
-			textarea.style.position = 'fixed';
-			textarea.style.opacity = '0';
-			document.body.appendChild(textarea);
-			textarea.select();
-			document.execCommand('copy');
-			document.body.removeChild(textarea);
-			setCopied(true);
-		}
-	}, [newlyCreated, copied]);
+		reset();
+	}, [setNewlyCreated, reset]);
 
 	return (
 		<Modal>

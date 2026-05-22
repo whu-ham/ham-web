@@ -1,58 +1,23 @@
 /**
  * @author Claude
- * @version 3.0
+ * @version 4.0
  * @date 2026/5/22
  *
- * Modal for rotating an API token. Warns that the old key is immediately
- * revoked, and lets the user set a new TTL.
+ * Modal for rotating an API token.
+ * Rendering-only — all logic in useRotateToken.
  */
+
 'use client';
 
 import { Button, Label, Modal, NumberField } from '@heroui/react';
-import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
-import toast from 'react-hot-toast';
 
-import {
-	newlyCreatedTokenAtom,
-	rotateModalAtom,
-} from '@/app/console/tokens/store';
-import { ApiError, TokenApi } from '@/services/token/api';
+import { useRotateToken } from '@/app/console/tokens/useRotateToken';
 
 const RotateTokenModal = () => {
 	const t = useTranslations('apikey');
-	const [rotateModal, setRotateModal] = useAtom(rotateModalAtom);
-	const setNewlyCreated = useSetAtom(newlyCreatedTokenAtom);
-	const [ttl, setTtl] = useState(30);
-	const [submitting, setSubmitting] = useState(false);
-
-	const handleClose = useCallback(() => {
-		setRotateModal({ visible: false, tokenId: null });
-		setTtl(30);
-	}, [setRotateModal]);
-
-	const handleSubmit = useCallback(async () => {
-		if (!rotateModal.tokenId) return;
-
-		setSubmitting(true);
-		try {
-			const resp = await TokenApi.rotate(rotateModal.tokenId, {
-				ttl_days: ttl,
-			});
-			setNewlyCreated(resp);
-			toast.success(t('rotateModal.success'));
-			handleClose();
-		} catch (e) {
-			if (e instanceof ApiError) {
-				toast.error(e.message || t('error.rotateFailed'));
-			} else {
-				toast.error(t('error.rotateFailed'));
-			}
-		} finally {
-			setSubmitting(false);
-		}
-	}, [rotateModal.tokenId, ttl, setNewlyCreated, handleClose, t]);
+	const { rotateModal, ttl, setTtl, submitting, handleClose, handleSubmit } =
+		useRotateToken();
 
 	return (
 		<Modal>

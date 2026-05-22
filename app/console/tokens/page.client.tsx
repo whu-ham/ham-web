@@ -1,45 +1,38 @@
 /**
  * @author Claude
- * @version 1.3
+ * @version 2.0
  * @date 2026/5/22
  *
  * Client-side page for /console/tokens — Token management.
- * Lists all tokens, with create/rotate/revoke actions.
+ * Rendering-only — list logic in useTokenList, logout in useLogout.
  */
+
 'use client';
 
 import { Button, Spinner } from '@heroui/react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useHydrateAtoms } from 'jotai/utils';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 import CreateTokenModal from '@/app/console/tokens/CreateTokenModal';
 import RotateTokenModal from '@/app/console/tokens/RotateTokenModal';
 import TokenCard from '@/app/console/tokens/TokenCard';
 import TokenRevealModal from '@/app/console/tokens/TokenRevealModal';
 import {
-	createModalVisibleAtom,
-	newlyCreatedTokenAtom,
-	rotateModalAtom,
 	tokenListAtom,
 	tokenListLoadingAtom,
 } from '@/app/console/tokens/store';
+import { useTokenList } from '@/app/console/tokens/useTokenList';
 import LanguageSwitcher from '@/components/preferences/LanguageSwitcher';
 import ThemeSwitcher from '@/components/preferences/ThemeSwitcher';
 import UserMenu from '@/components/preferences/UserMenu';
 import type { TokenListItem } from '@/services/token/api';
-import { TokenApi } from '@/services/token/api';
-import { WebAuthApi } from '@/services/sso/api';
-import { useRouter } from 'next/navigation';
 
 interface TokensPageProps {
 	initialTokens?: TokenListItem[];
 }
 
 const TokensPage = ({ initialTokens }: TokensPageProps) => {
-	// Hydrate atoms with SSR data before first render — no loading flash
 	useHydrateAtoms([
 		[tokenListAtom, initialTokens ?? []],
 		[tokenListLoadingAtom, !initialTokens],
@@ -47,67 +40,8 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 
 	const t = useTranslations('apikey');
 	const router = useRouter();
-	const [tokens, setTokens] = useAtom(tokenListAtom);
-	const [loading, setLoading] = useAtom(tokenListLoadingAtom);
-	const setCreateModalVisible = useSetAtom(createModalVisibleAtom);
-	const setRotateModal = useSetAtom(rotateModalAtom);
-	const newlyCreated = useAtomValue(newlyCreatedTokenAtom);
-	const [hydrated, setHydrated] = useState(false);
-
-	const fetchTokens = useCallback(async () => {
-		setLoading(true);
-		try {
-			const resp = await TokenApi.list();
-			setTokens(resp.tokens);
-		} catch {
-			toast.error(t('error.fetchFailed'));
-		} finally {
-			setLoading(false);
-		}
-	}, [setTokens, setLoading, t]);
-
-	// If no SSR data, fetch on mount
-	useEffect(() => {
-		if (!initialTokens) {
-			fetchTokens();
-		}
-		setHydrated(true);
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-	// Refresh list when a new token is created/rotated (after hydration)
-	useEffect(() => {
-		if (hydrated && newlyCreated) {
-			fetchTokens();
-		}
-	}, [newlyCreated, fetchTokens, hydrated]);
-
-	const handleRevoke = useCallback(
-		async (id: string) => {
-			try {
-				await TokenApi.revoke(id);
-				setTokens((prev) => prev.filter((tk) => tk.id !== id));
-			} catch {
-				toast.error(t('error.revokeFailed'));
-			}
-		},
-		[setTokens, t]
-	);
-
-	const handleRotate = useCallback(
-		(id: string) => {
-			setRotateModal({ visible: true, tokenId: id });
-		},
-		[setRotateModal]
-	);
-
-	const handleLogout = useCallback(async () => {
-		try {
-			await WebAuthApi.logout();
-		} finally {
-			const from = encodeURIComponent('/console/tokens');
-			router.push(`/login?from=${from}`);
-		}
-	}, [router]);
+	const { tokens, loading, handleRevoke, handleRotate, setCreateModalVisible } =
+		useTokenList(initialTokens);
 
 	return (
 		<div className={'min-h-screen w-full bg-surface'}>
@@ -147,10 +81,10 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 							<LanguageSwitcher />
 						</div>
 						<div className={'sm:hidden'}>
-							<UserMenu onLogout={handleLogout} compact />
+							<UserMenu compact />
 						</div>
 						<div className={'hidden sm:block'}>
-							<UserMenu onLogout={handleLogout} />
+							<UserMenu />
 						</div>
 					</div>
 				</div>

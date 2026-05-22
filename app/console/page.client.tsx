@@ -1,23 +1,21 @@
 /**
  * @author Claude
- * @version 1.3
+ * @version 2.0
  * @date 2026/5/22
  *
- * Console page client component. Receives authenticated user data
- * from SSR and renders the console view.
+ * Console page client component. Rendering-only — logout logic in useLogout.
  */
+
 'use client';
 
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useCallback } from 'react';
 
 import ConsoleView from '@/app/console/ConsoleView';
 import LanguageSwitcher from '@/components/preferences/LanguageSwitcher';
 import ThemeSwitcher from '@/components/preferences/ThemeSwitcher';
 import UserMenu from '@/components/preferences/UserMenu';
-import { MeResponse, WebAuthApi } from '@/services/sso/api';
+import { MeResponse } from '@/services/sso/api';
 
 interface ConsolePageProps {
 	me: MeResponse;
@@ -25,16 +23,6 @@ interface ConsolePageProps {
 
 const ConsolePage = ({ me }: ConsolePageProps) => {
 	const t = useTranslations('console');
-	const router = useRouter();
-
-	const handleLogout = useCallback(async () => {
-		try {
-			await WebAuthApi.logout();
-		} finally {
-			const from = encodeURIComponent('/console');
-			router.push(`/login?from=${from}`);
-		}
-	}, [router]);
 
 	return (
 		<div className={'min-h-screen w-full bg-surface'}>
@@ -69,10 +57,10 @@ const ConsolePage = ({ me }: ConsolePageProps) => {
 							<LanguageSwitcher />
 						</div>
 						<div className={'sm:hidden'}>
-							<UserMenu onLogout={handleLogout} compact />
+							<UserMenu compact />
 						</div>
 						<div className={'hidden sm:block'}>
-							<UserMenu onLogout={handleLogout} />
+							<UserMenu />
 						</div>
 					</div>
 				</div>

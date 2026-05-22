@@ -3,14 +3,12 @@
  * @version 1.0
  * @date 2026/5/22
  *
- * Server-side auth API for use in Server Components.
- * Calls the backend directly via HAM_BACKEND_ORIGIN and
- * forwards cookies between the browser request and the backend.
+ * Server-side fetch infrastructure for Server Components.
+ * Forwards browser cookies to the backend and handles Set-Cookie forwarding.
  */
 import { cookies } from 'next/headers';
 
 import { LOCALE_COOKIE } from '@/i18n/config';
-import type { MeResponse } from '@/services/sso/api';
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 
@@ -62,7 +60,7 @@ const parseSetCookieHeader = (header: string) => {
 /**
  * Forward Set-Cookie headers from a backend response to the browser response.
  */
-const forwardSetCookies = async (res: Response) => {
+export const forwardSetCookies = async (res: Response) => {
 	const cookieStore = await cookies();
 	const setCookies = res.headers.getSetCookie?.() ?? [];
 	for (const sc of setCookies) {
@@ -80,7 +78,7 @@ const forwardSetCookies = async (res: Response) => {
 /**
  * Make a server-side fetch to the backend, forwarding browser cookies.
  */
-const serverFetchAsync = async (
+export const serverFetch = async (
 	path: string,
 	init?: RequestInit
 ): Promise<Response> => {
@@ -100,40 +98,4 @@ const serverFetchAsync = async (
 			...(init?.headers ?? {}),
 		},
 	});
-};
-
-/**
- * Fetch current user info. Returns null if not authenticated.
- */
-export const fetchMe = async (): Promise<MeResponse | null> => {
-	try {
-		const res = await serverFetchAsync('/web/auth/me');
-		if (res.status === 401) return null;
-		if (!res.ok) return null;
-		return (await res.json()) as MeResponse;
-	} catch {
-		return null;
-	}
-};
-
-/**
- * Process an app callback (exchange code for session) in SSR.
- * Forwards Set-Cookie headers from the backend to the browser.
- * Returns true if the callback was processed successfully.
- */
-export const processAppCallback = async (code: string): Promise<boolean> => {
-	try {
-		const res = await serverFetchAsync('/api/auth/app-callback', {
-			method: 'POST',
-			body: JSON.stringify({ code }),
-		});
-
-		if (!res.ok) return false;
-
-		// Forward Set-Cookie headers (session cookie) to browser
-		await forwardSetCookies(res);
-		return true;
-	} catch {
-		return false;
-	}
 };
