@@ -110,8 +110,8 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 					'mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-3'
 				}
 			>
-				{/* Create button above the list */}
-				{!loading && tokens.length > 0 && (
+				{/* Create button above the list — always visible when not loading */}
+				{!loading && (
 					<div className={'flex justify-end'}>
 						<Button
 							variant={'primary'}
