@@ -1,6 +1,10 @@
 /**
  * Standalone login page. Redirects here from protected routes
  * when the user is not authenticated.
+ *
+ * No cookies are generated on this page. STATE_COOKIE and FROM_COOKIE
+ * are set lazily via a server action when the user initiates mobile
+ * app login (see app/login/actions.ts).
  */
 import { Suspense } from 'react';
 
@@ -37,12 +41,11 @@ const Page = async ({ searchParams }: PageProps) => {
 		return redirect(safeRedirect(from, fallback));
 	}
 
-	const state = crypto.randomUUID();
 	const safeFrom = safeRedirect(from);
 
 	return (
 		<Suspense>
-			<LoginPage initialState={state} from={safeFrom} />
+			<LoginPage from={safeFrom} />
 		</Suspense>
 	);
 };

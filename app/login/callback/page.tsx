@@ -1,18 +1,18 @@
 /**
  * @author Claude
- * @version 2.1
+ * @version 2.2
  * @date 2026/5/22
  *
  * OAuth2 callback page for mobile app login.
  *
  * Flow:
- *   1. /login page calls POST /api/auth/login-init, which writes
- *      OAuth2 state and redirect target to HttpOnly cookies.
+ *   1. User taps "Open App" on /login → setLoginCookies server action
+ *      writes OAuth2 state and redirect target to HttpOnly cookies.
  *   2. App authorizes and redirects back here with ?code=xxx&state=yyy
  *   3. This SSR page validates state against the HttpOnly cookie BEFORE
  *      exchanging the code, preventing OAuth2 Login CSRF.
  *   4. On success, redirects to the original `from` URL (stored in
- *      ham_login_from cookie).
+ *      FROM_COOKIE cookie).
  *   5. On failure, redirects to /login with error details.
  */
 import { getTranslations } from 'next-intl/server';
@@ -22,9 +22,7 @@ import { redirect } from 'next/navigation';
 
 import { processAppCallback } from '@/app/lib/auth';
 import { safeRedirect } from '@/services/redirect';
-
-const STATE_COOKIE = 'ham_login_state';
-const FROM_COOKIE = 'ham_login_from';
+import { FROM_COOKIE, STATE_COOKIE } from '@/services/auth-cookies';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('console');
@@ -62,7 +60,7 @@ const Page = async ({ searchParams }: PageProps) => {
 		);
 	}
 
-	// Read the `from` redirect target from cookie (set by /api/auth/login-init)
+	// Read the `from` redirect target from cookie (set by setLoginCookies action)
 	const storedFrom = cookieStore.get(FROM_COOKIE)?.value;
 	cookieStore.delete(FROM_COOKIE);
 
