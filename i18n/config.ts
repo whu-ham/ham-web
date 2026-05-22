@@ -21,7 +21,7 @@ export type Locale = (typeof LOCALES)[number];
 
 export const DEFAULT_LOCALE: Locale = 'zh';
 
-export const LOCALE_COOKIE = 'NEXT_LOCALE';
+export { LOCALE_COOKIE } from '@/services/cookies';
 
 export const LOCALE_QUERY_KEY = 'lang';
 

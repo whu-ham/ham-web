@@ -9,7 +9,7 @@
 
 import { cookies } from 'next/headers';
 
-import { FROM_COOKIE, STATE_COOKIE } from '@/services/auth-cookies';
+import { FROM_COOKIE, STATE_COOKIE } from '@/services/cookies';
 
 /** Cookie max-age: 10 minutes (enough for the app OAuth2 round-trip). */
 const COOKIE_MAX_AGE = 60 * 10;
