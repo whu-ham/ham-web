@@ -9,7 +9,6 @@
  * - requireAuth       — get current user, redirect to /login if unauthenticated
  * - processAppCallback — exchange OAuth2 code for session (mobile app login)
  */
-import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import type { MeResponse } from '@/services/sso/api';
@@ -45,11 +44,8 @@ export const requireAuth = async (currentPath: string): Promise<MeResponse> => {
 	const me = await fetchMe();
 	if (me) return me;
 
-	const headersList = await headers();
-	const host = headersList.get('host') || 'localhost:3000';
-	const protocol = headersList.get('x-forwarded-proto') || 'https';
-	const from = `${protocol}://${host}${currentPath}`;
-	redirect(`/login?from=${encodeURIComponent(from)}`);
+	// Use relative path so safeRedirect works on any domain (localhost, staging, etc.)
+	redirect(`/login?from=${encodeURIComponent(currentPath)}`);
 };
 
 /**

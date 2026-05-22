@@ -42,9 +42,10 @@ const Page = async ({ searchParams }: PageProps) => {
 		redirect('/login');
 	}
 
-	// In SSR we can't read sessionStorage, so we redirect to a client-side
-	// intermediary that reads it and bounces to the final destination.
-	redirect(`${APP_CALLBACK_PATH}/done`);
+	// Pass state to the client-side done page for CSRF validation.
+	// SSR cannot access sessionStorage, so the client component must
+	// compare the returned state against the one stored at login time.
+	redirect(`${APP_CALLBACK_PATH}/done?state=${encodeURIComponent(state)}`);
 };
 
 export default Page;
