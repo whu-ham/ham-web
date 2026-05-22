@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 2.1
+ * @version 2.2
  * @date 2026/5/22
  *
  * Custom hook for /sso-authorize page orchestration.
@@ -8,10 +8,10 @@
  * Responsibilities:
  *   - Parse client_id / scope / redirect_uri / state from the URL
  *   - Detect desktop vs mobile and run deep-link handoff on mobile
- *   - On desktop, use the SSR-provided me to enter consent stage directly
+ *   - On desktop + !me → client-side redirect to /login
+ *   - On desktop + me  → consent stage directly
+ *   - On mobile (any auth state) → try deep link first
  *   - Visibility-aware session refresh while on consent stage
- *
- * M7 fix: Uses deviceKindAtom from store (computed once, shared).
  */
 
 'use client';
@@ -52,7 +52,7 @@ const parseParams = (): SsoAuthorizeParams | null => {
 	return { appId, scope, state, redirectUri };
 };
 
-export const useSsoAuthorize = (me: MeResponse) => {
+export const useSsoAuthorize = (me: MeResponse | null) => {
 	const [params, setParams] = useAtom(paramsAtom);
 	const [stage, setStage] = useAtom(stageAtom);
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
@@ -70,7 +70,6 @@ export const useSsoAuthorize = (me: MeResponse) => {
 			sessionConfirmedAtRef.current = Date.now();
 		}
 
-		// M7: Compute device kind once and store it globally
 		if (typeof navigator !== 'undefined') {
 			setDeviceKind(detectDeviceKind(navigator.userAgent));
 		}
@@ -118,11 +117,17 @@ export const useSsoAuthorize = (me: MeResponse) => {
 				: detectDeviceKind(navigator.userAgent);
 
 		if (deviceKind === 'desktop') {
+			if (!me) {
+				// Desktop + unauthenticated → redirect to /login
+				redirectToLogin();
+				return;
+			}
 			// SSR already confirmed auth — go straight to consent
 			setStage({ kind: 'consent', me });
 			return;
 		}
 
+		// Mobile: always try deep link first, regardless of auth state
 		if (autoProbeFiredRef.current) return;
 		autoProbeFiredRef.current = true;
 
@@ -132,9 +137,9 @@ export const useSsoAuthorize = (me: MeResponse) => {
 			timeoutMs: AUTO_PROBE_TIMEOUT_MS,
 		}).then((result) => {
 			if (result.launched) return;
-			setStage({ kind: 'deep-link-fallback' });
+			setStage({ kind: 'deep-link-fallback', authenticated: !!me });
 		});
-	}, [params, deepLinkUrl, me, setStage]);
+	}, [params, deepLinkUrl, me, setStage, redirectToLogin]);
 
 	return { stage };
 };

@@ -1,10 +1,13 @@
 /**
  * @author Claude
- * @version 4.1
+ * @version 4.2
  * @date 2026/5/22
  *
  * Client-side orchestrator for /sso-authorize.
  * Rendering-only — all orchestration logic lives in useSsoAuthorize.
+ *
+ * `me` may be null when the user is unauthenticated on mobile
+ * (server lets the client try deep link first).
  */
 
 'use client';
@@ -17,7 +20,7 @@ import { useSsoAuthorize } from '@/app/sso-authorize/useSsoAuthorize';
 import type { MeResponse } from '@/services/sso/api';
 
 interface SsoAuthorizePageProps {
-	me: MeResponse;
+	me: MeResponse | null;
 }
 
 const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
@@ -38,7 +41,7 @@ const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
 	if (stage.kind === 'deep-link-fallback') {
 		return (
 			<PageFrame>
-				<DeepLinkFallback />
+				<DeepLinkFallback isAuthenticated={stage.authenticated} />
 			</PageFrame>
 		);
 	}

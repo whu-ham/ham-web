@@ -1,7 +1,8 @@
 /**
  * Combined login surface for the /login page.
- * Shows the QR code as the primary login method, with a Passkey button
- * below as a secondary option (hidden automatically when unsupported).
+ *
+ * Desktop: QR code (primary) + Passkey (secondary)
+ * Mobile:  Open App (primary) + Passkey (secondary). QR is hidden.
  *
  * Mobile app login: before launching the deep link, calls the
  * setLoginCookies server action to write HttpOnly cookies (state + from),
@@ -74,15 +75,21 @@ const LoginView = ({
 			</header>
 
 			<section className={'flex flex-col items-center gap-6'}>
-				<QRLoginView onLoginSucceeded={onLoginSucceeded} />
-				<div className={'w-full flex items-center justify-center gap-4'}>
-					<Separator className={'w-16 shrink'} />
-					<span className={'shrink-0 text-sm text-muted'}>
-						{t('login.divider.other')}
-					</span>
-					<Separator className={'w-16 shrink'} />
-				</div>
+				{/* Desktop: QR code as primary login */}
+				{!mobile && <QRLoginView onLoginSucceeded={onLoginSucceeded} />}
+
+				{!mobile && (
+					<div className={'w-full flex items-center justify-center gap-4'}>
+						<Separator className={'w-16 shrink'} />
+						<span className={'shrink-0 text-sm text-muted'}>
+							{t('login.divider.other')}
+						</span>
+						<Separator className={'w-16 shrink'} />
+					</div>
+				)}
+
 				<PasskeyLoginView onLoginSucceeded={onLoginSucceeded} />
+
 				{mobile && (
 					<>
 						<div className={'w-full flex items-center justify-center gap-4'}>

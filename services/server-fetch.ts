@@ -116,16 +116,44 @@ export const forwardSetCookies = async (res: Response) => {
 };
 
 /**
+ * Backend error envelope. Error responses from the backend follow
+ * the shared errorx contract: { code, message }. Successful responses
+ * are raw JSON payloads (NOT wrapped), matching what the BFF proxy
+ * streams to the browser and what client-side request<T>() returns.
+ */
+interface BackendErrorEnvelope {
+	code?: string | number;
+	message?: string;
+}
+
+/**
+ * Result of serverFetch: the raw Response (for status/headers access)
+ * plus the parsed JSON body. For error responses, `errorEnvelope`
+ * provides access to the backend's error code and message.
+ */
+export interface ServerFetchResult<T = unknown> {
+	response: Response;
+	data: T;
+	errorEnvelope: BackendErrorEnvelope;
+}
+
+/**
  * Make a server-side fetch to the backend, forwarding browser cookies.
  * Only auth-related cookies are forwarded to minimize information exposure.
+ *
+ * Unwraps error envelopes on non-OK responses so callers can access
+ * the backend's error code and message. Successful responses are
+ * returned as raw JSON — matching the pattern of _proxy.ts which
+ * streams the raw backend body to the client, and of client-side
+ * request<T>() which also returns raw JSON.
  *
  * C2 fix: Cookie header is only included when relevant cookies exist,
  * avoiding sending an empty `Cookie: ` header that could mislead the backend.
  */
-export const serverFetch = async (
+export const serverFetch = async <T = unknown>(
 	path: string,
 	init?: RequestInit
-): Promise<Response> => {
+): Promise<ServerFetchResult<T>> => {
 	const cookieStore = await cookies();
 	const locale = cookieStore.get(LOCALE_COOKIE)?.value;
 	// M2: Only forward whitelisted cookies
@@ -137,6 +165,7 @@ export const serverFetch = async (
 
 	// C2: Only include Cookie header when there are relevant cookies
 	const headers: Record<string, string> = {
+		Accept: 'application/json',
 		...(init?.body ? { 'Content-Type': 'application/json' } : {}),
 		...(locale ? { 'Accept-Language': locale } : {}),
 		...((init?.headers as Record<string, string>) ?? {}),
@@ -145,8 +174,24 @@ export const serverFetch = async (
 		headers.Cookie = relevantCookies;
 	}
 
-	return fetch(`${BACKEND_ORIGIN}${path}`, {
+	const response = await fetch(`${BACKEND_ORIGIN}${path}`, {
 		...init,
 		headers,
 	});
+
+	const body: unknown = await response.json();
+	// Successful responses are raw JSON payloads (same shape the BFF proxy
+	// streams to the client). Error responses may carry { code, message }.
+	const isEnvelope =
+		typeof body === 'object' &&
+		body !== null &&
+		'code' in body &&
+		'message' in body;
+	const data = (
+		isEnvelope && 'data' in body ? (body as { data: T }).data : body
+	) as T;
+	const errorEnvelope: BackendErrorEnvelope = isEnvelope
+		? (body as BackendErrorEnvelope)
+		: {};
+	return { response, data, errorEnvelope };
 };

@@ -30,9 +30,9 @@ export const fetchTokenList = async (): Promise<TokenListItem[] | null> => {
 	}
 
 	try {
-		const res = await serverFetch('/web/tokens');
-		if (!res.ok) return null;
-		const data = (await res.json()) as ListTokensResponse;
+		const { response, data } =
+			await serverFetch<ListTokensResponse>('/web/tokens');
+		if (!response.ok) return null;
 		return data.tokens ?? [];
 	} catch {
 		return null;
