@@ -106,20 +106,19 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 
 			<div className={'flex flex-col gap-0.5'}>
 				{token.scopes.map((scope) => (
-					<span
-						key={scope}
-						className={
-							'text-xs font-mono text-muted'
-						}
-					>
+					<span key={scope} className={'text-xs font-mono text-muted'}>
 						{scope}
 					</span>
 				))}
 			</div>
 
 			<div className={'flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-muted'}>
-				<span>{t('card.createdAt')} {formatDate(token.created_at, locale)}</span>
-				<span>{t('card.expiresAt')} {formatDate(token.expires_at, locale)}</span>
+				<span>
+					{t('card.createdAt')} {formatDate(token.created_at, locale)}
+				</span>
+				<span>
+					{t('card.expiresAt')} {formatDate(token.expires_at, locale)}
+				</span>
 				<span>
 					{token.last_used_at
 						? `${t('card.lastUsedAt')} ${formatDate(token.last_used_at, locale)}`

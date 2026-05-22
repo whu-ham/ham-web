@@ -24,7 +24,7 @@ import {
 	Link,
 	Spinner,
 } from '@heroui/react';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -35,7 +35,6 @@ import { paramsAtom, stageAtom } from '@/app/sso-authorize/store';
 const ConsentView = () => {
 	const params = useAtomValue(paramsAtom)!;
 	const stage = useAtomValue(stageAtom);
-	const setStage = useSetAtom(stageAtom);
 	const me = stage.kind === 'consent' ? stage.me : null;
 	const t = useTranslations('sso.consent');
 	const [info, setInfo] = useState<ConsentInfoResponse | null>(null);
@@ -55,9 +54,10 @@ const ConsentView = () => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			setStage({ kind: 'login' });
+			const from = encodeURIComponent(window.location.href);
+			window.location.href = `/login?from=${from}`;
 		}
-	}, [setStage]);
+	}, []);
 
 	const bail = useCallback(
 		(oauthError: 'access_denied' | 'server_error') => {

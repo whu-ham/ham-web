@@ -10,7 +10,7 @@
  */
 'use client';
 
-import HeaderBar from '@/components/HeaderBar';
+import HeaderBar from '@/components/layout/HeaderBar';
 
 interface PageFrameProps {
 	children: React.ReactNode;
@@ -20,7 +20,11 @@ interface PageFrameProps {
 	className?: string;
 }
 
-const PageFrame = ({ children, maxWidth = 'max-w-md', className }: PageFrameProps) => (
+const PageFrame = ({
+	children,
+	maxWidth = 'max-w-md',
+	className,
+}: PageFrameProps) => (
 	<div
 		className={
 			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-1 sm:px-2 md:px-4 py-20 ' +

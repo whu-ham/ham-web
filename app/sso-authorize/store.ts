@@ -6,7 +6,7 @@
  * Jotai atoms for the /sso-authorize page.
  *
  * - `paramsAtom`     — parsed URL params (null until client mount).
- * - `stageAtom`      — current page stage (loading → login/consent/etc.).
+ * - `stageAtom`      — current page stage (loading → consent/etc.).
  * - `deepLinkUrlAtom`— derived `ham://` deep-link URL (empty string when
  *                      params are not yet available).
  */
@@ -29,10 +29,8 @@ export interface SsoAuthorizeParams {
 
 export type Stage =
 	| { kind: 'loading' }
-	| { kind: 'invalid'; reason: string }
 	| { kind: 'deep-link-trying' }
 	| { kind: 'deep-link-fallback' }
-	| { kind: 'login' }
 	| { kind: 'consent'; me: MeResponse };
 
 // ---------------------------------------------------------------------------

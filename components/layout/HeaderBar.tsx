@@ -11,8 +11,8 @@
  */
 'use client';
 
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import ThemeSwitcher from '@/components/ThemeSwitcher';
+import LanguageSwitcher from '@/components/preferences/LanguageSwitcher';
+import ThemeSwitcher from '@/components/preferences/ThemeSwitcher';
 
 const HeaderBar = () => {
 	return (

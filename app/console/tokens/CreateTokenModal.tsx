@@ -33,7 +33,6 @@ const CHILD_SCOPES = ['mcp:read', 'mcp:write'] as const;
 
 const CreateTokenModal = () => {
 	const t = useTranslations('apikey');
-	const tc = useTranslations('common');
 	const [visible, setVisible] = useAtom(createModalVisibleAtom);
 	const setNewlyCreated = useSetAtom(newlyCreatedTokenAtom);
 	const [name, setName] = useState('');

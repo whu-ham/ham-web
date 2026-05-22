@@ -1,16 +1,15 @@
 /**
  * @author Claude
- * @version 3.0
- * @date 2026/5/21
+ * @version 4.0
+ * @date 2026/5/22
  *
- * Generic QR login view extracted from app/sso-authorize/QRLoginView.tsx.
- * Accepts an `onLoggedIn` callback instead of directly writing to a
- * Jotai atom, making it reusable across SSO and console pages.
+ * Generic QR login view for the /login page.
+ * Writes to `loginMeAtom` on success instead of calling a callback prop.
  *
  * QR login flow:
  *   1. POST /api/auth/qr/ticket → get ticket
  *   2. GET /api/auth/qr/ticket/:ticket → poll state
- *   3. On CONFIRMED → call /api/auth/me → onLoggedIn(me)
+ *   3. On CONFIRMED → call /api/auth/me → setLoginMe(me)
  *
  * Visibility-aware polling (§4):
  *   - The poll interval is paused while `document.hidden` is true.
@@ -22,21 +21,17 @@
 
 import { Avatar } from '@heroui/react';
 import toast from 'react-hot-toast';
+import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { QRCodeSVG } from 'qrcode.react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { loginMeAtom } from '@/app/login/store';
 import {
 	CheckTicketResponse,
-	MeResponse,
 	QR_TICKET_STATE,
 	WebAuthApi,
 } from '@/services/sso/api';
-
-interface QRLoginViewProps {
-	onLoggedIn: (me: MeResponse) => void;
-	onLoginFailed?: () => void;
-}
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -44,8 +39,13 @@ const isDocumentHidden = (): boolean => {
 	return typeof document !== 'undefined' && document.hidden;
 };
 
-const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
+interface QRLoginViewProps {
+	onLoginFailed?: () => void;
+}
+
+const QRLoginView = ({ onLoginFailed }: QRLoginViewProps) => {
 	const t = useTranslations('sso.qr');
+	const setLoginMe = useSetAtom(loginMeAtom);
 	const [ticket, setTicket] = useState<string>('');
 	const [check, setCheck] = useState<CheckTicketResponse | null>(null);
 	const [creating, setCreating] = useState(false);
@@ -103,7 +103,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 					window.setTimeout(async () => {
 						try {
 							const me = await WebAuthApi.me();
-							onLoggedIn(me);
+							setLoginMe(me);
 						} catch {
 							onLoginFailed?.();
 						}
@@ -130,7 +130,7 @@ const QRLoginView = ({ onLoggedIn, onLoginFailed }: QRLoginViewProps) => {
 		}
 
 		return () => clearTimer();
-	}, [ticket, clearTimer, onLoggedIn, onLoginFailed]);
+	}, [ticket, clearTimer, setLoginMe, onLoginFailed, t]);
 
 	useEffect(() => {
 		const onVisibilityChange = () => {

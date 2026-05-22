@@ -6,8 +6,7 @@
 const now = Date.now();
 const dayMs = 86_400_000;
 
-const futureDate = (days: number) =>
-	new Date(now + days * dayMs).toISOString();
+const futureDate = (days: number) => new Date(now + days * dayMs).toISOString();
 
 export const mockTokenList = [
 	{

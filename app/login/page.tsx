@@ -1,0 +1,48 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/5/22
+ *
+ * Standalone login page. Redirects here from protected routes
+ * when the user is not authenticated.
+ */
+import { Suspense } from 'react';
+
+import LoginPage from '@/app/login/page.client';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+import { fetchMe } from '@/services/sso/server';
+
+export const generateMetadata = async (): Promise<Metadata> => {
+	const t = await getTranslations('console');
+	return { title: t('login.metaTitle') };
+};
+
+interface PageProps {
+	searchParams: Promise<{ from?: string }>;
+}
+
+const Page = async ({ searchParams }: PageProps) => {
+	const me = await fetchMe();
+	if (me) {
+		const { from } = await searchParams;
+		if (from) {
+			return redirect(from);
+		}
+		const headersList = await headers();
+		const host = headersList.get('host') || 'localhost:3000';
+		const protocol = headersList.get('x-forwarded-proto') || 'https';
+		redirect(`${protocol}://${host}/console`);
+	}
+
+	return (
+		<Suspense>
+			<LoginPage />
+		</Suspense>
+	);
+};
+
+export default Page;

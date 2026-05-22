@@ -103,5 +103,3 @@ export const buildSsoAuthorizeDeepLink = (params: {
 	usp.set('redirect_uri', params.redirectUri);
 	return `ham://sso-authorize?${usp.toString()}`;
 };
-
-

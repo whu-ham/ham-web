@@ -1,17 +1,17 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/5/22
  *
  * Server-side data fetching for token endpoints.
- * Used by Server Components for SSR preloading.
+ * Calls the backend directly via HAM_BACKEND_ORIGIN.
  */
 import { cookies } from 'next/headers';
 
 import { LOCALE_COOKIE } from '@/i18n/config';
 import type { ListTokensResponse, TokenListItem } from '@/services/token/api';
 
-const API_BASE = `${process.env.NEXT_PUBLIC_API_BASE ?? ''}/api`;
+const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 const isDev = process.env.NODE_ENV === 'development';
 
 /**
@@ -34,7 +34,7 @@ export const fetchTokenList = async (): Promise<TokenListItem[]> => {
 			.map((c) => `${c.name}=${c.value}`)
 			.join('; ');
 
-		const res = await fetch(`${API_BASE}/tokens`, {
+		const res = await fetch(`${BACKEND_ORIGIN}/web/tokens`, {
 			headers: {
 				...(locale ? { 'Accept-Language': locale } : {}),
 				Cookie: allCookies,

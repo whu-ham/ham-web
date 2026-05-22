@@ -155,10 +155,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 
 	// Locale state
 	const [hasOverride, setHasOverride] = useAtom(localeOverrideAtom);
-	const [browserLocale, setBrowserLocale] = useState<Locale | null>(null);
-	useEffect(() => {
-		setBrowserLocale(detectBrowserLocale());
-	}, []);
+	const [browserLocale] = useState<Locale | null>(() => detectBrowserLocale());
 
 	const selectedThemeKey: ThemeKey = override ?? AUTO_THEME_KEY;
 	const selectedLocaleKey = hasOverride ? currentLocale : AUTO_LOCALE_KEY;
@@ -210,16 +207,16 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 				})}
 			>
 				<span
-					className={'material-icons-round text-[18px]! leading-none! text-gray-500'}
+					className={
+						'material-icons-round text-[18px]! leading-none! text-gray-500'
+					}
 					aria-hidden={true}
 				>
 					more_vert
 				</span>
 			</Dropdown.Trigger>
 			<Dropdown.Popover placement='bottom end'>
-				<Dropdown.Menu
-					onAction={(key) => key === 'logout' && onLogout()}
-				>
+				<Dropdown.Menu onAction={(key) => key === 'logout' && onLogout()}>
 					{compact && (
 						<>
 							{/* Theme section */}
@@ -266,49 +263,71 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 								onSelectionChange={onLocaleSelectionChange}
 							>
 								<Header>{tLang('switcher.label')}</Header>
-							<Dropdown.Item
-								key={`locale-${AUTO_LOCALE_KEY}`}
-								id={`locale-${AUTO_LOCALE_KEY}`}
-								textValue={autoLocaleLabel}
-							>
-								<Dropdown.ItemIndicator />
-								<Label className={'inline-flex items-center gap-2'}>
-									<span
-										className={
-											'material-icons-round text-[18px]! leading-none! text-gray-500'
-										}
-										aria-hidden={true}
-									>
-										{LOCALE_ICON.auto}
-									</span>
-									<span className={'leading-none'}>{autoLocaleLabel}</span>
-								</Label>
-							</Dropdown.Item>
-							{LOCALES.map((l) => (
 								<Dropdown.Item
-									key={`locale-${l}`}
-									id={`locale-${l}`}
-									textValue={LOCALE_LABELS[l]}
+									key={`locale-${AUTO_LOCALE_KEY}`}
+									id={`locale-${AUTO_LOCALE_KEY}`}
+									textValue={autoLocaleLabel}
 								>
 									<Dropdown.ItemIndicator />
 									<Label className={'inline-flex items-center gap-2'}>
 										<span
 											className={
-												'text-[14px] font-medium leading-none! text-gray-500 w-[18px] text-center shrink-0'
+												'material-icons-round text-[18px]! leading-none! text-gray-500'
 											}
 											aria-hidden={true}
 										>
-											{LOCALE_ICON[l]}
+											{LOCALE_ICON.auto}
 										</span>
-										<span className={'leading-none'}>{LOCALE_LABELS[l]}</span>
+										<span className={'leading-none'}>{autoLocaleLabel}</span>
 									</Label>
 								</Dropdown.Item>
-							))}
+								{LOCALES.map((l) => (
+									<Dropdown.Item
+										key={`locale-${l}`}
+										id={`locale-${l}`}
+										textValue={LOCALE_LABELS[l]}
+									>
+										<Dropdown.ItemIndicator />
+										<Label className={'inline-flex items-center gap-2'}>
+											<span
+												className={
+													'text-[14px] font-medium leading-none! text-gray-500 w-[18px] text-center shrink-0'
+												}
+												aria-hidden={true}
+											>
+												{LOCALE_ICON[l]}
+											</span>
+											<span className={'leading-none'}>{LOCALE_LABELS[l]}</span>
+										</Label>
+									</Dropdown.Item>
+								))}
 							</Dropdown.Section>
 
 							<Separator />
 						</>
 					)}
+
+					<Dropdown.Item
+						id='docs'
+						textValue={tCommon('docs')}
+						href='https://docs.ham.nowcent.cn'
+						target='_blank'
+						rel='noopener noreferrer'
+					>
+						<Label className={'inline-flex items-center gap-2'}>
+							<span
+								className={
+									'material-icons-round text-[18px]! leading-none! text-gray-500'
+								}
+								aria-hidden={true}
+							>
+								description
+							</span>
+							<span className={'leading-none'}>{tCommon('docs')}</span>
+						</Label>
+					</Dropdown.Item>
+
+					<Separator />
 
 					<Dropdown.Item
 						id='logout'

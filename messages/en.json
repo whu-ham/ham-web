@@ -7,7 +7,8 @@
 		"confirm": "Confirm",
 		"loading": "Loading…",
 		"logout": "Sign out",
-		"menu": "Menu"
+		"menu": "Menu",
+		"docs": "Documentation"
 	},
 	"language": {
 		"switcher": {
@@ -93,6 +94,7 @@
 		"login": {
 			"title": "Sign in to Ham to continue",
 			"subtitle": "You need to sign in before authorizing",
+			"signInBrowser": "Sign in with browser",
 			"divider": {
 				"other": "Or sign in with"
 			}
@@ -103,7 +105,8 @@
 			"expired": "QR code expired",
 			"refresh": "Click to refresh",
 			"loginSuccess": "Signed in",
-			"createFailed": "Failed to create QR code, please retry later"
+			"createFailed": "Failed to create QR code, please retry later",
+			"loginFailed": "Sign-in failed, please retry"
 		},
 		"passkey": {
 			"description": "Use the passkey you already registered in Ham to sign in without scanning.",
@@ -135,8 +138,12 @@
 		"meta": {
 			"title": "Console | Ham"
 		},
+		"header": {
+			"title": "Ham Console"
+		},
 		"login": {
 			"title": "Sign in to Ham",
+			"metaTitle": "Sign in | Ham",
 			"subtitle": "for Web",
 			"divider": {
 				"other": "Or sign in with"

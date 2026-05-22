@@ -1,36 +1,36 @@
 /**
  * @author Claude
- * @version 3.1
- * @date 2026/5/21
+ * @version 3.3
+ * @date 2026/5/22
  *
  * Client-side orchestrator for /sso-authorize.
  *
- * Responsibilities (aligned with requirements §1–§5):
+ * Server Component (page.tsx) already validates that client_id and
+ * redirect_uri are present; this component only runs when params are valid.
+ *
+ * Responsibilities:
  *   - Parse client_id / scope / redirect_uri / state from the URL once on
- *     mount. Invalid params render InvalidRequestView without any backend
- *     call.
+ *     mount and write them to the paramsAtom.
  *   - Detect desktop vs mobile.
  *     On mobile we run a staged deep-link handoff:
  *       0. Silently fire `ham://...` with a short timeout.
  *       1. If that auto-attempt times out, show DeepLinkTrying — the
  *          "Continuing in Ham…" screen with a manual "Open Ham" button.
  *       2. If the manual attempt also times out or raises synchronously,
- *          switch to DeepLinkFallback which offers App install links and
- *          (when supported) the Passkey fallback.
- *   - On desktop (or the mobile Passkey fallback branch) call /web/auth/me
- *     to detect an existing session. Authenticated → jump straight to the
- *     consent page. Unauthenticated → show the login tabs.
+ *          switch to DeepLinkFallback which offers App install links.
+ *   - On desktop call /web/auth/me to detect an existing session.
+ *     Authenticated → jump straight to the consent page.
+ *     Unauthenticated → redirect to /login with the current URL as `from`.
  *   - Shepherd the user through the consent decision and redirect them
  *     back to the third-party `redirect_uri` using
  *     `window.location.replace`.
  *
- * Visibility-aware session refresh (§4):
+ * Visibility-aware session refresh:
  *   - While the page is in the `consent` stage, a `visibilitychange`
  *     listener fires whenever the tab returns to the foreground.
  *   - On each restore it calls `WebAuthApi.refresh()` to silently renew
  *     the HttpOnly session cookie. If the session has already expired
- *     (401) the user is sent back to the login stage so they can
- *     re-authenticate without a confusing error.
+ *     (401) the user is redirected to /login to re-authenticate.
  *
  * Global state (params, stage, deepLinkUrl) lives in Jotai atoms defined
  * in ./store.ts. All child views read/write atoms directly — no prop
@@ -44,9 +44,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import ConsentView from '@/app/sso-authorize/ConsentView';
 import DeepLinkFallback from '@/app/sso-authorize/DeepLinkFallback';
 import DeepLinkTrying from '@/app/sso-authorize/DeepLinkTrying';
-import InvalidRequestView from '@/app/sso-authorize/InvalidRequestView';
-import LoginView from '@/components/LoginView';
-import PageFrame from '@/components/PageFrame';
+import PageFrame from '@/components/layout/PageFrame';
 import {
 	deepLinkUrlAtom,
 	paramsAtom,
@@ -110,26 +108,25 @@ const SsoAuthorizePage = () => {
 	// Resolve params once (client only — SSR has no window).
 	useEffect(() => {
 		const parsed = parseParams();
-		if (!parsed) {
-			setStage({ kind: 'invalid', reason: 'invalid_request' });
-			return;
+		if (parsed) {
+			setParams(parsed);
 		}
-		setParams(parsed);
-	}, [setParams, setStage]);
+	}, [setParams]);
+
+	const redirectToLogin = useCallback(() => {
+		const from = encodeURIComponent(window.location.href);
+		window.location.href = `/login?from=${from}`;
+	}, []);
 
 	const probeLoginThenConsent = useCallback(async () => {
 		try {
 			const me = await WebAuthApi.me();
 			sessionConfirmedAtRef.current = Date.now();
 			setStage({ kind: 'consent', me });
-		} catch (e) {
-			if (e instanceof ApiError && e.status === 401) {
-				setStage({ kind: 'login' });
-				return;
-			}
-			setStage({ kind: 'login' });
+		} catch {
+			redirectToLogin();
 		}
-	}, [setStage]);
+	}, [setStage, redirectToLogin]);
 
 	// Visibility-aware session refresh
 	useEffect(() => {
@@ -147,7 +144,7 @@ const SsoAuthorizePage = () => {
 				sessionConfirmedAtRef.current = Date.now();
 			} catch (e) {
 				if (e instanceof ApiError && e.status === 401) {
-					setStage({ kind: 'login' });
+					redirectToLogin();
 				}
 			}
 		};
@@ -156,7 +153,7 @@ const SsoAuthorizePage = () => {
 		return () => {
 			document.removeEventListener('visibilitychange', onVisibilityChange);
 		};
-	}, [stage.kind, setStage]);
+	}, [stage.kind, redirectToLogin]);
 
 	useEffect(() => {
 		if (!params) return;
@@ -191,14 +188,6 @@ const SsoAuthorizePage = () => {
 		return <div className={'min-h-screen'} />;
 	}
 
-	if (stage.kind === 'invalid') {
-		return (
-			<PageFrame>
-				<InvalidRequestView />
-			</PageFrame>
-		);
-	}
-
 	if (stage.kind === 'deep-link-trying') {
 		return (
 			<PageFrame>
@@ -211,18 +200,6 @@ const SsoAuthorizePage = () => {
 		return (
 			<PageFrame>
 				<DeepLinkFallback />
-			</PageFrame>
-		);
-	}
-
-	if (stage.kind === 'login') {
-		return (
-			<PageFrame>
-				<LoginView
-					onLoggedIn={(me) => setStage({ kind: 'consent', me })}
-					onLoginFailed={() => setStage({ kind: 'login' })}
-					namespace='sso'
-				/>
 			</PageFrame>
 		);
 	}

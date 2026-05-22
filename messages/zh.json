@@ -7,7 +7,8 @@
 		"confirm": "确认",
 		"loading": "加载中…",
 		"logout": "退出登录",
-		"menu": "菜单"
+		"menu": "菜单",
+		"docs": "文档"
 	},
 	"language": {
 		"switcher": {
@@ -93,6 +94,7 @@
 		"login": {
 			"title": "登录Ham以继续授权",
 			"subtitle": "授权前需要先完成Ham账号登录",
+			"signInBrowser": "使用浏览器登录",
 			"divider": {
 				"other": "或选择以下方式登录"
 			}
@@ -103,7 +105,8 @@
 			"expired": "二维码已失效",
 			"refresh": "点击刷新",
 			"loginSuccess": "登录成功",
-			"createFailed": "无法创建二维码，请稍后重试"
+			"createFailed": "无法创建二维码，请稍后重试",
+			"loginFailed": "登录失败，请重试"
 		},
 		"passkey": {
 			"description": "使用你已在Ham中注册的Passkey，无需扫码即可快速登录。",
@@ -135,8 +138,12 @@
 		"meta": {
 			"title": "控制台 | Ham"
 		},
+		"header": {
+			"title": "Ham 控制台"
+		},
 		"login": {
 			"title": "登录Ham",
+			"metaTitle": "登录 | Ham",
 			"subtitle": "for Web",
 			"divider": {
 				"other": "其它登录方式"

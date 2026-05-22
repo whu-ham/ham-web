@@ -15,13 +15,12 @@ let nextId = 4;
 const now = Date.now();
 const dayMs = 86_400_000;
 
-const futureDate = (days: number) =>
-	new Date(now + days * dayMs).toISOString();
+const futureDate = (days: number) => new Date(now + days * dayMs).toISOString();
 
 // Clone shared data so mutations don't affect the SSR module
 const mockTokens = [...mockTokenList];
 
-function generateTokenValue(): string {
+const generateTokenValue = (): string => {
 	const chars =
 		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	let result = 'ham_';
@@ -29,7 +28,7 @@ function generateTokenValue(): string {
 		result += chars.charAt(Math.floor(Math.random() * chars.length));
 	}
 	return result;
-}
+};
 
 // ---------------------------------------------------------------------------
 // Handlers
@@ -82,14 +81,14 @@ export const tokenHandlers = [
 		if (!body.name?.trim()) {
 			return HttpResponse.json(
 				{ code: '12001', message: 'name is required' },
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
 		if (mockTokens.length >= 5) {
 			return HttpResponse.json(
 				{ code: '12002', message: 'token limit reached' },
-				{ status: 403 },
+				{ status: 403 }
 			);
 		}
 
@@ -124,7 +123,7 @@ export const tokenHandlers = [
 		if (idx === -1) {
 			return HttpResponse.json(
 				{ code: '12004', message: 'token not found' },
-				{ status: 404 },
+				{ status: 404 }
 			);
 		}
 		mockTokens.splice(idx, 1);
@@ -140,7 +139,7 @@ export const tokenHandlers = [
 		if (!item) {
 			return HttpResponse.json(
 				{ code: '12004', message: 'token not found' },
-				{ status: 404 },
+				{ status: 404 }
 			);
 		}
 

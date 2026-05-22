@@ -1,11 +1,10 @@
 /**
  * @author Claude
- * @version 2.0
- * @date 2026/5/21
+ * @version 3.0
+ * @date 2026/5/22
  *
- * Generic Passkey login button extracted from app/sso-authorize/PasskeyLoginView.tsx.
- * Accepts an `onLoggedIn` callback instead of directly writing to a
- * Jotai atom, making it reusable across SSO and console pages.
+ * Generic Passkey login button for the /login page.
+ * Writes to `loginMeAtom` on success instead of calling a callback prop.
  *
  * Renders nothing when the browser does not support WebAuthn / Passkeys.
  */
@@ -13,22 +12,21 @@
 
 import { Button } from '@heroui/react';
 import toast from 'react-hot-toast';
+import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useState } from 'react';
 
-import { ApiError, MeResponse, WebAuthApi } from '@/services/sso/api';
+import { loginMeAtom } from '@/app/login/store';
+import { ApiError, WebAuthApi } from '@/services/sso/api';
 import { isPasskeySupported } from '@/services/sso/ua';
 
 interface PasskeyLoginViewProps {
-	onLoggedIn: (me: MeResponse) => void;
 	onLoginFailed?: () => void;
 }
 
-const PasskeyLoginView = ({
-	onLoggedIn,
-	onLoginFailed,
-}: PasskeyLoginViewProps) => {
+const PasskeyLoginView = ({ onLoginFailed }: PasskeyLoginViewProps) => {
 	const t = useTranslations('sso.passkey');
+	const setLoginMe = useSetAtom(loginMeAtom);
 	const [loading, setLoading] = useState(false);
 	const [supported] = useState<boolean | null>(isPasskeySupported);
 
@@ -70,7 +68,7 @@ const PasskeyLoginView = ({
 
 			try {
 				const me = await WebAuthApi.me();
-				onLoggedIn(me);
+				setLoginMe(me);
 			} catch {
 				onLoginFailed?.();
 			}
@@ -88,7 +86,7 @@ const PasskeyLoginView = ({
 		} finally {
 			setLoading(false);
 		}
-	}, [onLoggedIn, onLoginFailed, t]);
+	}, [setLoginMe, onLoginFailed, t]);
 
 	if (!supported) return null;
 

@@ -22,7 +22,6 @@ import { ApiError, TokenApi } from '@/services/token/api';
 
 const RotateTokenModal = () => {
 	const t = useTranslations('apikey');
-	const tc = useTranslations('common');
 	const [rotateModal, setRotateModal] = useAtom(rotateModalAtom);
 	const setNewlyCreated = useSetAtom(newlyCreatedTokenAtom);
 	const [ttl, setTtl] = useState(30);

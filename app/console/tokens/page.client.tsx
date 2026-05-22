@@ -26,9 +26,9 @@ import {
 	tokenListAtom,
 	tokenListLoadingAtom,
 } from '@/app/console/tokens/store';
-import LanguageSwitcher from '@/components/LanguageSwitcher';
-import ThemeSwitcher from '@/components/ThemeSwitcher';
-import UserMenu from '@/components/UserMenu';
+import LanguageSwitcher from '@/components/preferences/LanguageSwitcher';
+import ThemeSwitcher from '@/components/preferences/ThemeSwitcher';
+import UserMenu from '@/components/preferences/UserMenu';
 import type { TokenListItem } from '@/services/token/api';
 import { TokenApi } from '@/services/token/api';
 import { WebAuthApi } from '@/services/sso/api';
@@ -104,7 +104,10 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			router.push('/console');
+			const from = encodeURIComponent(
+				`${window.location.origin}/console/tokens`
+			);
+			router.push(`/login?from=${from}`);
 		}
 	}, [router]);
 
@@ -130,9 +133,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 							aria-label={t('backToConsole')}
 						>
 							<span
-								className={
-									'material-icons-round text-[18px]! leading-none!'
-								}
+								className={'material-icons-round text-[18px]! leading-none!'}
 								aria-hidden={true}
 							>
 								arrow_back
@@ -172,9 +173,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 							onPress={() => setCreateModalVisible(true)}
 						>
 							<span
-								className={
-									'material-icons-round text-[18px]! leading-none!'
-								}
+								className={'material-icons-round text-[18px]! leading-none!'}
 								aria-hidden={true}
 							>
 								add
@@ -191,11 +190,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 				)}
 
 				{!loading && tokens.length === 0 && (
-					<div
-						className={
-							'flex flex-col items-center gap-2 py-8 text-center'
-						}
-					>
+					<div className={'flex flex-col items-center gap-2 py-8 text-center'}>
 						<span
 							className={
 								'material-icons-round text-muted text-[48px]! leading-none!'
@@ -207,9 +202,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 						<h2 className={'text-base font-medium text-foreground'}>
 							{t('empty.title')}
 						</h2>
-						<p className={'text-sm text-muted'}>
-							{t('empty.description')}
-						</p>
+						<p className={'text-sm text-muted'}>{t('empty.description')}</p>
 					</div>
 				)}
 

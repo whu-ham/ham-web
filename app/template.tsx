@@ -3,7 +3,7 @@
  * which uses key={pathname} to force re-mount and replay the
  * fade-in animation on every navigation.
  */
-import { PageTransition } from '@/components/PageTransition';
+import { PageTransition } from '@/components/layout/PageTransition';
 
 export default function Template({ children }: { children: React.ReactNode }) {
 	return <PageTransition>{children}</PageTransition>;

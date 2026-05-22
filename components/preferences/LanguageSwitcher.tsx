@@ -9,7 +9,7 @@ import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import type { Selection } from '@heroui/react';
 import { useAtom } from 'jotai';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 
 import enMessages from '@/messages/en.json';
 import jaMessages from '@/messages/ja.json';
@@ -109,10 +109,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 	const [hasOverride, setHasOverride] = useAtom(localeOverrideAtom);
 
 	// Detect browser locale on client only to avoid hydration mismatch
-	const [browserLocale, setBrowserLocale] = useState<Locale | null>(null);
-	useEffect(() => {
-		setBrowserLocale(detectBrowserLocale());
-	}, []);
+	const [browserLocale] = useState<Locale | null>(() => detectBrowserLocale());
 
 	const selectedKey: MenuKey = hasOverride ? currentLocale : AUTO_KEY;
 

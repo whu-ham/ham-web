@@ -109,9 +109,9 @@ const Body = ({
 			 * in place after hydration without waiting for useEffect.
 			 */}
 			<script
-					suppressHydrationWarning
-					dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
-				/>
+				suppressHydrationWarning
+				dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+			/>
 			<NextIntlClientProvider locale={locale} messages={messages}>
 				<Providers>{children}</Providers>
 			</NextIntlClientProvider>

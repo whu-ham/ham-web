@@ -1,42 +1,42 @@
 /**
  * @author Claude
- * @version 2.0
- * @date 2026/5/21
+ * @version 3.0
+ * @date 2026/5/22
  *
- * Generic combined login surface extracted from app/sso-authorize/LoginView.tsx.
- * Accepts `onLoggedIn` callback and `namespace` i18n prop so it can be
- * reused across SSO and console pages.
- *
+ * Combined login surface for the /login page.
  * Shows the QR code as the primary login method, with a Passkey button
  * below as a secondary option (hidden automatically when unsupported).
+ *
+ * Reads mobile / deep-link state from Jotai atoms — no callback props
+ * for login success or app launching.
  */
 'use client';
 
 import Image from 'next/image';
 import { Button, Separator } from '@heroui/react';
+import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
+import { useCallback } from 'react';
 
 import icon from '@/public/icon-1024.png';
-import PasskeyLoginView from '@/components/PasskeyLoginView';
-import QRLoginView from '@/components/QRLoginView';
-import { MeResponse } from '@/services/sso/api';
+import PasskeyLoginView from '@/app/login/PasskeyLoginView';
+import QRLoginView from '@/app/login/QRLoginView';
+import { deepLinkUrlAtom, mobileAtom } from '@/app/login/store';
+import { tryLaunchDeepLink } from '@/services/sso/deepLink';
 
 interface LoginViewProps {
-	onLoggedIn: (me: MeResponse) => void;
-	onLoginFailed?: () => void;
 	/** i18n namespace for title/subtitle, default 'sso' */
 	namespace?: string;
-	/** Mobile: open native app to complete login. When provided, shows "Open App" button */
-	onOpenApp?: () => void;
 }
 
-const LoginView = ({
-	onLoggedIn,
-	onLoginFailed,
-	namespace = 'sso',
-	onOpenApp,
-}: LoginViewProps) => {
+const LoginView = ({ namespace = 'sso' }: LoginViewProps) => {
 	const t = useTranslations(namespace);
+	const mobile = useAtomValue(mobileAtom);
+	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
+
+	const handleOpenApp = useCallback(() => {
+		tryLaunchDeepLink({ url: deepLinkUrl });
+	}, [deepLinkUrl]);
 
 	return (
 		<>
@@ -55,7 +55,7 @@ const LoginView = ({
 			</header>
 
 			<section className={'flex flex-col items-center gap-6'}>
-				<QRLoginView onLoggedIn={onLoggedIn} onLoginFailed={onLoginFailed} />
+				<QRLoginView />
 				<div className={'w-full flex items-center justify-center gap-4'}>
 					<Separator className={'w-16 shrink'} />
 					<span className={'shrink-0 text-sm text-muted'}>
@@ -63,11 +63,8 @@ const LoginView = ({
 					</span>
 					<Separator className={'w-16 shrink'} />
 				</div>
-				<PasskeyLoginView
-					onLoggedIn={onLoggedIn}
-					onLoginFailed={onLoginFailed}
-				/>
-				{onOpenApp && (
+				<PasskeyLoginView />
+				{mobile && (
 					<>
 						<div className={'w-full flex items-center justify-center gap-4'}>
 							<Separator className={'w-16 shrink'} />
@@ -79,7 +76,7 @@ const LoginView = ({
 						<Button
 							variant={'primary'}
 							className={'w-full'}
-							onPress={onOpenApp}
+							onPress={handleOpenApp}
 						>
 							<span
 								className={'material-icons-round text-[18px]! leading-none!'}
