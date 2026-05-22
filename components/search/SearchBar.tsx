@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Separator } from '@heroui/react';
-import { SearchBarItem } from '@/components/type';
+import { SearchBarItem } from '@/components/search/types';
 import classNames from 'classnames';
 
 /**

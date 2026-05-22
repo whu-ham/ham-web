@@ -11,7 +11,7 @@
 
 export type DeviceKind = 'ios' | 'android' | 'desktop';
 
-export function detectDeviceKind(userAgent: string): DeviceKind {
+export const detectDeviceKind = (userAgent: string): DeviceKind => {
 	const ua = userAgent.toLowerCase();
 	if (/iphone|ipad|ipod/.test(ua)) {
 		return 'ios';
@@ -29,12 +29,12 @@ export function detectDeviceKind(userAgent: string): DeviceKind {
 		return 'android';
 	}
 	return 'desktop';
-}
+};
 
-export function isMobile(userAgent: string): boolean {
+export const isMobile = (userAgent: string): boolean => {
 	const kind = detectDeviceKind(userAgent);
 	return kind === 'ios' || kind === 'android';
-}
+};
 
 /**
  * Best effort "App download" URL per platform. The real store URLs should
@@ -42,14 +42,14 @@ export function isMobile(userAgent: string): boolean {
  * product-approved defaults keeps the fallback page self-contained until
  * that config pipeline lands.
  */
-export function getAppStoreURL(kind: DeviceKind): string {
+export const getAppStoreURL = (kind: DeviceKind): string => {
 	switch (kind) {
 		case 'ios':
 			return 'https://apps.apple.com/cn/app/ham/id1577896044';
 		default:
 			return 'https://whu-ham.github.io/download/';
 	}
-}
+};
 
 /**
  * Quick feature-detect for WebAuthn / Passkey support. Keeps the check
@@ -57,11 +57,11 @@ export function getAppStoreURL(kind: DeviceKind): string {
  * we don't dangle a "Use Passkey" button on browsers that can't honor
  * it.
  */
-export function isPasskeySupported(): boolean {
+export const isPasskeySupported = (): boolean => {
 	if (typeof window === 'undefined') return false;
 	return (
 		typeof window.PublicKeyCredential !== 'undefined' &&
 		typeof navigator !== 'undefined' &&
 		typeof navigator.credentials !== 'undefined'
 	);
-}
+};

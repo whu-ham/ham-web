@@ -5,7 +5,10 @@
 		"retry": "重试",
 		"cancel": "取消",
 		"confirm": "确认",
-		"loading": "加载中…"
+		"loading": "加载中…",
+		"logout": "退出登录",
+		"menu": "菜单",
+		"docs": "文档"
 	},
 	"language": {
 		"switcher": {
@@ -49,13 +52,13 @@
 			"title": "工具台 | Ham"
 		},
 		"greeting": {
-			"lateNight": "还不睡吗",
-			"dawn": "清晨好",
-			"morning": "早上好",
-			"noon": "中午好",
-			"afternoon": "下午好",
-			"evening": "晚上好",
-			"default": "你好"
+			"lateNight": "还不睡吗，{name}",
+			"dawn": "清晨好，{name}",
+			"morning": "早上好，{name}",
+			"noon": "中午好，{name}",
+			"afternoon": "下午好，{name}",
+			"evening": "晚上好，{name}",
+			"default": "你好，{name}"
 		},
 		"logout": "退出登录",
 		"workbench": "工具台",
@@ -91,6 +94,7 @@
 		"login": {
 			"title": "登录Ham以继续授权",
 			"subtitle": "授权前需要先完成Ham账号登录",
+			"signInBrowser": "使用浏览器登录",
 			"divider": {
 				"other": "或选择以下方式登录"
 			}
@@ -101,7 +105,8 @@
 			"expired": "二维码已失效",
 			"refresh": "点击刷新",
 			"loginSuccess": "登录成功",
-			"createFailed": "无法创建二维码，请稍后重试"
+			"createFailed": "无法创建二维码，请稍后重试",
+			"loginFailed": "登录失败，请重试"
 		},
 		"passkey": {
 			"description": "使用你已在Ham中注册的Passkey，无需扫码即可快速登录。",
@@ -127,6 +132,110 @@
 			"authorized": "授权成功",
 			"errorTitle": "授权失败",
 			"backToThirdParty": "返回第三方应用"
+		}
+	},
+	"console": {
+		"meta": {
+			"title": "控制台 | Ham"
+		},
+		"header": {
+			"title": "Ham 控制台"
+		},
+		"login": {
+			"title": "登录Ham",
+			"metaTitle": "登录 | Ham",
+			"subtitle": "for Web",
+			"divider": {
+				"other": "其它登录方式"
+			},
+			"openApp": "跳转到APP登录",
+			"appCallbackFailed": "App登录失败，请重试",
+			"appCallbackProcessing": "正在完成登录…"
+		},
+		"greeting": {
+			"lateNight": "还不睡吗，{name}",
+			"dawn": "清晨好，{name}",
+			"morning": "早上好，{name}",
+			"noon": "中午好，{name}",
+			"afternoon": "下午好，{name}",
+			"evening": "晚上好，{name}",
+			"default": "你好，{name}"
+		},
+		"logout": "退出登录",
+		"card": {
+			"apikey": {
+				"title": "API Key 管理",
+				"subtitle": "创建与管理你的 API 密钥"
+			}
+		}
+	},
+	"apikey": {
+		"meta": {
+			"title": "API Key 管理 | Ham"
+		},
+		"title": "API Keys",
+		"backToConsole": "返回控制台",
+		"create": "创建 Key",
+		"empty": {
+			"title": "暂无 API Key",
+			"description": "点击上方按钮创建"
+		},
+		"scope": {
+			"mcp": "完整 MCP 权限（读取 + 写入）",
+			"mcp:read": "仅 MCP 读取权限",
+			"mcp:write": "仅 MCP 写入权限"
+		},
+		"scopeGroup": {
+			"mcp": "MCP"
+		},
+		"card": {
+			"scopes": "权限",
+			"createdAt": "创建于",
+			"expiresAt": "过期于",
+			"lastUsedAt": "最后使用",
+			"neverUsed": "从未使用",
+			"rotate": "轮换",
+			"revoke": "吊销",
+			"revokeConfirm": "确定要吊销此 Key 吗？此操作不可恢复。"
+		},
+		"createModal": {
+			"title": "创建 API Key",
+			"name": "名称",
+			"namePlaceholder": "例如：Cursor IDE",
+			"scopes": "权限范围",
+			"ttl": "有效期（天）",
+			"submit": "创建",
+			"success": "API Key 创建成功"
+		},
+		"rotateModal": {
+			"title": "轮换 API Key",
+			"warning": "旧 Key 将立即失效！",
+			"ttl": "新有效期（天）",
+			"submit": "轮换",
+			"success": "API Key 轮换成功"
+		},
+		"tokenReveal": {
+			"title": "你的 API Key",
+			"label": "API Key",
+			"warning": "请立即复制，此 Key 不会再显示。",
+			"copy": "复制",
+			"copied": "已复制",
+			"close": "关闭",
+			"copyFailed": "复制到剪贴板失败"
+		},
+		"validation": {
+			"nameRequired": "名称不能为空",
+			"nameTooLong": "名称不能超过128个字符",
+			"scopesRequired": "请至少选择一个权限",
+			"ttlRange": "有效期需在1-30天之间",
+			"tokenLimit": "已达到最大数量限制"
+		},
+		"error": {
+			"fetchFailed": "获取 API Key 列表失败",
+			"createFailed": "创建失败",
+			"rotateFailed": "轮换失败",
+			"revokeFailed": "吊销失败",
+			"retry": "重试"
 		}
 	}
 }

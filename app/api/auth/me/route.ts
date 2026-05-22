@@ -8,8 +8,8 @@
  */
 import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
-export async function GET(req: Request): Promise<Response> {
+export const GET = async (req: Request): Promise<Response> => {
 	return proxyToBackend(req, '/web/auth/me');
-}
+};
 
 export const OPTIONS = handlePreflight;

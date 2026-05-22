@@ -1,20 +1,13 @@
-'use client';
-
 /**
  * @author Claude
- * @version 2.8
- * @date 2026/4/21 19:53:00
+ * @version 3.0
+ * @date 2026/5/22
  *
- * Consent page rendered once the user is signed into HAM Web. Mirrors
- * the layout of the native App consent dialog: third-party app header,
- * scope list with descriptions, current user with a "switch account"
- * link, and the Authorize / Reject actions.
- *
- * When `can_auto_authorize` is true a notice is shown informing the user
- * that they have previously authorized this app.
- *
- * Reads `paramsAtom` and `stageAtom` from jotai — no props needed.
+ * Consent page rendered once the user is signed into HAM Web.
+ * Rendering-only — all logic lives in useConsent.
  */
+
+'use client';
 
 import {
 	Avatar,
@@ -24,110 +17,23 @@ import {
 	Link,
 	Spinner,
 } from '@heroui/react';
-import { useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
-import { ApiError, ConsentInfoResponse, WebAuthApi } from '@/services/sso/api';
-import { paramsAtom, stageAtom } from '@/app/sso-authorize/store';
+import { useConsent } from '@/app/sso-authorize/useConsent';
 
 const ConsentView = () => {
-	const params = useAtomValue(paramsAtom)!;
-	const stage = useAtomValue(stageAtom);
-	const setStage = useSetAtom(stageAtom);
-	const me = stage.kind === 'consent' ? stage.me : null;
 	const t = useTranslations('sso.consent');
-	const [info, setInfo] = useState<ConsentInfoResponse | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const [submitting, setSubmitting] = useState(false);
-	// Tracks which scopes the user has selected.
-	const [checkedScopes, setCheckedScopes] = useState<string[]>([]);
-
-	// Initialise checkedScopes whenever info loads.
-	useEffect(() => {
-		if (!info) return;
-		setCheckedScopes(info.scopes.map((s) => s.scope));
-	}, [info]);
-
-	const onSwitchAccount = useCallback(async () => {
-		try {
-			await WebAuthApi.logout();
-		} finally {
-			setStage({ kind: 'login' });
-		}
-	}, [setStage]);
-
-	const bail = useCallback(
-		(oauthError: 'access_denied' | 'server_error') => {
-			try {
-				const url = new URL(params.redirectUri);
-				url.searchParams.set('error', oauthError);
-				if (params.state) {
-					url.searchParams.set('state', params.state);
-				}
-				window.location.replace(url.toString());
-			} catch {
-				setError(
-					oauthError === 'server_error' ? t('serverError') : t('accessDenied')
-				);
-			}
-		},
-		[params.redirectUri, params.state, t]
-	);
-
-	const confirm = useCallback(
-		async (nonce: string) => {
-			setSubmitting(true);
-			try {
-				const resp = await WebAuthApi.consentConfirm({
-					client_id: params.appId,
-					scope: checkedScopes,
-					redirect_uri: params.redirectUri,
-					state: params.state,
-					nonce,
-				});
-				window.location.replace(resp.redirect_url);
-			} catch (e) {
-				if (e instanceof ApiError) {
-					toast.error(e.message || t('submitFailed'));
-				} else {
-					toast.error(t('submitFailed'));
-				}
-				bail('server_error');
-			} finally {
-				setSubmitting(false);
-			}
-		},
-		[bail, checkedScopes, params.appId, params.redirectUri, params.state, t]
-	);
-
-	// Load consent info on mount. The backend issues a fresh nonce each
-	// time, so we always fetch before mounting the action buttons.
-	useEffect(() => {
-		let cancelled = false;
-		WebAuthApi.consentInfo({
-			client_id: params.appId,
-			scope: params.scope,
-			redirect_uri: params.redirectUri,
-			state: params.state,
-		})
-			.then((resp) => {
-				if (cancelled) return;
-				setInfo(resp);
-			})
-			.catch((e: unknown) => {
-				if (cancelled) return;
-				if (e instanceof ApiError) {
-					setError(e.message || t('fetchFailed'));
-				} else {
-					setError(t('fetchFailed'));
-				}
-			});
-		return () => {
-			cancelled = true;
-		};
-	}, [params.appId, params.redirectUri, params.scope, params.state, t]);
+	const {
+		me,
+		info,
+		error,
+		submitting,
+		checkedScopes,
+		setCheckedScopes,
+		onSwitchAccount,
+		bail,
+		confirm,
+	} = useConsent();
 
 	if (error) {
 		return (
@@ -195,7 +101,7 @@ const ConsentView = () => {
 				>
 					<span
 						className={
-							'material-icons-round !text-[16px] !leading-none shrink-0'
+							'material-icons-round text-[16px]! leading-none! shrink-0'
 						}
 						aria-hidden={true}
 					>
@@ -210,9 +116,6 @@ const ConsentView = () => {
 				<CheckboxGroup
 					value={checkedScopes}
 					onChange={(v) => {
-						// Required scopes must remain selected regardless of user
-						// interaction. Merge the incoming selection with the
-						// required set so the UI never drops them.
 						const next = new Set(v as string[]);
 						info.scopes.forEach((s) => {
 							if (s.required) next.add(s.scope);
@@ -272,12 +175,6 @@ const ConsentView = () => {
 							{(me.nickname ?? me.user_id ?? '?').slice(0, 1)}
 						</Avatar.Fallback>
 					</Avatar>
-					{/*
-					 * `min-w-0` on both the row and the column is what actually
-					 * lets `truncate` work inside a flex container — without it
-					 * the child's intrinsic content width wins and overflows the
-					 * viewport on narrow phones.
-					 */}
 					<div className={'flex flex-col items-start min-w-0'}>
 						<span className={'text-sm font-semibold truncate text-foreground'}>
 							{me.nickname ?? me.user_id}
@@ -290,13 +187,6 @@ const ConsentView = () => {
 						</Link>
 					</div>
 				</div>
-				{/*
-				 * On mobile the two action buttons stack below the user
-				 * row and each take half the width so they read as a
-				 * clear pair. On ≥sm the footer becomes a single row
-				 * with the user on the left and the buttons on the right
-				 * (original desktop layout).
-				 */}
 				<div
 					className={
 						'flex items-center gap-2 w-full sm:w-auto sm:shrink-0 [&>*]:flex-1 sm:[&>*]:flex-none'

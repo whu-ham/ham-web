@@ -1,8 +1,10 @@
 /**
  * @author orangeboy
- * @version 1.0
+ * @version 1.2
  * @date 2026/5/5 17:07:13
  */
-const Page = () => <></>;
+import { redirect } from 'next/navigation';
+
+const Page = () => redirect('/console');
 
 export default Page;

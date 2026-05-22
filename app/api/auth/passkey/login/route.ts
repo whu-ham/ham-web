@@ -8,8 +8,8 @@
  */
 import { handlePreflight, proxyToBackend } from '@/app/api/_proxy';
 
-export async function POST(req: Request): Promise<Response> {
+export const POST = async (req: Request): Promise<Response> => {
 	return proxyToBackend(req, '/web/auth/passkey/login');
-}
+};
 
 export const OPTIONS = handlePreflight;

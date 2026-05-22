@@ -39,9 +39,9 @@ export interface DeepLinkOptions {
  * so the orchestrator can short-circuit the wait and show the
  * "app-not-installed" UI immediately.
  */
-export function tryLaunchDeepLink(
+export const tryLaunchDeepLink = (
 	opts: DeepLinkOptions
-): Promise<DeepLinkResult> {
+): Promise<DeepLinkResult> => {
 	const timeoutMs = opts.timeoutMs ?? 2500;
 
 	return new Promise<DeepLinkResult>((resolve) => {
@@ -78,7 +78,7 @@ export function tryLaunchDeepLink(
 			}
 		}
 	});
-}
+};
 
 /**
  * buildSsoAuthorizeDeepLink constructs the `ham://sso-authorize?...` URL
@@ -86,12 +86,12 @@ export function tryLaunchDeepLink(
  * the third-party web app attached on the original `/sso-authorize` URL so
  * the App can resume the OAuth 2.0 flow unchanged.
  */
-export function buildSsoAuthorizeDeepLink(params: {
+export const buildSsoAuthorizeDeepLink = (params: {
 	appId: string;
 	scope: string[];
 	state: string;
 	redirectUri: string;
-}): string {
+}): string => {
 	const usp = new URLSearchParams();
 	usp.set('client_id', params.appId);
 	if (params.scope.length > 0) {
@@ -102,4 +102,4 @@ export function buildSsoAuthorizeDeepLink(params: {
 	}
 	usp.set('redirect_uri', params.redirectUri);
 	return `ham://sso-authorize?${usp.toString()}`;
-}
+};

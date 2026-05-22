@@ -13,6 +13,7 @@ export default defineConfig([
 	reactHooks.configs.flat.recommended,
 	{
 		rules: {
+			'@typescript-eslint/no-unused-vars': 'error',
 			'react/self-closing-comp': [
 				'error',
 				{
@@ -21,6 +22,7 @@ export default defineConfig([
 				},
 			],
 			'no-console': ['error', { allow: ['warn', 'error'] }],
+			'func-style': ['error', 'expression', { allowArrowFunctions: true }],
 		},
 	},
 	globalIgnores(['out/*', '.next/*', '.*/']),

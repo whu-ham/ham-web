@@ -1,20 +1,22 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/4/21 14:51:13
  *
  * Jotai atoms for the /sso-authorize page.
  *
  * - `paramsAtom`     — parsed URL params (null until client mount).
- * - `stageAtom`      — current page stage (loading → login/consent/etc.).
+ * - `stageAtom`      — current page stage (loading → consent/etc.).
  * - `deepLinkUrlAtom`— derived `ham://` deep-link URL (empty string when
  *                      params are not yet available).
+ * - `deviceKindAtom` — detected device kind (computed once on mount).
  */
 
 import { atom } from 'jotai';
 
 import { MeResponse } from '@/services/sso/api';
 import { buildSsoAuthorizeDeepLink } from '@/services/sso/deepLink';
+import { DeviceKind } from '@/services/sso/ua';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -29,10 +31,8 @@ export interface SsoAuthorizeParams {
 
 export type Stage =
 	| { kind: 'loading' }
-	| { kind: 'invalid'; reason: string }
 	| { kind: 'deep-link-trying' }
 	| { kind: 'deep-link-fallback' }
-	| { kind: 'login' }
 	| { kind: 'consent'; me: MeResponse };
 
 // ---------------------------------------------------------------------------
@@ -42,6 +42,9 @@ export type Stage =
 export const paramsAtom = atom<SsoAuthorizeParams | null>(null);
 
 export const stageAtom = atom<Stage>({ kind: 'loading' });
+
+/** M7: Device kind computed once and shared across components */
+export const deviceKindAtom = atom<DeviceKind>('desktop');
 
 /** Derived: builds the `ham://` deep-link URL from current params. */
 export const deepLinkUrlAtom = atom<string>((get) => {

@@ -5,7 +5,10 @@
 		"retry": "Retry",
 		"cancel": "Cancel",
 		"confirm": "Confirm",
-		"loading": "Loading…"
+		"loading": "Loading…",
+		"logout": "Sign out",
+		"menu": "Menu",
+		"docs": "Documentation"
 	},
 	"language": {
 		"switcher": {
@@ -49,13 +52,13 @@
 			"title": "Workbench | Ham"
 		},
 		"greeting": {
-			"lateNight": "Still up?",
-			"dawn": "Early bird",
-			"morning": "Good morning",
-			"noon": "Good noon",
-			"afternoon": "Good afternoon",
-			"evening": "Good evening",
-			"default": "Hello"
+			"lateNight": "Still up, {name}?",
+			"dawn": "Early bird, {name}",
+			"morning": "Good morning, {name}",
+			"noon": "Good noon, {name}",
+			"afternoon": "Good afternoon, {name}",
+			"evening": "Good evening, {name}",
+			"default": "Hello, {name}"
 		},
 		"logout": "Sign out",
 		"workbench": "Workbench",
@@ -91,6 +94,7 @@
 		"login": {
 			"title": "Sign in to Ham to continue",
 			"subtitle": "You need to sign in before authorizing",
+			"signInBrowser": "Sign in with browser",
 			"divider": {
 				"other": "Or sign in with"
 			}
@@ -101,7 +105,8 @@
 			"expired": "QR code expired",
 			"refresh": "Click to refresh",
 			"loginSuccess": "Signed in",
-			"createFailed": "Failed to create QR code, please retry later"
+			"createFailed": "Failed to create QR code, please retry later",
+			"loginFailed": "Sign-in failed, please retry"
 		},
 		"passkey": {
 			"description": "Use the passkey you already registered in Ham to sign in without scanning.",
@@ -127,6 +132,110 @@
 			"authorized": "Authorization successful",
 			"errorTitle": "Authorization failed",
 			"backToThirdParty": "Back to third-party app"
+		}
+	},
+	"console": {
+		"meta": {
+			"title": "Console | Ham"
+		},
+		"header": {
+			"title": "Ham Console"
+		},
+		"login": {
+			"title": "Sign in to Ham",
+			"metaTitle": "Sign in | Ham",
+			"subtitle": "for Web",
+			"divider": {
+				"other": "Or sign in with"
+			},
+			"openApp": "Sign in with App",
+			"appCallbackFailed": "App sign-in failed, please retry",
+			"appCallbackProcessing": "Completing sign-in…"
+		},
+		"greeting": {
+			"lateNight": "Still up, {name}?",
+			"dawn": "Early bird, {name}",
+			"morning": "Good morning, {name}",
+			"noon": "Good noon, {name}",
+			"afternoon": "Good afternoon, {name}",
+			"evening": "Good evening, {name}",
+			"default": "Hello, {name}"
+		},
+		"logout": "Sign out",
+		"card": {
+			"apikey": {
+				"title": "API Key Management",
+				"subtitle": "Create and manage your API keys"
+			}
+		}
+	},
+	"apikey": {
+		"meta": {
+			"title": "API Key Management | Ham"
+		},
+		"title": "API Keys",
+		"backToConsole": "Back to Console",
+		"create": "Create Key",
+		"empty": {
+			"title": "No API Keys yet",
+			"description": "Click the button above to create one"
+		},
+		"scope": {
+			"mcp": "Full MCP access (read + write)",
+			"mcp:read": "MCP read-only access",
+			"mcp:write": "MCP write-only access"
+		},
+		"scopeGroup": {
+			"mcp": "MCP"
+		},
+		"card": {
+			"scopes": "Scopes",
+			"createdAt": "Created",
+			"expiresAt": "Expires",
+			"lastUsedAt": "Last used",
+			"neverUsed": "Never used",
+			"rotate": "Rotate",
+			"revoke": "Revoke",
+			"revokeConfirm": "Are you sure you want to revoke this key? This action cannot be undone."
+		},
+		"createModal": {
+			"title": "Create API Key",
+			"name": "Name",
+			"namePlaceholder": "e.g. Cursor IDE",
+			"scopes": "Scopes",
+			"ttl": "TTL (days)",
+			"submit": "Create",
+			"success": "API Key created successfully"
+		},
+		"rotateModal": {
+			"title": "Rotate API Key",
+			"warning": "The old key will be immediately revoked!",
+			"ttl": "New TTL (days)",
+			"submit": "Rotate",
+			"success": "API Key rotated successfully"
+		},
+		"tokenReveal": {
+			"title": "Your API Key",
+			"label": "API Key",
+			"warning": "Copy this key now. It will not be shown again.",
+			"copy": "Copy",
+			"copied": "Copied",
+			"close": "Close",
+			"copyFailed": "Failed to copy to clipboard"
+		},
+		"validation": {
+			"nameRequired": "Name is required",
+			"nameTooLong": "Name must be 128 characters or less",
+			"scopesRequired": "At least one scope is required",
+			"ttlRange": "TTL must be between 1 and 30 days",
+			"tokenLimit": "Maximum token limit reached"
+		},
+		"error": {
+			"fetchFailed": "Failed to fetch API keys",
+			"createFailed": "Failed to create",
+			"rotateFailed": "Failed to rotate",
+			"revokeFailed": "Failed to revoke",
+			"retry": "Retry"
 		}
 	}
 }

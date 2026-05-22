@@ -10,7 +10,7 @@ User documentation: [https://orangeboychen.github.io/whu-ham/](https://orangeboy
 
 - **Framework**: [Next.js](https://nextjs.org/) 16 (App Router) + React 19 + TypeScript
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) + [HeroUI v3](https://heroui.com/)
-- **State**: [Jotai](https://jotai.org/) + [React Redux](https://react-redux.js.org/)
+- **State**: [Jotai](https://jotai.org/)
 - **i18n**: [`next-intl`](https://next-intl.dev/) with catalogues under [`messages/`](./messages) (`zh` / `en` / `ja`)
 - **Tooling**: ESLint v9 (flat config), Prettier, pnpm
 
@@ -41,22 +41,37 @@ Dev server runs at [http://localhost:3000](http://localhost:3000).
 ## Repository Layout
 
 ```
-app/              # Next.js App Router entry, pages, components, services
-  component/      # Shared UI components (theme, language switcher, header bar, …)
-  service/        # API / service layer
-  sso-authorize/  # SSO consent + QR / Passkey login surface
-  login/          # Standalone login page
-  course-grade-stat/
-i18n/             # next-intl runtime config
-messages/         # Locale message catalogues (en / zh / ja)
-public/           # Static assets
-middleware.ts     # Locale + auth routing middleware
+app/                  # Next.js App Router pages & components
+  lib/auth.ts         # Server-side auth helpers (fetchMe, requireAuth, processAppCallback)
+  console/            # Authenticated console (API key management)
+    tokens/           # Token CRUD pages
+  login/              # Standalone login page
+    callback/         # OAuth2 app-callback (code → session)
+  sso-authorize/      # SSO consent + deep-link handoff
+  api/                # BFF route handlers (proxy to backend)
+components/           # Shared UI components (theme, language switcher, header bar, …)
+hooks/                # Shared React hooks
+services/             # Service layer
+  shared.ts           # Client-side HTTP infrastructure (ApiError, request<T>)
+  server-fetch.ts     # Server-side fetch (cookie forwarding, Set-Cookie relay)
+  redirect.ts         # Safe redirect URL validation
+  sso/                # SSO client API (WebAuthApi), deep-link builder, UA detection
+  token/              # Token client API & server-side data fetching
+store/                # Global Jotai atoms
+i18n/                 # next-intl runtime config
+messages/             # Locale message catalogues (en / zh / ja)
+mocks/                # MSW mock handlers & data (dev only)
+public/               # Static assets
+middleware.ts         # Locale + auth routing middleware
 ```
 
 ## Features
 
 - [x] SSO authorisation flow (consent view, QR login, deep-link to native app)
 - [x] Passkey (WebAuthn) login
+- [x] Mobile app login (deep-link → OAuth2 code callback)
+- [x] API key management (create, rotate, revoke)
+- [x] SSR auth guard (`requireAuth`) with redirect-back support
 - [x] Dark / light / system theme switcher
 - [x] Multi-language UI (`zh` / `en` / `ja`) with cookie persistence
 - [x] Mobile H5 fallback (install prompt + Passkey option)

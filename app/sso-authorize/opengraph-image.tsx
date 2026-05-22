@@ -46,6 +46,7 @@ export default async function OgImage() {
 				{/* App icon */}
 				<img
 					src={ICON_DATA_URL}
+					alt={alt}
 					width={180}
 					height={180}
 					style={{

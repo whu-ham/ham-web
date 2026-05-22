@@ -7,6 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"cf:build": "opennextjs-cloudflare build",
 		"cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
 		"cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -52,12 +54,29 @@
 		"eslint-plugin-react-hooks": "^7.0.1",
 		"globals": "^17.1.0",
 		"jiti": "^2.6.1",
+		"msw": "^2.14.6",
 		"postcss": "^8",
 		"prettier": "3.4.2",
 		"sass": "^1.83.4",
 		"tailwindcss": "^4.2.2",
 		"typescript": "^5",
 		"typescript-eslint": "^8.53.1",
+		"vitest": "^4.1.7",
 		"wrangler": "^4.84.1"
+	},
+	"msw": {
+		"workerDirectory": [
+			"public"
+		]
+	},
+	"pnpm": {
+		"onlyBuiltDependencies": [
+			"@parcel/watcher",
+			"@swc/core",
+			"esbuild",
+			"msw",
+			"sharp",
+			"workerd"
+		]
 	}
 }
