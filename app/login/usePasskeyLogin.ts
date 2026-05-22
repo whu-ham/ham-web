@@ -12,7 +12,7 @@
 import toast from 'react-hot-toast';
 import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { loginMeAtom } from '@/app/login/store';
 import {
@@ -35,6 +35,14 @@ export const usePasskeyLogin = (
 	const setLoginMe = useSetAtom(loginMeAtom);
 	const [loading, setLoading] = useState(false);
 	const [supported] = useState<boolean | null>(isPasskeySupported);
+	const cancelledRef = useRef(false);
+
+	// s5: Clean up on unmount
+	useEffect(() => {
+		return () => {
+			cancelledRef.current = true;
+		};
+	}, []);
 
 	const login = useCallback(async () => {
 		setLoading(true);
@@ -74,6 +82,7 @@ export const usePasskeyLogin = (
 
 			try {
 				const me = await WebAuthApi.me();
+				if (cancelledRef.current) return;
 				setLoginMe(me);
 			} catch {
 				onLoginFailed?.();
@@ -90,7 +99,9 @@ export const usePasskeyLogin = (
 				toast.error(t('loginFailed'));
 			}
 		} finally {
-			setLoading(false);
+			if (!cancelledRef.current) {
+				setLoading(false);
+			}
 		}
 	}, [setLoginMe, onLoginFailed, t]);
 

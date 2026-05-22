@@ -20,15 +20,19 @@ export const useCopyToken = (token: string | undefined) => {
 			await navigator.clipboard.writeText(token);
 			setCopied(true);
 		} catch {
-			const textarea = document.createElement('textarea');
-			textarea.value = token;
-			textarea.style.position = 'fixed';
-			textarea.style.opacity = '0';
-			document.body.appendChild(textarea);
-			textarea.select();
-			document.execCommand('copy');
-			document.body.removeChild(textarea);
-			setCopied(true);
+			try {
+				const textarea = document.createElement('textarea');
+				textarea.value = token;
+				textarea.style.position = 'fixed';
+				textarea.style.opacity = '0';
+				document.body.appendChild(textarea);
+				textarea.select();
+				document.execCommand('copy');
+				document.body.removeChild(textarea);
+				setCopied(true);
+			} catch {
+				// execCommand fallback also failed — ignore
+			}
 		}
 	}, [token, copied]);
 

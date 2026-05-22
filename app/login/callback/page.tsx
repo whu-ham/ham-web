@@ -1,23 +1,30 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 2.0
  * @date 2026/5/22
  *
  * OAuth2 callback page for mobile app login.
  *
  * Flow:
  *   1. /login page builds deep link with redirect_uri=/login/callback
+ *      and writes OAuth2 state to an HttpOnly cookie (ham_login_state).
  *   2. App authorizes and redirects back here with ?code=xxx&state=yyy
- *   3. This SSR page validates state, exchanges code for session,
- *      then redirects to the original `from` URL (stored in sessionStorage).
- *   4. If state mismatch or code exchange fails, redirects to /login with error.
+ *   3. This SSR page validates state against the cookie BEFORE
+ *      exchanging the code, preventing OAuth2 Login CSRF.
+ *   4. On success, redirects to the original `from` URL (stored in
+ *      ham_login_from cookie).
+ *   5. On failure, redirects to /login.
  */
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { processAppCallback } from '@/app/lib/auth';
-import { APP_CALLBACK_PATH } from '@/app/login/store';
+import { safeRedirect } from '@/services/redirect';
+
+const STATE_COOKIE = 'ham_login_state';
+const FROM_COOKIE = 'ham_login_from';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('console');
@@ -35,17 +42,28 @@ const Page = async ({ searchParams }: PageProps) => {
 		redirect('/login');
 	}
 
-	// Process the code exchange
-	const success = await processAppCallback(code);
-	if (!success) {
-		// Callback failed — back to login
+	// Validate OAuth2 state BEFORE code exchange to prevent CSRF.
+	const cookieStore = await cookies();
+	const storedState = cookieStore.get(STATE_COOKIE)?.value;
+
+	// Clear state cookie immediately (one-time use)
+	cookieStore.delete(STATE_COOKIE);
+
+	if (!storedState || storedState !== state) {
 		redirect('/login');
 	}
 
-	// Pass state to the client-side done page for CSRF validation.
-	// SSR cannot access sessionStorage, so the client component must
-	// compare the returned state against the one stored at login time.
-	redirect(`${APP_CALLBACK_PATH}/done?state=${encodeURIComponent(state)}`);
+	// Process the code exchange (only after state validation passes)
+	const success = await processAppCallback(code);
+	if (!success) {
+		redirect('/login');
+	}
+
+	// Read the `from` redirect target from cookie (set by /login page)
+	const storedFrom = cookieStore.get(FROM_COOKIE)?.value;
+	cookieStore.delete(FROM_COOKIE);
+
+	redirect(safeRedirect(storedFrom, '/console'));
 };
 
 export default Page;

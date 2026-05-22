@@ -227,7 +227,7 @@
 			"nameTooLong": "Name must be 128 characters or less",
 			"scopesRequired": "At least one scope is required",
 			"ttlRange": "TTL must be between 1 and 30 days",
-			"tokenLimit": "Maximum token limit reached (5)"
+			"tokenLimit": "Maximum token limit reached"
 		},
 		"error": {
 			"fetchFailed": "Failed to fetch API keys",

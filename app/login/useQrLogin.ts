@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/5/22
  *
  * Custom hook for QR login flow:
@@ -13,6 +13,10 @@
  *   - When the tab becomes visible again the hook immediately fires one
  *     poll. If the ticket had expired while hidden it is automatically
  *     refreshed.
+ *
+ * M5 fix: Uses useRef to track latest poll result instead of reading
+ * state inside a setState updater (which is impure). Avoids side effects
+ * in updater functions and prevents concurrent interval issues.
  */
 
 'use client';
@@ -58,6 +62,8 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 	const timerRef = useRef<number | null>(null);
 	const creatingRef = useRef(false);
 	const pollRef = useRef<(() => Promise<void>) | null>(null);
+	// M5: Track latest poll result via ref to avoid setState updater side effects
+	const lastCheckRef = useRef<CheckTicketResponse | null>(null);
 
 	const clearTimer = useCallback(() => {
 		if (timerRef.current !== null) {
@@ -72,6 +78,7 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 		setCreating(true);
 		setRefreshing(true);
 		setCheck(null);
+		lastCheckRef.current = null;
 		setCreateFailed(false);
 		try {
 			const resp = await WebAuthApi.createQrTicket();
@@ -100,6 +107,7 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 		const poll = async () => {
 			try {
 				const resp = await WebAuthApi.checkQrTicket(ticket);
+				lastCheckRef.current = resp;
 				setCheck(resp);
 
 				if (resp.state === QR_TICKET_STATE.CONFIRMED) {
@@ -146,22 +154,26 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 			const currentPoll = pollRef.current;
 			if (!currentPoll) return;
 
+			// M5: Read lastCheckRef instead of using setState updater for side effects
 			currentPoll().then(() => {
-				if (timerRef.current === null) {
-					setCheck((prev) => {
-						const expiredOrInvalid =
-							prev?.state === QR_TICKET_STATE.EXPIRED ||
-							prev?.state === QR_TICKET_STATE.INVALID;
-						if (expiredOrInvalid) {
-							refresh();
-						}
-						return prev;
-					});
+				if (timerRef.current !== null) return; // Already restarted
+
+				const last = lastCheckRef.current;
+				if (
+					last &&
+					(last.state === QR_TICKET_STATE.EXPIRED ||
+						last.state === QR_TICKET_STATE.INVALID)
+				) {
+					refresh();
+					return;
+				}
+
+				// Only start interval if we're still visible
+				if (!document.hidden) {
+					clearTimer();
+					timerRef.current = window.setInterval(currentPoll, POLL_INTERVAL_MS);
 				}
 			});
-
-			clearTimer();
-			timerRef.current = window.setInterval(currentPoll, POLL_INTERVAL_MS);
 		};
 
 		document.addEventListener('visibilitychange', onVisibilityChange);

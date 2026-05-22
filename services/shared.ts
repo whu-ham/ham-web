@@ -36,28 +36,13 @@ export class ApiError extends Error {
 	}
 }
 
-/**
- * Read the active locale from the NEXT_LOCALE cookie so that every
- * backend request carries the correct Accept-Language header and the
- * server returns i18n content in the language the user has selected.
- * Falls back to the browser's own Accept-Language when no explicit
- * override cookie is present.
- */
-const getAcceptLanguage = (): string | undefined => {
-	if (typeof document === 'undefined') return undefined;
-	const raw = document.cookie
-		.split(';')
-		.map((c) => c.trim())
-		.find((c) => c.startsWith('NEXT_LOCALE='));
-	if (!raw) return undefined;
-	return decodeURIComponent(raw.slice('NEXT_LOCALE='.length)) || undefined;
-};
+import { getAcceptLanguageFromDocument } from '@/services/locale';
 
 export const request = async <T>(
 	path: string,
 	init?: RequestInit
 ): Promise<T> => {
-	const acceptLanguage = getAcceptLanguage();
+	const acceptLanguage = getAcceptLanguageFromDocument();
 	// All requests go to the BFF. `API_BASE` is either same-origin `/api`
 	// (default) or `<NEXT_PUBLIC_API_BASE>/api` when the BFF lives on a
 	// different origin. See the module header for details.

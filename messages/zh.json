@@ -227,7 +227,7 @@
 			"nameTooLong": "名称不能超过128个字符",
 			"scopesRequired": "请至少选择一个权限",
 			"ttlRange": "有效期需在1-30天之间",
-			"tokenLimit": "已达到最大数量（5个）"
+			"tokenLimit": "已达到最大数量限制"
 		},
 		"error": {
 			"fetchFailed": "获取 API Key 列表失败",

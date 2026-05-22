@@ -32,7 +32,11 @@ const Page = async ({ searchParams }: PageProps) => {
 		const { from } = await searchParams;
 		const headersList = await headers();
 		const host = headersList.get('host') || 'localhost:3000';
-		const protocol = headersList.get('x-forwarded-proto') || 'https';
+		// m1: Use http for localhost, https otherwise
+		const isLocalhost = host.startsWith('localhost');
+		const protocol = isLocalhost
+			? 'http'
+			: headersList.get('x-forwarded-proto') || 'https';
 		const fallback = `${protocol}://${host}/console`;
 		return redirect(safeRedirect(from, fallback));
 	}

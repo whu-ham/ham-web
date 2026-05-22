@@ -1,52 +1,24 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/4/20
  *
  * Dark-mode toggle for HeroUI v3 modeled after `LanguageSwitcher`.
- * The trigger is deliberately icon-only to keep the SSO header
- * uncluttered, while each dropdown entry pairs its Material Icon
- * with a localized label so the tri-state choice (auto / light /
- * dark) stays self-describing for both screen-reader and sighted
- * users.
  *
- * Resolution policy (aligned with `theme/config.ts`):
- *   - Default option is "Follow system" (`auto`). When selected we
- *     DELETE the `NEXT_THEME` cookie and let
- *     `prefers-color-scheme` decide on every subsequent paint.
- *   - When the user picks a concrete theme we persist it in
- *     `NEXT_THEME` (cookie + localStorage) as an explicit override.
- *   - The `<html>` element carries BOTH `class="light|dark"` and
- *     `data-theme="light|dark"`, per the HeroUI v3 Colors guide, so
- *     Tailwind's `dark:` variant and HeroUI's own
- *     `[data-theme]` selectors stay in sync.
- *
- * The theme is applied client-side on every preference change and
- * every system-preference change (when in auto mode). There is no
- * server round-trip because theme affects presentation only, so we
- * skip `router.refresh()` to avoid losing the SSO page's OAuth query
- * state.
+ * M9 fix: Theme logic extracted to useThemePreference hook, shared with UserMenu.
  */
 'use client';
 
 import type { Selection } from '@heroui/react';
 
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 
+import { THEMES, Theme, isTheme } from '@/components/theme/config';
 import {
-	THEMES,
-	THEME_CLASSES,
-	Theme,
-	isTheme,
-} from '@/components/theme/config';
-import {
-	resolvedThemeAtom,
-	systemThemeAtom,
-	themeOverrideAtom,
-} from '@/store/themeAtom';
+	THEME_ICON,
+	useThemePreference,
+} from '@/components/preferences/useThemePreference';
 
 interface ThemeSwitcherProps {
 	className?: string;
@@ -55,57 +27,14 @@ interface ThemeSwitcherProps {
 const AUTO_KEY = 'auto' as const;
 type MenuKey = typeof AUTO_KEY | Theme;
 
-const THEME_ICON: Record<MenuKey, string> = {
-	auto: 'brightness_auto',
-	light: 'light_mode',
-	dark: 'dark_mode',
-};
-
-/**
- * Writes BOTH `class="light|dark"` and `data-theme="light|dark"` on
- * `<html>`. HeroUI v3 requires both hooks.
- */
-const applyThemeToDocument = (resolved: Theme) => {
-	if (typeof document === 'undefined') return;
-	const root = document.documentElement;
-	const other: Theme = resolved === 'dark' ? 'light' : 'dark';
-	root.classList.remove(THEME_CLASSES[other]);
-	root.classList.add(THEME_CLASSES[resolved]);
-	root.setAttribute('data-theme', resolved);
-	root.style.colorScheme = resolved;
-};
-
 const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 	const t = useTranslations('theme');
+	const { selectedKey, onSelectionChange } = useThemePreference();
 
-	const [override, setOverride] = useAtom(themeOverrideAtom);
-	const setSystemTheme = useSetAtom(systemThemeAtom);
-	const resolvedTheme = useAtomValue(resolvedThemeAtom);
-
-	// Keep systemThemeAtom in sync with the OS preference.
-	useEffect(() => {
-		if (typeof window === 'undefined' || !window.matchMedia) return;
-		const mql = window.matchMedia('(prefers-color-scheme: dark)');
-		const handler = () => setSystemTheme(mql.matches ? 'dark' : 'light');
-		mql.addEventListener('change', handler);
-		return () => mql.removeEventListener('change', handler);
-	}, [setSystemTheme]);
-
-	// Apply the resolved theme to the document on every change.
-	useEffect(() => {
-		applyThemeToDocument(resolvedTheme);
-	}, [resolvedTheme]);
-
-	const selectedKey: MenuKey = override ?? AUTO_KEY;
-
-	const onSelectionChange = (keys: Selection) => {
+	const onMenuSelectionChange = (keys: Selection) => {
 		const key = Array.from(keys)[0]?.toString();
 		if (!key) return;
-		if (key === AUTO_KEY) {
-			setOverride(null);
-		} else if (isTheme(key)) {
-			setOverride(key);
-		}
+		onSelectionChange(key);
 	};
 
 	return (
@@ -133,7 +62,7 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 					aria-label={t('switcher.ariaLabel')}
 					selectedKeys={new Set([selectedKey])}
 					selectionMode={'single'}
-					onSelectionChange={onSelectionChange}
+					onSelectionChange={onMenuSelectionChange}
 				>
 					{(['auto', ...THEMES] as const).map((key) => {
 						const label =

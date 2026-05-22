@@ -17,8 +17,8 @@ const dayMs = 86_400_000;
 
 const futureDate = (days: number) => new Date(now + days * dayMs).toISOString();
 
-// Clone shared data so mutations don't affect the SSR module
-const mockTokens = [...mockTokenList];
+// Deep clone shared data so mutations don't affect the SSR module
+const mockTokens = structuredClone(mockTokenList);
 
 const generateTokenValue = (): string => {
 	const chars =

@@ -1,25 +1,28 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/5/22
  *
  * Custom hook for token list management.
  * Handles fetching, revoking, rotate modal, and create modal coordination.
+ *
+ * M3 fix: Uses tokenListVersionAtom as an event signal instead of
+ * newlyCreatedTokenAtom. Fixes missing deps and double data source issues.
  */
 
 'use client';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 import {
 	createModalVisibleAtom,
-	newlyCreatedTokenAtom,
 	rotateModalAtom,
 	tokenListAtom,
 	tokenListLoadingAtom,
+	tokenListVersionAtom,
 } from '@/app/console/tokens/store';
 import type { TokenListItem } from '@/services/token/api';
 import { TokenApi } from '@/services/token/api';
@@ -41,8 +44,7 @@ export const useTokenList = (
 	const [loading, setLoading] = useAtom(tokenListLoadingAtom);
 	const setCreateModalVisible = useSetAtom(createModalVisibleAtom);
 	const setRotateModal = useSetAtom(rotateModalAtom);
-	const newlyCreated = useAtomValue(newlyCreatedTokenAtom);
-	const [hydrated, setHydrated] = useState(false);
+	const tokenListVersion = useAtomValue(tokenListVersionAtom);
 
 	const fetchTokens = useCallback(async () => {
 		setLoading(true);
@@ -56,18 +58,19 @@ export const useTokenList = (
 		}
 	}, [setTokens, setLoading, t]);
 
+	// Hydrate from SSR data or fetch on mount
 	useEffect(() => {
-		if (!initialTokens) {
+		if (!initialTokens || initialTokens.length === 0) {
 			fetchTokens();
 		}
-		setHydrated(true);
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [initialTokens, fetchTokens]);
 
+	// Refetch when version changes (create/rotate success)
 	useEffect(() => {
-		if (hydrated && newlyCreated) {
+		if (tokenListVersion > 0) {
 			fetchTokens();
 		}
-	}, [newlyCreated, fetchTokens, hydrated]);
+	}, [tokenListVersion, fetchTokens]);
 
 	const handleRevoke = useCallback(
 		async (id: string) => {

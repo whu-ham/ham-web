@@ -11,12 +11,13 @@
 
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
 	newlyCreatedTokenAtom,
 	rotateModalAtom,
+	tokenListVersionAtom,
 } from '@/app/console/tokens/store';
 import { ApiError, TokenApi } from '@/services/token/api';
 
@@ -33,8 +34,17 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 	const t = useTranslations('apikey');
 	const [rotateModal, setRotateModal] = useAtom(rotateModalAtom);
 	const setNewlyCreated = useSetAtom(newlyCreatedTokenAtom);
+	const bumpVersion = useSetAtom(tokenListVersionAtom);
 	const [ttl, setTtl] = useState(30);
 	const [submitting, setSubmitting] = useState(false);
+	const cancelledRef = useRef(false);
+
+	// s5: Clean up on unmount
+	useEffect(() => {
+		return () => {
+			cancelledRef.current = true;
+		};
+	}, []);
 
 	const handleClose = useCallback(() => {
 		setRotateModal({ visible: false, tokenId: null });
@@ -49,19 +59,24 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 			const resp = await TokenApi.rotate(rotateModal.tokenId, {
 				ttl_days: ttl,
 			});
+			if (cancelledRef.current) return;
 			setNewlyCreated(resp);
+			bumpVersion((v) => v + 1);
 			toast.success(t('rotateModal.success'));
 			handleClose();
 		} catch (e) {
+			if (cancelledRef.current) return;
 			if (e instanceof ApiError) {
 				toast.error(e.message || t('error.rotateFailed'));
 			} else {
 				toast.error(t('error.rotateFailed'));
 			}
 		} finally {
-			setSubmitting(false);
+			if (!cancelledRef.current) {
+				setSubmitting(false);
+			}
 		}
-	}, [rotateModal.tokenId, ttl, setNewlyCreated, handleClose, t]);
+	}, [rotateModal.tokenId, ttl, setNewlyCreated, handleClose, t, bumpVersion]);
 
 	return {
 		rotateModal,

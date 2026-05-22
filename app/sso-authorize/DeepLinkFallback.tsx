@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.9
+ * @version 2.0
  * @date 2026/5/22
  *
  * Mobile fallback view shown when the `ham://sso-authorize` deep link did
@@ -11,7 +11,7 @@
  *   3. Sign in with browser — navigates to /login with the current URL
  *      as the return destination.
  *
- * Reads `deepLinkUrlAtom` directly — no props needed.
+ * M7 fix: Reads deviceKind from store atom instead of computing locally.
  */
 'use client';
 
@@ -22,17 +22,14 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import icon from '@/public/icon-1024.png';
-import { detectDeviceKind, getAppStoreURL } from '@/services/sso/ua';
-import { deepLinkUrlAtom } from '@/app/sso-authorize/store';
+import { getAppStoreURL } from '@/services/sso/ua';
+import { deepLinkUrlAtom, deviceKindAtom } from '@/app/sso-authorize/store';
 
 const DeepLinkFallback = () => {
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
+	const deviceKind = useAtomValue(deviceKindAtom);
 
-	const deviceKind = useMemo(() => {
-		if (typeof navigator === 'undefined') return 'desktop' as const;
-		return detectDeviceKind(navigator.userAgent);
-	}, []);
 	const storeUrl = useMemo(() => getAppStoreURL(deviceKind), [deviceKind]);
 
 	const reopenApp = () => {

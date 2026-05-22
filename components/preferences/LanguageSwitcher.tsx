@@ -1,27 +1,22 @@
 /**
  * @author Claude
- * @version 2.5
+ * @version 2.6
  * @date 2026/4/21 19:56:00
+ *
+ * M9 fix: Locale logic extracted to useLocalePreference hook, shared with UserMenu.
  */
 'use client';
 
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import type { Selection } from '@heroui/react';
-import { useAtom } from 'jotai';
-import { useLocale, useTranslations } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useTranslations } from 'next-intl';
 
-import enMessages from '@/messages/en.json';
-import jaMessages from '@/messages/ja.json';
-import zhMessages from '@/messages/zh.json';
+import { LOCALES, LOCALE_LABELS, Locale, isLocale } from '@/i18n/config';
 import {
-	LOCALES,
-	LOCALE_COOKIE,
-	LOCALE_LABELS,
-	Locale,
-	isLocale,
-} from '@/i18n/config';
-import { localeOverrideAtom } from '@/store/localeAtom';
+	LOCALE_ICON,
+	useLocalePreference,
+	resolveAutoLabel,
+} from '@/components/preferences/useLocalePreference';
 
 interface LanguageSwitcherProps {
 	className?: string;
@@ -30,121 +25,23 @@ interface LanguageSwitcherProps {
 const AUTO_KEY = 'auto' as const;
 type MenuKey = typeof AUTO_KEY | Locale;
 
-const LOCALE_ICON: Record<Locale | 'auto', string> = {
-	auto: 'language',
-	zh: '文',
-	en: 'A',
-	ja: 'あ',
-};
-
-const LOCALE_MESSAGES: Record<Locale, typeof enMessages> = {
-	zh: zhMessages,
-	en: enMessages,
-	ja: jaMessages,
-};
-
-// --- Helpers --------------------------------------------------------
-
-/**
- * Best-effort match of the browser's preferred language against our
- * supported catalogue.
- */
-const detectBrowserLocale = (): Locale | null => {
-	if (typeof navigator === 'undefined') return null;
-	const candidates: string[] = [];
-	if (Array.isArray(navigator.languages))
-		candidates.push(...navigator.languages);
-	if (navigator.language) candidates.push(navigator.language);
-	for (const raw of candidates) {
-		const tag = raw.toLowerCase();
-		if (isLocale(tag)) return tag;
-		const base = tag.split('-')[0];
-		if (isLocale(base)) return base;
-	}
-	return null;
-};
-
-/**
- * Resolve the "Follow browser" label in the browser's own language.
- */
-const resolveAutoLabel = (
-	browserLocale: Locale | null,
-	fallback: string
-): string => {
-	if (!browserLocale) return fallback;
-	const catalogue = LOCALE_MESSAGES[browserLocale].language.switcher;
-	return catalogue.autoWithDetected.replace(
-		'{detected}',
-		LOCALE_LABELS[browserLocale]
-	);
-};
-
-// --- Cookie helpers -------------------------------------------------
-
-const writeLocaleCookie = (locale: Locale) => {
-	document.cookie = `${LOCALE_COOKIE}=${locale}; path=/; max-age=31536000; SameSite=Lax`;
-	try {
-		window.localStorage.setItem(LOCALE_COOKIE, locale);
-	} catch {
-		// Ignore — private mode may block storage access.
-	}
-};
-
-const clearLocaleCookie = () => {
-	document.cookie = `${LOCALE_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
-	try {
-		window.localStorage.removeItem(LOCALE_COOKIE);
-	} catch {
-		// Ignore — private mode may block storage access.
-	}
-};
-
-// --- Component ------------------------------------------------------
-
 const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
-	const currentLocale = useLocale() as Locale;
-	const [isPending, startTransition] = useTransition();
 	const t = useTranslations('language');
 
-	const [hasOverride, setHasOverride] = useAtom(localeOverrideAtom);
+	const { selectedKey, browserLocale, onSelectionChange } =
+		useLocalePreference();
 
-	// Detect browser locale on client only to avoid hydration mismatch
-	const [browserLocale] = useState<Locale | null>(() => detectBrowserLocale());
-
-	const selectedKey: MenuKey = hasOverride ? currentLocale : AUTO_KEY;
-
-	const onSelectionChange = (keys: Selection) => {
+	const onMenuSelectionChange = (keys: Selection) => {
 		const rawKey = Array.from(keys)[0]?.toString();
 		if (!rawKey) return;
-
-		if (rawKey === AUTO_KEY) {
-			if (!hasOverride) return;
-			clearLocaleCookie();
-			setHasOverride(false);
-		} else if (isLocale(rawKey)) {
-			// Already explicitly set to the same locale — nothing to do.
-			if (hasOverride && rawKey === currentLocale) return;
-			writeLocaleCookie(rawKey);
-			setHasOverride(true);
-			// In auto mode, if the browser locale already matches the chosen
-			// locale the page language is unchanged — just record the override
-			// without reloading.
-			if (!hasOverride && rawKey === browserLocale) return;
-		} else {
-			return;
-		}
-
-		startTransition(() => {
-			window.location.reload();
-		});
+		onSelectionChange(rawKey);
 	};
 
 	const autoLabel = resolveAutoLabel(browserLocale, t('switcher.auto'));
 	const autoTriggerLabel =
 		browserLocale === null ? t('switcher.autoUnsupported') : autoLabel;
-	const triggerLabel = hasOverride
-		? LOCALE_LABELS[currentLocale]
-		: autoTriggerLabel;
+	const triggerLabel =
+		selectedKey !== AUTO_KEY ? LOCALE_LABELS[selectedKey as Locale] : autoTriggerLabel;
 
 	return (
 		<Dropdown>
@@ -156,7 +53,6 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 					isIconOnly: true,
 					className: `inline-flex items-center justify-center sm:w-auto sm:gap-2 sm:px-3 ${className ?? ''}`,
 				})}
-				isDisabled={isPending}
 			>
 				<span
 					className={
@@ -173,7 +69,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 					aria-label={t('switcher.ariaLabel')}
 					selectedKeys={new Set([selectedKey])}
 					selectionMode={'single'}
-					onSelectionChange={onSelectionChange}
+					onSelectionChange={onMenuSelectionChange}
 				>
 					<Dropdown.Item id={AUTO_KEY} textValue={autoTriggerLabel}>
 						<Dropdown.ItemIndicator />

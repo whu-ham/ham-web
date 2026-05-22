@@ -227,7 +227,7 @@
 			"nameTooLong": "名前は128文字以内で入力してください",
 			"scopesRequired": "少なくとも1つの権限を選択してください",
 			"ttlRange": "有効期間は1〜30日の範囲で指定してください",
-			"tokenLimit": "最大トークン数に達しました（5個）"
+			"tokenLimit": "最大トークン数に達しました"
 		},
 		"error": {
 			"fetchFailed": "API Key の取得に失敗しました",

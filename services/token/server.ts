@@ -1,27 +1,30 @@
 /**
  * @author Claude
- * @version 1.2
+ * @version 1.3
  * @date 2026/5/22
  *
  * Server-side data fetching for token endpoints.
  * Calls the backend directly via serverFetch.
+ *
+ * M1 fix: Mock data is only loaded when NEXT_PUBLIC_ENABLE_MSW is
+ * explicitly 'true', preventing mocks from entering production bundles.
  */
 import { serverFetch } from '@/services/server-fetch';
 
 import type { ListTokensResponse, TokenListItem } from '@/services/token/api';
 
-const isDev = process.env.NODE_ENV === 'development';
+const isMswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === 'true';
 
 /**
  * Fetch the token list on the server.
- * In development, returns mock data directly (MSW is browser-only).
+ * When MSW is enabled, returns mock data directly (MSW is browser-only).
  * In production, reads the auth session from cookies and forwards Accept-Language.
  * Returns an empty array on error so the page always renders.
  */
 export const fetchTokenList = async (): Promise<TokenListItem[]> => {
-	if (isDev) {
+	if (isMswEnabled) {
 		const { mockTokenList } = await import('@/mocks/data');
-		return mockTokenList;
+		return structuredClone(mockTokenList);
 	}
 
 	try {

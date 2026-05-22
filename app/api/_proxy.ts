@@ -55,6 +55,27 @@ const ALLOWED_REQUEST_HEADERS = [
 const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
 
 /**
+ * s2: Centralized BFF → backend path mapping.
+ * All `/api/*` routes are mapped to their backend paths here.
+ * Routes not in this map use the default convention: `/api/X` → `/web/X`.
+ * The only exception is app-callback which maps to `/api/auth/app-callback`
+ * on the backend (different prefix).
+ */
+const BACKEND_PATH_MAP: Record<string, string> = {
+	'/api/auth/app-callback': '/api/auth/app-callback',
+};
+
+/**
+ * Resolve a BFF path to the backend path.
+ * Checks BACKEND_PATH_MAP first, then applies the default /api → /web convention.
+ */
+const resolveBackendPath = (bffPath: string): string => {
+	if (BACKEND_PATH_MAP[bffPath]) return BACKEND_PATH_MAP[bffPath];
+	// Default: /api/X → /web/X
+	return bffPath.replace(/^\/api/, '/web');
+};
+
+/**
  * Decide whether the incoming request should receive CORS headers, and
  * which origin to echo back. Returns `null` when no CORS headers should
  * be added (single-origin deploy, or request Origin does not match the
@@ -124,8 +145,9 @@ export const proxyToBackend = async (
 		method: req.method,
 		headers: forwardHeaders,
 		body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
-		// @ts-expect-error — Node 18+ / Cloudflare Workers support duplex
-		duplex: 'half',
+		// duplex is supported in Node 18+ and Cloudflare Workers
+		// but not yet in the TypeScript DOM types
+		...({ duplex: 'half' } as Record<string, unknown>),
 	});
 
 	// Copy response headers back to the client (including Set-Cookie).

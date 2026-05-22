@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 3.0
+ * @version 3.1
  * @date 2026/5/22
  *
  * Client-side login page. Handles QR, passkey, and mobile app login.
@@ -11,9 +11,9 @@
  * QRLoginView / PasskeyLoginView write to `loginMeAtom` on success;
  * this component watches it and performs the redirect.
  *
- * Before launching the app deep link, `from` is persisted to
- * sessionStorage so that /login/callback can redirect back after
- * the OAuth2 code exchange.
+ * OAuth2 state and redirect target are persisted to cookies
+ * so that /login/callback (SSR) can validate state and redirect
+ * without requiring sessionStorage (which SSR cannot access).
  */
 'use client';
 
@@ -32,13 +32,21 @@ import PageFrame from '@/components/layout/PageFrame';
 import { isMobile } from '@/services/sso/ua';
 import { safeRedirect } from '@/services/redirect';
 
-const SESSION_KEY_FROM = 'ham_login_from';
-const SESSION_KEY_STATE = 'ham_login_state';
+const STATE_COOKIE = 'ham_login_state';
+const FROM_COOKIE = 'ham_login_from';
 
 const generateState = (): string => {
 	const arr = new Uint8Array(16);
 	crypto.getRandomValues(arr);
 	return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
+};
+
+const setCookie = (name: string, value: string, maxAge = 600) => {
+	document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
+};
+
+const deleteCookie = (name: string) => {
+	document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
 };
 
 const LoginPage = () => {
@@ -55,18 +63,18 @@ const LoginPage = () => {
 		setFrom(resolved);
 		setMobile(isMobile(navigator.userAgent));
 
-		// Generate OAuth2 state for CSRF protection and persist it
+		// Generate OAuth2 state for CSRF protection and persist to cookie
 		const state = generateState();
 		setState(state);
-		sessionStorage.setItem(SESSION_KEY_FROM, resolved);
-		sessionStorage.setItem(SESSION_KEY_STATE, state);
+		setCookie(STATE_COOKIE, state, 600); // 10 min
+		setCookie(FROM_COOKIE, encodeURIComponent(resolved), 600);
 	}, [searchParams, setFrom, setMobile, setState]);
 
 	// Redirect when login succeeds
 	useEffect(() => {
 		if (loginMe && from) {
-			sessionStorage.removeItem(SESSION_KEY_FROM);
-			sessionStorage.removeItem(SESSION_KEY_STATE);
+			deleteCookie(STATE_COOKIE);
+			deleteCookie(FROM_COOKIE);
 			window.location.href = from;
 		}
 	}, [loginMe, from]);
@@ -79,5 +87,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-
-export { SESSION_KEY_FROM, SESSION_KEY_STATE };

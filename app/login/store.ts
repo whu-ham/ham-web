@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/5/22
  *
  * Jotai atoms for the /login page.
@@ -10,6 +10,8 @@
  * - `mobileAtom`      — whether the current device is mobile.
  * - `stateAtom`       — OAuth2 state for CSRF protection, generated on mount.
  * - `deepLinkUrlAtom` — derived `ham://` deep-link URL for mobile app login.
+ *                        Lazily computed — returns '' until state is set
+ *                        client-side (avoids SSR empty-origin issue).
  */
 
 import { atom } from 'jotai';
@@ -43,15 +45,21 @@ export const mobileAtom = atom(false);
 /** OAuth2 state parameter for CSRF protection. Generated on mount. */
 export const stateAtom = atom<string>('');
 
-/** Derived: builds the `ham://` deep-link URL with fixed redirectUri and state. */
+/**
+ * Derived: builds the `ham://` deep-link URL with fixed redirectUri and state.
+ * M6 fix: origin is computed lazily only when state is available on the client.
+ * On SSR, state is '' so this returns '' early — no invalid URL generated.
+ */
 export const deepLinkUrlAtom = atom<string>((get) => {
 	const state = get(stateAtom);
 	if (!state) return '';
-	const origin = typeof window !== 'undefined' ? window.location.origin : '';
+	// Only compute origin on client; on SSR this branch is unreachable
+	// because state is always '' during SSR.
+	if (typeof window === 'undefined') return '';
 	return buildSsoAuthorizeDeepLink({
 		appId: process.env.NEXT_PUBLIC_CONSOLE_CLIENT_ID ?? '',
 		scope: [],
 		state,
-		redirectUri: `${origin}${APP_CALLBACK_PATH}`,
+		redirectUri: `${window.location.origin}${APP_CALLBACK_PATH}`,
 	});
 });

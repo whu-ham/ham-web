@@ -22,13 +22,15 @@ interface TokenCardProps {
 
 const formatDate = (iso: string, locale: string): string => {
 	try {
-		return new Date(iso).toLocaleDateString(locale, {
+		const date = new Date(iso);
+		if (isNaN(date.getTime())) return '-';
+		return date.toLocaleDateString(locale, {
 			year: 'numeric',
 			month: 'short',
 			day: 'numeric',
 		});
 	} catch {
-		return iso;
+		return '-';
 	}
 };
 

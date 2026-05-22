@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 2.0
+ * @version 2.1
  * @date 2026/5/22
  *
  * Custom hook for /sso-authorize page orchestration.
@@ -10,15 +10,18 @@
  *   - Detect desktop vs mobile and run deep-link handoff on mobile
  *   - On desktop, use the SSR-provided me to enter consent stage directly
  *   - Visibility-aware session refresh while on consent stage
+ *
+ * M7 fix: Uses deviceKindAtom from store (computed once, shared).
  */
 
 'use client';
 
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
 	deepLinkUrlAtom,
+	deviceKindAtom,
 	paramsAtom,
 	SsoAuthorizeParams,
 	stageAtom,
@@ -53,6 +56,7 @@ export const useSsoAuthorize = (me: MeResponse) => {
 	const [params, setParams] = useAtom(paramsAtom);
 	const [stage, setStage] = useAtom(stageAtom);
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
+	const setDeviceKind = useSetAtom(deviceKindAtom);
 
 	const autoProbeFiredRef = useRef(false);
 	const sessionConfirmedAtRef = useRef<number>(0);
@@ -65,7 +69,12 @@ export const useSsoAuthorize = (me: MeResponse) => {
 		if (sessionConfirmedAtRef.current === 0) {
 			sessionConfirmedAtRef.current = Date.now();
 		}
-	}, [setParams]);
+
+		// M7: Compute device kind once and store it globally
+		if (typeof navigator !== 'undefined') {
+			setDeviceKind(detectDeviceKind(navigator.userAgent));
+		}
+	}, [setParams, setDeviceKind]);
 
 	const redirectToLogin = useCallback(() => {
 		const from = encodeURIComponent(

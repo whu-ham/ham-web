@@ -7,6 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint .",
+		"test": "vitest run",
+		"test:watch": "vitest",
 		"cf:build": "opennextjs-cloudflare build",
 		"cf:preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
 		"cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
@@ -59,6 +61,7 @@
 		"tailwindcss": "^4.2.2",
 		"typescript": "^5",
 		"typescript-eslint": "^8.53.1",
+		"vitest": "^4.1.7",
 		"wrangler": "^4.84.1"
 	},
 	"msw": {

@@ -12,17 +12,18 @@
 
 import { useAtom, useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import {
 	createModalVisibleAtom,
 	newlyCreatedTokenAtom,
+	tokenListVersionAtom,
 } from '@/app/console/tokens/store';
 import { ApiError, TokenApi, VALID_SCOPES } from '@/services/token/api';
 
 const PARENT_SCOPE = 'mcp';
-const CHILD_SCOPES = ['mcp:read', 'mcp:write'] as const;
+const CHILD_SCOPES: readonly string[] = ['mcp:read', 'mcp:write'];
 
 export interface UseCreateTokenReturn {
 	visible: boolean;
@@ -43,10 +44,19 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 	const t = useTranslations('apikey');
 	const [visible, setVisible] = useAtom(createModalVisibleAtom);
 	const setNewlyCreated = useSetAtom(newlyCreatedTokenAtom);
+	const bumpVersion = useSetAtom(tokenListVersionAtom);
 	const [name, setName] = useState('');
 	const [scopes, setScopes] = useState<string[]>([]);
 	const [ttl, setTtl] = useState(30);
 	const [submitting, setSubmitting] = useState(false);
+	const cancelledRef = useRef(false);
+
+	// s5: Clean up on unmount
+	useEffect(() => {
+		return () => {
+			cancelledRef.current = true;
+		};
+	}, []);
 
 	const isParentChecked = scopes.includes(PARENT_SCOPE);
 
@@ -66,7 +76,7 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 				return prev.filter(
 					(s) =>
 						s !== PARENT_SCOPE &&
-						!CHILD_SCOPES.includes(s as (typeof CHILD_SCOPES)[number])
+						!CHILD_SCOPES.includes(s)
 				);
 			}
 			let next = checked ? [...prev, scope] : prev.filter((s) => s !== scope);
@@ -121,10 +131,13 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 				scopes: normalizedScopes as (typeof VALID_SCOPES)[number][],
 				ttl_days: ttl,
 			});
+			if (cancelledRef.current) return;
 			setNewlyCreated(resp);
+			bumpVersion((v) => v + 1);
 			toast.success(t('createModal.success'));
 			handleClose();
 		} catch (e) {
+			if (cancelledRef.current) return;
 			if (e instanceof ApiError) {
 				if (e.code === '12002' || e.status === 403) {
 					toast.error(t('validation.tokenLimit'));
@@ -135,9 +148,11 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 				toast.error(t('error.createFailed'));
 			}
 		} finally {
-			setSubmitting(false);
+			if (!cancelledRef.current) {
+				setSubmitting(false);
+			}
 		}
-	}, [name, scopes, normalizedScopes, ttl, t, setNewlyCreated, handleClose]);
+	}, [name, scopes, normalizedScopes, ttl, t, setNewlyCreated, handleClose, bumpVersion]);
 
 	return {
 		visible,
