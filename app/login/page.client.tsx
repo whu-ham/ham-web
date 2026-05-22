@@ -21,6 +21,7 @@ import LoginView from '@/app/login/LoginView';
 import { fromAtom, loginMeAtom, mobileAtom } from '@/app/login/store';
 import PageFrame from '@/components/layout/PageFrame';
 import { isMobile } from '@/services/sso/ua';
+import { safeRedirect } from '@/services/redirect';
 
 const LoginPage = () => {
 	const searchParams = useSearchParams();
@@ -31,7 +32,7 @@ const LoginPage = () => {
 	// Initialize atoms on mount
 	useEffect(() => {
 		const urlFrom = searchParams.get('from');
-		setFrom(urlFrom ?? `${window.location.origin}/console`);
+		setFrom(safeRedirect(urlFrom, `${window.location.origin}/console`));
 		setMobile(isMobile(navigator.userAgent));
 	}, [searchParams, setFrom, setMobile]);
 

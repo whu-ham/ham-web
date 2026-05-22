@@ -54,7 +54,9 @@ const ConsentView = () => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			const from = encodeURIComponent(window.location.href);
+			const from = encodeURIComponent(
+				window.location.pathname + window.location.search
+			);
 			window.location.href = `/login?from=${from}`;
 		}
 	}, []);

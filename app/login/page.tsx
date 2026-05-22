@@ -15,6 +15,7 @@ import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { fetchMe } from '@/services/sso/server';
+import { safeRedirect } from '@/services/redirect';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('console');
@@ -29,13 +30,11 @@ const Page = async ({ searchParams }: PageProps) => {
 	const me = await fetchMe();
 	if (me) {
 		const { from } = await searchParams;
-		if (from) {
-			return redirect(from);
-		}
 		const headersList = await headers();
 		const host = headersList.get('host') || 'localhost:3000';
 		const protocol = headersList.get('x-forwarded-proto') || 'https';
-		redirect(`${protocol}://${host}/console`);
+		const fallback = `${protocol}://${host}/console`;
+		return redirect(safeRedirect(from, fallback));
 	}
 
 	return (

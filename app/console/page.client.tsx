@@ -31,7 +31,7 @@ const ConsolePage = ({ me }: ConsolePageProps) => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			const from = encodeURIComponent(`${window.location.origin}/console`);
+			const from = encodeURIComponent('/console');
 			router.push(`/login?from=${from}`);
 		}
 	}, [router]);

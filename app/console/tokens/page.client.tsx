@@ -104,9 +104,7 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			const from = encodeURIComponent(
-				`${window.location.origin}/console/tokens`
-			);
+			const from = encodeURIComponent('/console/tokens');
 			router.push(`/login?from=${from}`);
 		}
 	}, [router]);
