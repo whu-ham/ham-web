@@ -73,13 +73,16 @@ export const processAppCallback = async (
 	code: string
 ): Promise<AppCallbackResult> => {
 	try {
-		const { response, envelope } = await serverFetch('/web/auth/app-callback', {
-			method: 'POST',
-			body: JSON.stringify({ code }),
-		});
+		const { response, errorEnvelope } = await serverFetch(
+			'/web/auth/app-callback',
+			{
+				method: 'POST',
+				body: JSON.stringify({ code }),
+			}
+		);
 
 		if (!response.ok) {
-			const reason = envelope.message || `HTTP ${response.status}`;
+			const reason = errorEnvelope.message || `HTTP ${response.status}`;
 			return { ok: false, reason };
 		}
 

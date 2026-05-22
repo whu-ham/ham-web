@@ -64,9 +64,33 @@ interface PageProps {
 	}>;
 }
 
-/** Simple server-side mobile detection from User-Agent. */
-const isMobileUA = (ua: string): boolean =>
-	/iphone|ipad|ipod|android/i.test(ua);
+/**
+ * Server-side mobile detection from User-Agent.
+ * Covers standard mobile UAs plus iPadOS ≥ 13 which reports as
+ * "Macintosh" in desktop browsing mode. We can't read
+ * navigator.maxTouchPoints on the server, so we rely on the
+ * Sec-CH-UA-Form-Factors client hint (when available) or fall back
+ * to assuming Macintosh + touch could be iPadOS.
+ */
+const isMobileUA = (
+	ua: string,
+	secChUaFormFactors?: string | null
+): boolean => {
+	const lower = ua.toLowerCase();
+	// Standard mobile identifiers
+	if (/iphone|ipad|ipod|android/i.test(lower)) return true;
+	// iPadOS ≥ 13 desktop-mode Safari: UA contains "Macintosh" but
+	// the device is a tablet. If Sec-CH-UA-Form-Factors is present
+	// and includes "Mobile", treat as mobile. Otherwise, Macintosh
+	// with "touch" in the UA hints at iPadOS.
+	if (/macintosh/.test(lower)) {
+		if (secChUaFormFactors?.toLowerCase().includes('mobile')) return true;
+		// Some iPadOS Safari versions include "touch" in the UA or
+		// we can check Sec-CH-UA-Form-Factors for "EInk" / "Mobile"
+		if (/\btouch\b/.test(lower)) return true;
+	}
+	return false;
+};
 
 const Page = async ({ searchParams }: PageProps) => {
 	const { client_id, redirect_uri, scope, state } = await searchParams;
@@ -88,9 +112,10 @@ const Page = async ({ searchParams }: PageProps) => {
 	if (!me) {
 		const headersList = await headers();
 		const ua = headersList.get('user-agent') ?? '';
+		const secChUaFormFactors = headersList.get('sec-ch-ua-form-factors');
 		// On mobile: let the client try the deep link first, then show login fallback.
 		// On desktop: redirect to /login immediately.
-		if (!isMobileUA(ua)) {
+		if (!isMobileUA(ua, secChUaFormFactors)) {
 			redirect(`/login?from=${encodeURIComponent(from)}`);
 		}
 	}

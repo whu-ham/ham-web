@@ -116,36 +116,36 @@ export const forwardSetCookies = async (res: Response) => {
 };
 
 /**
- * Backend response envelope. The backend always wraps responses in
- * { code, data, message }. We unwrap the `data` field so callers
- * get the actual payload directly, consistent with what the BFF
- * proxy transparently streams to the browser (where the client-side
- * request<T>() also sees the raw unwrapped body after proxy).
+ * Backend error envelope. Error responses from the backend follow
+ * the shared errorx contract: { code, message }. Successful responses
+ * are raw JSON payloads (NOT wrapped), matching what the BFF proxy
+ * streams to the browser and what client-side request<T>() returns.
  */
-interface BackendEnvelope<T = unknown> {
-	code: number;
-	data: T;
+interface BackendErrorEnvelope {
+	code?: string | number;
 	message?: string;
 }
 
 /**
  * Result of serverFetch: the raw Response (for status/headers access)
- * plus the unwrapped `data` payload and the full envelope (for error
- * message extraction).
+ * plus the parsed JSON body. For error responses, `errorEnvelope`
+ * provides access to the backend's error code and message.
  */
 export interface ServerFetchResult<T = unknown> {
 	response: Response;
 	data: T;
-	envelope: BackendEnvelope<T>;
+	errorEnvelope: BackendErrorEnvelope;
 }
 
 /**
  * Make a server-side fetch to the backend, forwarding browser cookies.
  * Only auth-related cookies are forwarded to minimize information exposure.
  *
- * Unwraps the backend's `{code, data}` envelope so callers receive the
- * inner `data` payload directly — matching the pattern of _proxy.ts
- * which streams the raw backend body to the client.
+ * Unwraps error envelopes on non-OK responses so callers can access
+ * the backend's error code and message. Successful responses are
+ * returned as raw JSON — matching the pattern of _proxy.ts which
+ * streams the raw backend body to the client, and of client-side
+ * request<T>() which also returns raw JSON.
  *
  * C2 fix: Cookie header is only included when relevant cookies exist,
  * avoiding sending an empty `Cookie: ` header that could mislead the backend.
@@ -179,6 +179,19 @@ export const serverFetch = async <T = unknown>(
 		headers,
 	});
 
-	const envelope = (await response.json()) as BackendEnvelope<T>;
-	return { response, data: envelope.data, envelope };
+	const body: unknown = await response.json();
+	// Successful responses are raw JSON payloads (same shape the BFF proxy
+	// streams to the client). Error responses may carry { code, message }.
+	const isEnvelope =
+		typeof body === 'object' &&
+		body !== null &&
+		'code' in body &&
+		'message' in body;
+	const data = (
+		isEnvelope && 'data' in body ? (body as { data: T }).data : body
+	) as T;
+	const errorEnvelope: BackendErrorEnvelope = isEnvelope
+		? (body as BackendErrorEnvelope)
+		: {};
+	return { response, data, errorEnvelope };
 };
