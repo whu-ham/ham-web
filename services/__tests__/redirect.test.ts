@@ -18,7 +18,9 @@ describe('safeRedirect', () => {
 	it('accepts valid relative paths', () => {
 		expect(safeRedirect('/console')).toBe('/console');
 		expect(safeRedirect('/console/tokens')).toBe('/console/tokens');
-		expect(safeRedirect('/sso-authorize?client_id=foo')).toBe('/sso-authorize?client_id=foo');
+		expect(safeRedirect('/sso-authorize?client_id=foo')).toBe(
+			'/sso-authorize?client_id=foo'
+		);
 		expect(safeRedirect('/')).toBe('/');
 	});
 

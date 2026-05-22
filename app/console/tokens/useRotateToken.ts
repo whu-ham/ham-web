@@ -37,6 +37,7 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 	const bumpVersion = useSetAtom(tokenListVersionAtom);
 	const [ttl, setTtl] = useState(30);
 	const [submitting, setSubmitting] = useState(false);
+	const submittingRef = useRef(false);
 	const cancelledRef = useRef(false);
 
 	// s5: Clean up on unmount
@@ -53,7 +54,9 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 
 	const handleSubmit = useCallback(async () => {
 		if (!rotateModal.tokenId) return;
+		if (submittingRef.current) return; // M8: Prevent double submit
 
+		submittingRef.current = true;
 		setSubmitting(true);
 		try {
 			const resp = await TokenApi.rotate(rotateModal.tokenId, {
@@ -73,6 +76,7 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 			}
 		} finally {
 			if (!cancelledRef.current) {
+				submittingRef.current = false;
 				setSubmitting(false);
 			}
 		}

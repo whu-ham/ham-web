@@ -1,8 +1,4 @@
 /**
- * @author Claude
- * @version 5.0
- * @date 2026/5/22
- *
  * Generic QR login view for the /login page.
  * Rendering-only — all logic lives in useQrLogin.
  */
@@ -16,10 +12,10 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useQrLogin } from '@/app/login/useQrLogin';
 
 interface QRLoginViewProps {
-	onLoginFailed?: () => void;
+	onLoginSucceeded?: () => void;
 }
 
-const QRLoginView = ({ onLoginFailed }: QRLoginViewProps) => {
+const QRLoginView = ({ onLoginSucceeded }: QRLoginViewProps) => {
 	const t = useTranslations('sso.qr');
 	const {
 		ticket,
@@ -31,7 +27,7 @@ const QRLoginView = ({ onLoginFailed }: QRLoginViewProps) => {
 		isExpired,
 		isConfirmed,
 		isScanned,
-	} = useQrLogin(onLoginFailed);
+	} = useQrLogin(onLoginSucceeded);
 
 	return (
 		<div className={'flex flex-col items-center gap-4'}>

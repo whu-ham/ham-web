@@ -7,4 +7,9 @@ export default defineConfig({
 			'@': path.resolve(__dirname, '.'),
 		},
 	},
+	define: {
+		// Provide required env vars for modules that validate at import time
+		'process.env.HAM_BACKEND_ORIGIN': '"http://localhost:8080"',
+		'process.env.NODE_ENV': '"test"',
+	},
 });

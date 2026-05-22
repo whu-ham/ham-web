@@ -12,13 +12,7 @@ import { useAtom } from 'jotai';
 import { useLocale } from 'next-intl';
 import { useState, useTransition } from 'react';
 
-import {
-	LOCALES,
-	LOCALE_COOKIE,
-	LOCALE_LABELS,
-	Locale,
-	isLocale,
-} from '@/i18n/config';
+import { LOCALE_COOKIE, LOCALE_LABELS, Locale, isLocale } from '@/i18n/config';
 import { localeOverrideAtom } from '@/store/localeAtom';
 import enMessages from '@/messages/en.json';
 import jaMessages from '@/messages/ja.json';

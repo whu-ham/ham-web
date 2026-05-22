@@ -1,87 +1,55 @@
 /**
  * @author Claude
- * @version 3.1
+ * @version 3.5
  * @date 2026/5/22
  *
  * Client-side login page. Handles QR, passkey, and mobile app login.
  * After successful login, redirects to the URL specified in the
- * `from` query parameter (defaults to /console).
+ * `from` prop (set by SSR page.tsx).
  *
- * State management uses Jotai atoms defined in ./store.ts.
- * QRLoginView / PasskeyLoginView write to `loginMeAtom` on success;
- * this component watches it and performs the redirect.
- *
- * OAuth2 state and redirect target are persisted to cookies
- * so that /login/callback (SSR) can validate state and redirect
- * without requiring sessionStorage (which SSR cannot access).
+ * C1 fix: OAuth2 state and HttpOnly cookies are set in SSR page.tsx.
+ * State and from are passed as props — no client-side fetch needed.
+ * Login success is a simple boolean signal — no redundant me() call.
  */
 'use client';
 
-import { useAtom, useSetAtom } from 'jotai';
-import { useSearchParams } from 'next/navigation';
+import { useSetAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
 import LoginView from '@/app/login/LoginView';
-import {
-	fromAtom,
-	loginMeAtom,
-	mobileAtom,
-	stateAtom,
-} from '@/app/login/store';
+import { loginSucceededAtom, mobileAtom, stateAtom } from '@/app/login/store';
 import PageFrame from '@/components/layout/PageFrame';
 import { isMobile } from '@/services/sso/ua';
-import { safeRedirect } from '@/services/redirect';
 
-const STATE_COOKIE = 'ham_login_state';
-const FROM_COOKIE = 'ham_login_from';
+interface LoginPageProps {
+	initialState: string;
+	from: string;
+}
 
-const generateState = (): string => {
-	const arr = new Uint8Array(16);
-	crypto.getRandomValues(arr);
-	return Array.from(arr, (b) => b.toString(16).padStart(2, '0')).join('');
-};
-
-const setCookie = (name: string, value: string, maxAge = 600) => {
-	document.cookie = `${name}=${value}; path=/; max-age=${maxAge}; SameSite=Lax; Secure`;
-};
-
-const deleteCookie = (name: string) => {
-	document.cookie = `${name}=; path=/; max-age=0; SameSite=Lax`;
-};
-
-const LoginPage = () => {
-	const searchParams = useSearchParams();
-	const [from, setFrom] = useAtom(fromAtom);
+const LoginPage = ({ initialState, from }: LoginPageProps) => {
 	const setMobile = useSetAtom(mobileAtom);
 	const setState = useSetAtom(stateAtom);
-	const [loginMe] = useAtom(loginMeAtom);
+	const setLoginSucceeded = useSetAtom(loginSucceededAtom);
+	const loginSucceeded = useAtomValue(loginSucceededAtom);
 
-	// Initialize atoms on mount
 	useEffect(() => {
-		const urlFrom = searchParams.get('from');
-		const resolved = safeRedirect(urlFrom, `${window.location.origin}/console`);
-		setFrom(resolved);
+		setState(initialState);
 		setMobile(isMobile(navigator.userAgent));
+	}, [initialState, setState, setMobile]);
 
-		// Generate OAuth2 state for CSRF protection and persist to cookie
-		const state = generateState();
-		setState(state);
-		setCookie(STATE_COOKIE, state, 600); // 10 min
-		setCookie(FROM_COOKIE, encodeURIComponent(resolved), 600);
-	}, [searchParams, setFrom, setMobile, setState]);
-
-	// Redirect when login succeeds
+	// Redirect when login succeeds — session cookie is already set by backend
 	useEffect(() => {
-		if (loginMe && from) {
-			deleteCookie(STATE_COOKIE);
-			deleteCookie(FROM_COOKIE);
+		if (loginSucceeded && from) {
 			window.location.href = from;
 		}
-	}, [loginMe, from]);
+	}, [loginSucceeded, from]);
 
 	return (
 		<PageFrame>
-			<LoginView namespace='console' />
+			<LoginView
+				namespace='console'
+				onLoginSucceeded={() => setLoginSucceeded(true)}
+			/>
 		</PageFrame>
 	);
 };

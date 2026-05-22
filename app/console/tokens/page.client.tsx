@@ -1,12 +1,16 @@
 /**
  * @author Claude
- * @version 2.0
+ * @version 2.1
  * @date 2026/5/22
  *
  * Client-side page for /console/tokens — Token management.
  * Rendering-only — list logic in useTokenList, logout in useLogout.
+ *
+ * M1 fix: Handles null initialTokens (SSR fetch failed) by entering
+ * loading state and letting client-side fetch recover.
+ *
+ * m8 fix: Shows a retry button in the empty state when fetchError is true.
  */
-
 'use client';
 
 import { Button, Spinner } from '@heroui/react';
@@ -20,6 +24,7 @@ import TokenCard from '@/app/console/tokens/TokenCard';
 import TokenRevealModal from '@/app/console/tokens/TokenRevealModal';
 import {
 	tokenListAtom,
+	tokenListErrorAtom,
 	tokenListLoadingAtom,
 } from '@/app/console/tokens/store';
 import { useTokenList } from '@/app/console/tokens/useTokenList';
@@ -29,19 +34,28 @@ import UserMenu from '@/components/preferences/UserMenu';
 import type { TokenListItem } from '@/services/token/api';
 
 interface TokensPageProps {
-	initialTokens?: TokenListItem[];
+	initialTokens?: TokenListItem[] | null;
 }
 
 const TokensPage = ({ initialTokens }: TokensPageProps) => {
+	// M1: null initialTokens means SSR failed — enter loading state
 	useHydrateAtoms([
 		[tokenListAtom, initialTokens ?? []],
 		[tokenListLoadingAtom, !initialTokens],
+		[tokenListErrorAtom, false],
 	]);
 
 	const t = useTranslations('apikey');
 	const router = useRouter();
-	const { tokens, loading, handleRevoke, handleRotate, setCreateModalVisible } =
-		useTokenList(initialTokens);
+	const {
+		tokens,
+		loading,
+		fetchError,
+		fetchTokens,
+		handleRevoke,
+		handleRotate,
+		setCreateModalVisible,
+	} = useTokenList(initialTokens);
 
 	return (
 		<div className={'min-h-screen w-full bg-surface'}>
@@ -135,6 +149,23 @@ const TokensPage = ({ initialTokens }: TokensPageProps) => {
 							{t('empty.title')}
 						</h2>
 						<p className={'text-sm text-muted'}>{t('empty.description')}</p>
+						{/* m8: Retry button when fetch failed */}
+						{fetchError && (
+							<Button
+								variant={'tertiary'}
+								size={'sm'}
+								onPress={fetchTokens}
+								className={'mt-2'}
+							>
+								<span
+									className={'material-icons-round text-[18px]! leading-none!'}
+									aria-hidden={true}
+								>
+									refresh
+								</span>
+								{t('error.retry')}
+							</Button>
+						)}
 					</div>
 				)}
 

@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/5/22
  *
  * Server-side fetch infrastructure for Server Components.
@@ -8,12 +8,29 @@
  *
  * M2 fix: Only forwards auth-related cookies to the backend,
  * avoiding unnecessary exposure of frontend-only cookies.
+ *
+ * C2 fix: Empty Cookie header is no longer sent when no relevant
+ * cookies exist, avoiding misleading the backend.
+ *
+ * M6 fix: Validates HAM_BACKEND_ORIGIN at module load time to
+ * prevent silent failures from misconfigured deployments.
+ *
+ * m6 fix: parseSetCookieHeader now validates Date objects from
+ * the expires attribute before including them in options.
  */
 import { cookies } from 'next/headers';
 
 import { LOCALE_COOKIE } from '@/i18n/config';
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
+
+// M6: Validate at module load to catch deployment misconfig early
+if (!BACKEND_ORIGIN && process.env.NODE_ENV !== 'test') {
+	throw new Error(
+		'[server-fetch] HAM_BACKEND_ORIGIN env var is required. ' +
+			'The BFF cannot function without a backend origin to proxy to.'
+	);
+}
 
 /**
  * Cookie names that are relevant to the backend.
@@ -23,13 +40,12 @@ const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 const FORWARDABLE_COOKIES = new Set([
 	'ham_session',
 	'ham_refresh',
-	'ham_login_state',
-	'ham_login_from',
 	LOCALE_COOKIE,
 ]);
 
 /**
  * Parse a Set-Cookie header value into name, value, and options.
+ * m6 fix: validates Date objects from the expires attribute.
  */
 const parseSetCookieHeader = (header: string) => {
 	const [nameValue, ...attrs] = header.split(';');
@@ -55,9 +71,11 @@ const parseSetCookieHeader = (header: string) => {
 			case 'max-age':
 				options.maxAge = Number(val);
 				break;
-			case 'expires':
-				options.expires = new Date(val);
+			case 'expires': {
+				const d = new Date(val);
+				if (!Number.isNaN(d.getTime())) options.expires = d;
 				break;
+			}
 			case 'secure':
 				options.secure = true;
 				break;
@@ -80,7 +98,6 @@ export const forwardSetCookies = async (res: Response) => {
 	const cookieStore = await cookies();
 	const setCookies = res.headers.getSetCookie?.() ?? [];
 	if (setCookies.length === 0) {
-		// m10: Warn when Set-Cookie is unsupported — session may be lost silently
 		if (typeof res.headers.getSetCookie !== 'function') {
 			console.warn(
 				'[server-fetch] getSetCookie() is not supported by this runtime. ' +
@@ -103,6 +120,9 @@ export const forwardSetCookies = async (res: Response) => {
 /**
  * Make a server-side fetch to the backend, forwarding browser cookies.
  * Only auth-related cookies are forwarded to minimize information exposure.
+ *
+ * C2 fix: Cookie header is only included when relevant cookies exist,
+ * avoiding sending an empty `Cookie: ` header that could mislead the backend.
  */
 export const serverFetch = async (
 	path: string,
@@ -117,13 +137,18 @@ export const serverFetch = async (
 		.map((c) => `${c.name}=${c.value}`)
 		.join('; ');
 
+	// C2: Only include Cookie header when there are relevant cookies
+	const headers: Record<string, string> = {
+		...(init?.body ? { 'Content-Type': 'application/json' } : {}),
+		...(locale ? { 'Accept-Language': locale } : {}),
+		...((init?.headers as Record<string, string>) ?? {}),
+	};
+	if (relevantCookies) {
+		headers.Cookie = relevantCookies;
+	}
+
 	return fetch(`${BACKEND_ORIGIN}${path}`, {
 		...init,
-		headers: {
-			...(init?.body ? { 'Content-Type': 'application/json' } : {}),
-			...(locale ? { 'Accept-Language': locale } : {}),
-			Cookie: relevantCookies,
-			...(init?.headers ?? {}),
-		},
+		headers,
 	});
 };

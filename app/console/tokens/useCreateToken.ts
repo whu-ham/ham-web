@@ -49,6 +49,7 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 	const [scopes, setScopes] = useState<string[]>([]);
 	const [ttl, setTtl] = useState(30);
 	const [submitting, setSubmitting] = useState(false);
+	const submittingRef = useRef(false);
 	const cancelledRef = useRef(false);
 
 	// s5: Clean up on unmount
@@ -74,9 +75,7 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 					return [...new Set([PARENT_SCOPE, ...CHILD_SCOPES, ...prev])];
 				}
 				return prev.filter(
-					(s) =>
-						s !== PARENT_SCOPE &&
-						!CHILD_SCOPES.includes(s)
+					(s) => s !== PARENT_SCOPE && !CHILD_SCOPES.includes(s)
 				);
 			}
 			let next = checked ? [...prev, scope] : prev.filter((s) => s !== scope);
@@ -107,6 +106,7 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 	}, [setVisible]);
 
 	const handleSubmit = useCallback(async () => {
+		if (submittingRef.current) return; // M8: Prevent double submit
 		if (!name.trim()) {
 			toast.error(t('validation.nameRequired'));
 			return;
@@ -124,6 +124,7 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 			return;
 		}
 
+		submittingRef.current = true;
 		setSubmitting(true);
 		try {
 			const resp = await TokenApi.create({
@@ -149,10 +150,20 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 			}
 		} finally {
 			if (!cancelledRef.current) {
+				submittingRef.current = false;
 				setSubmitting(false);
 			}
 		}
-	}, [name, scopes, normalizedScopes, ttl, t, setNewlyCreated, handleClose, bumpVersion]);
+	}, [
+		name,
+		scopes,
+		normalizedScopes,
+		ttl,
+		t,
+		setNewlyCreated,
+		handleClose,
+		bumpVersion,
+	]);
 
 	return {
 		visible,

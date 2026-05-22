@@ -19,9 +19,7 @@ const applyScopeChange = (
 		if (checked) {
 			return [...new Set([PARENT_SCOPE, ...CHILD_SCOPES, ...prev])];
 		}
-		return prev.filter(
-			(s) => s !== PARENT_SCOPE && !CHILD_SCOPES.includes(s)
-		);
+		return prev.filter((s) => s !== PARENT_SCOPE && !CHILD_SCOPES.includes(s));
 	}
 	let next = checked ? [...prev, scope] : prev.filter((s) => s !== scope);
 	if (!checked) {
@@ -44,7 +42,11 @@ describe('handleScopeChange', () => {
 	});
 
 	it('unchecking parent deselects all children', () => {
-		const result = applyScopeChange(['mcp', 'mcp:read', 'mcp:write'], 'mcp', false);
+		const result = applyScopeChange(
+			['mcp', 'mcp:read', 'mcp:write'],
+			'mcp',
+			false
+		);
 		expect(result).toEqual([]);
 	});
 

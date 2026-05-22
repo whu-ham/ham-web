@@ -1,22 +1,16 @@
 /**
- * @author Claude
- * @version 1.2
- * @date 2026/5/22
- *
  * Jotai atoms for the /login page.
  *
- * - `fromAtom`        — URL to redirect to after login (from searchParams).
- * - `loginMeAtom`     — set by QRLoginView / PasskeyLoginView on success.
- * - `mobileAtom`      — whether the current device is mobile.
- * - `stateAtom`       — OAuth2 state for CSRF protection, generated on mount.
- * - `deepLinkUrlAtom` — derived `ham://` deep-link URL for mobile app login.
- *                        Lazily computed — returns '' until state is set
- *                        client-side (avoids SSR empty-origin issue).
+ * - `loginSucceededAtom` — signal: set to true when QR/Passkey login succeeds.
+ * - `mobileAtom`         — whether the current device is mobile.
+ * - `stateAtom`          — OAuth2 state for CSRF protection, generated in SSR.
+ * - `deepLinkUrlAtom`    — derived `ham://` deep-link URL for mobile app login.
+ *                          Lazily computed — returns '' until state is set
+ *                          client-side (avoids SSR empty-origin issue).
  */
 
 import { atom } from 'jotai';
 
-import { MeResponse } from '@/services/sso/api';
 import { buildSsoAuthorizeDeepLink } from '@/services/sso/deepLink';
 
 // ---------------------------------------------------------------------------
@@ -33,16 +27,13 @@ export const APP_CALLBACK_PATH = '/login/callback';
 // Atoms
 // ---------------------------------------------------------------------------
 
-/** URL to redirect to after successful login. Set from searchParams on mount. */
-export const fromAtom = atom<string>('');
-
-/** Set by QRLoginView / PasskeyLoginView when login succeeds. */
-export const loginMeAtom = atom<MeResponse | null>(null);
+/** Signal: set to true when QR/Passkey login succeeds. Triggers redirect. */
+export const loginSucceededAtom = atom(false);
 
 /** Whether the current device is mobile. Set on mount. */
 export const mobileAtom = atom(false);
 
-/** OAuth2 state parameter for CSRF protection. Generated on mount. */
+/** OAuth2 state parameter for CSRF protection. Set from SSR prop. */
 export const stateAtom = atom<string>('');
 
 /**

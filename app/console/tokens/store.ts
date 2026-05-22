@@ -20,6 +20,9 @@ export const tokenListAtom = atom<TokenListItem[]>([]);
 /** List loading state */
 export const tokenListLoadingAtom = atom<boolean>(true);
 
+/** Whether the last fetch attempt failed */
+export const tokenListErrorAtom = atom<boolean>(false);
+
 /** Newly created / rotated token (shown only once) */
 export const newlyCreatedTokenAtom = atom<CreateTokenResponse | null>(null);
 

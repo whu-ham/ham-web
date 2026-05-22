@@ -24,6 +24,14 @@
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 
+// M6: Validate at module load to catch deployment misconfig early
+if (!BACKEND_ORIGIN && process.env.NODE_ENV !== 'test') {
+	throw new Error(
+		'[_proxy] HAM_BACKEND_ORIGIN env var is required. ' +
+			'The BFF cannot function without a backend origin to proxy to.'
+	);
+}
+
 /**
  * Absolute frontend origins that are allowed to call this BFF cross-origin.
  * Parsed once at module load from the comma-separated `WEB_BASE_URL` env.
@@ -53,27 +61,6 @@ const ALLOWED_REQUEST_HEADERS = [
 ].join(', ');
 
 const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
-
-/**
- * s2: Centralized BFF → backend path mapping.
- * All `/api/*` routes are mapped to their backend paths here.
- * Routes not in this map use the default convention: `/api/X` → `/web/X`.
- * The only exception is app-callback which maps to `/api/auth/app-callback`
- * on the backend (different prefix).
- */
-const BACKEND_PATH_MAP: Record<string, string> = {
-	'/api/auth/app-callback': '/api/auth/app-callback',
-};
-
-/**
- * Resolve a BFF path to the backend path.
- * Checks BACKEND_PATH_MAP first, then applies the default /api → /web convention.
- */
-const resolveBackendPath = (bffPath: string): string => {
-	if (BACKEND_PATH_MAP[bffPath]) return BACKEND_PATH_MAP[bffPath];
-	// Default: /api/X → /web/X
-	return bffPath.replace(/^\/api/, '/web');
-};
 
 /**
  * Decide whether the incoming request should receive CORS headers, and

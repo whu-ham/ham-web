@@ -1,8 +1,4 @@
 /**
- * @author Claude
- * @version 4.0
- * @date 2026/5/22
- *
  * Generic Passkey login button for the /login page.
  * Rendering-only — all logic lives in usePasskeyLogin.
  *
@@ -17,12 +13,12 @@ import { useTranslations } from 'next-intl';
 import { usePasskeyLogin } from '@/app/login/usePasskeyLogin';
 
 interface PasskeyLoginViewProps {
-	onLoginFailed?: () => void;
+	onLoginSucceeded?: () => void;
 }
 
-const PasskeyLoginView = ({ onLoginFailed }: PasskeyLoginViewProps) => {
+const PasskeyLoginView = ({ onLoginSucceeded }: PasskeyLoginViewProps) => {
 	const t = useTranslations('sso.passkey');
-	const { loading, login, supported } = usePasskeyLogin(onLoginFailed);
+	const { loading, login, supported } = usePasskeyLogin(onLoginSucceeded);
 
 	if (!supported) return null;
 

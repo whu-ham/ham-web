@@ -1,20 +1,15 @@
 /**
- * @author Claude
- * @version 1.0
- * @date 2026/5/22
- *
  * Custom hook for Passkey (WebAuthn) login flow.
- * Handles credential request, server verification, and session retrieval.
+ * Handles credential request and server verification.
+ * On success, session cookie is set by backend — just call onLoginSucceeded.
  */
 
 'use client';
 
 import toast from 'react-hot-toast';
-import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { loginMeAtom } from '@/app/login/store';
 import {
 	base64ToArrayBuffer,
 	credentialToJSON,
@@ -29,15 +24,13 @@ export interface UsePasskeyLoginReturn {
 }
 
 export const usePasskeyLogin = (
-	onLoginFailed?: () => void
+	onLoginSucceeded?: () => void
 ): UsePasskeyLoginReturn => {
 	const t = useTranslations('sso.passkey');
-	const setLoginMe = useSetAtom(loginMeAtom);
 	const [loading, setLoading] = useState(false);
 	const [supported] = useState<boolean | null>(isPasskeySupported);
 	const cancelledRef = useRef(false);
 
-	// s5: Clean up on unmount
 	useEffect(() => {
 		return () => {
 			cancelledRef.current = true;
@@ -80,12 +73,9 @@ export const usePasskeyLogin = (
 			const assertionJSON = JSON.stringify(credentialToJSON(credential));
 			await WebAuthApi.passkeyLogin(assertionJSON, opt.session);
 
-			try {
-				const me = await WebAuthApi.me();
-				if (cancelledRef.current) return;
-				setLoginMe(me);
-			} catch {
-				onLoginFailed?.();
+			// Session cookie is already set by backend — just signal success
+			if (!cancelledRef.current) {
+				onLoginSucceeded?.();
 			}
 		} catch (e) {
 			if (e instanceof ApiError) {
@@ -103,7 +93,7 @@ export const usePasskeyLogin = (
 				setLoading(false);
 			}
 		}
-	}, [setLoginMe, onLoginFailed, t]);
+	}, [onLoginSucceeded, t]);
 
 	return { loading, login, supported };
 };

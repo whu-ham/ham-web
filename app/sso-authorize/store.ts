@@ -16,7 +16,7 @@ import { atom } from 'jotai';
 
 import { MeResponse } from '@/services/sso/api';
 import { buildSsoAuthorizeDeepLink } from '@/services/sso/deepLink';
-import { DeviceKind, detectDeviceKind } from '@/services/sso/ua';
+import { DeviceKind } from '@/services/sso/ua';
 
 // ---------------------------------------------------------------------------
 // Types

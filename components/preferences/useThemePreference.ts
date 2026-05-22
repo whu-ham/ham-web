@@ -11,11 +11,7 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
 
-import {
-	THEME_CLASSES,
-	Theme,
-	isTheme,
-} from '@/components/theme/config';
+import { THEME_CLASSES, Theme, isTheme } from '@/components/theme/config';
 import {
 	resolvedThemeAtom,
 	systemThemeAtom,

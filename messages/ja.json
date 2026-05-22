@@ -220,7 +220,8 @@
 			"warning": "今すぐコピーしてください。再度表示されることはありません。",
 			"copy": "コピー",
 			"copied": "コピーしました",
-			"close": "閉じる"
+			"close": "閉じる",
+			"copyFailed": "クリップボードへのコピーに失敗しました"
 		},
 		"validation": {
 			"nameRequired": "名前は必須です",
@@ -233,7 +234,8 @@
 			"fetchFailed": "API Key の取得に失敗しました",
 			"createFailed": "作成に失敗しました",
 			"rotateFailed": "ローテートに失敗しました",
-			"revokeFailed": "無効化に失敗しました"
+			"revokeFailed": "無効化に失敗しました",
+			"retry": "再試行"
 		}
 	}
 }

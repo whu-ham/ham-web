@@ -1,15 +1,20 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/5/22
  *
  * Console view shown when the user is authenticated.
  * Displays a large greeting and feature cards.
+ *
+ * m5 fix: Greeting key is computed in useEffect after mount to avoid
+ * SSR/client hydration mismatch (server and client may have different
+ * timezones / clock values).
  */
 'use client';
 
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { MeResponse } from '@/services/sso/api';
 
@@ -32,7 +37,13 @@ const ConsoleView = ({ me }: ConsoleViewProps) => {
 	const t = useTranslations('console');
 	const router = useRouter();
 
-	const greetingKey = getGreetingKey();
+	// m5: Compute greeting after mount to avoid hydration mismatch
+	const [greetingKey, setGreetingKey] = useState('default');
+
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- must run after hydration
+		setGreetingKey(getGreetingKey());
+	}, []);
 
 	return (
 		<>

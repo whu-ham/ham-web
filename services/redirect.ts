@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.1
+ * @version 1.2
  * @date 2026/5/22
  *
  * Redirect URL validation utilities.
@@ -15,6 +15,9 @@
  *
  * C2 fix: Allowed hosts are read from `NEXT_PUBLIC_ALLOWED_REDIRECT_HOSTS`
  * (comma-separated). When unset, only relative paths are allowed (safest).
+ *
+ * M4 fix: Simplified relative-path validation — single URL-parse check
+ * replaces the complex regex + multi-branch logic.
  */
 
 /**
@@ -42,23 +45,19 @@ export const safeRedirect = (
 	if (!from) return fallback;
 
 	// --- Relative path ---
-	// Must start with `/` but NOT `//` (which would be protocol-relative).
-	if (from.startsWith('/') && !from.startsWith('//')) {
-		// m2: Guard against backslash-encoded variants like `/\evil.com`
-		// Using regex is more reliable than URL parsing for this edge case.
-		if (!/^\/[^/\\]/.test(from) && from !== '/') {
-			// Single `/` is fine; paths starting with /\ or // are rejected
-			// by the checks above. This branch catches remaining oddities.
-			return fallback;
-		}
-		// Extra guard: reject if the path escapes the origin via URL parsing
+	// M4: Simplified — reject protocol-relative (//) and backslash variants (/\),
+	// then use URL parsing as the final authority.
+	if (
+		from.startsWith('/') &&
+		!from.startsWith('//') &&
+		!from.startsWith('/\\')
+	) {
 		try {
-			const resolved = new URL(from, 'https://placeholder.invalid');
-			if (resolved.host !== 'placeholder.invalid') return fallback;
+			const u = new URL(from, 'https://placeholder.invalid');
+			if (u.host === 'placeholder.invalid') return from;
 		} catch {
-			return fallback;
+			// Invalid URL — fall through to fallback
 		}
-		return from;
 	}
 
 	// --- Absolute URL ---

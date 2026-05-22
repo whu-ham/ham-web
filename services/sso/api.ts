@@ -109,11 +109,7 @@ export const WebAuthApi = {
 	logout: () => request<void>('/auth/logout', { method: 'POST' }),
 	refresh: () => request<void>('/auth/refresh', { method: 'POST' }),
 	// App callback -----------------------------------------------------
-	appCallback: (code: string) =>
-		request<void>('/auth/app-callback', {
-			method: 'POST',
-			body: JSON.stringify({ code }),
-		}),
+	// m2: Removed — app callback is now handled server-side only via processAppCallback.
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
 		client_id: string;

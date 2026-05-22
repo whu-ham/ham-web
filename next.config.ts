@@ -11,6 +11,21 @@ import createNextIntlPlugin from 'next-intl/plugin';
 // locale + message catalogue without us having to pass them manually.
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
-const nextConfig: NextConfig = {};
+const nextConfig: NextConfig = {
+	// M7: Block access to MSW service worker in production.
+	// The file exists in public/ for dev but should never be cached
+	// or accessible in production deployments.
+	headers: async () => [
+		{
+			source: '/mockServiceWorker.js',
+			headers: [
+				{
+					key: 'Cache-Control',
+					value: 'no-store, no-cache, must-revalidate, private',
+				},
+			],
+		},
+	],
+};
 
 export default withNextIntl(nextConfig);

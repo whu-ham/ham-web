@@ -1,12 +1,14 @@
 /**
  * @author Claude
- * @version 1.3
+ * @version 1.4
  * @date 2026/5/22
  *
  * Server-side data fetching for token endpoints.
  * Calls the backend directly via serverFetch.
  *
- * M1 fix: Mock data is only loaded when NEXT_PUBLIC_ENABLE_MSW is
+ * M1 fix: Returns null on error instead of an empty array, so the
+ * client can distinguish "no tokens" from "fetch failed".
+ * Mock data is only loaded when NEXT_PUBLIC_ENABLE_MSW is
  * explicitly 'true', preventing mocks from entering production bundles.
  */
 import { serverFetch } from '@/services/server-fetch';
@@ -19,9 +21,9 @@ const isMswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === 'true';
  * Fetch the token list on the server.
  * When MSW is enabled, returns mock data directly (MSW is browser-only).
  * In production, reads the auth session from cookies and forwards Accept-Language.
- * Returns an empty array on error so the page always renders.
+ * Returns null on error so the client can distinguish "no tokens" from "fetch failed".
  */
-export const fetchTokenList = async (): Promise<TokenListItem[]> => {
+export const fetchTokenList = async (): Promise<TokenListItem[] | null> => {
 	if (isMswEnabled) {
 		const { mockTokenList } = await import('@/mocks/data');
 		return structuredClone(mockTokenList);
@@ -29,10 +31,10 @@ export const fetchTokenList = async (): Promise<TokenListItem[]> => {
 
 	try {
 		const res = await serverFetch('/web/tokens');
-		if (!res.ok) return [];
+		if (!res.ok) return null;
 		const data = (await res.json()) as ListTokensResponse;
 		return data.tokens ?? [];
 	} catch {
-		return [];
+		return null;
 	}
 };

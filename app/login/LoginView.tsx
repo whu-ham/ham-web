@@ -1,15 +1,9 @@
 /**
- * @author Claude
- * @version 3.0
- * @date 2026/5/22
- *
  * Combined login surface for the /login page.
  * Shows the QR code as the primary login method, with a Passkey button
  * below as a secondary option (hidden automatically when unsupported).
- *
- * Reads mobile / deep-link state from Jotai atoms — no callback props
- * for login success or app launching.
  */
+
 'use client';
 
 import Image from 'next/image';
@@ -27,9 +21,11 @@ import { tryLaunchDeepLink } from '@/services/sso/deepLink';
 interface LoginViewProps {
 	/** i18n namespace for title/subtitle, default 'sso' */
 	namespace?: string;
+	/** Called when login succeeds (session cookie already set by backend) */
+	onLoginSucceeded?: () => void;
 }
 
-const LoginView = ({ namespace = 'sso' }: LoginViewProps) => {
+const LoginView = ({ namespace = 'sso', onLoginSucceeded }: LoginViewProps) => {
 	const t = useTranslations(namespace);
 	const mobile = useAtomValue(mobileAtom);
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
@@ -55,7 +51,7 @@ const LoginView = ({ namespace = 'sso' }: LoginViewProps) => {
 			</header>
 
 			<section className={'flex flex-col items-center gap-6'}>
-				<QRLoginView />
+				<QRLoginView onLoginSucceeded={onLoginSucceeded} />
 				<div className={'w-full flex items-center justify-center gap-4'}>
 					<Separator className={'w-16 shrink'} />
 					<span className={'shrink-0 text-sm text-muted'}>
@@ -63,7 +59,7 @@ const LoginView = ({ namespace = 'sso' }: LoginViewProps) => {
 					</span>
 					<Separator className={'w-16 shrink'} />
 				</div>
-				<PasskeyLoginView />
+				<PasskeyLoginView onLoginSucceeded={onLoginSucceeded} />
 				{mobile && (
 					<>
 						<div className={'w-full flex items-center justify-center gap-4'}>

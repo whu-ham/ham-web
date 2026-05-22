@@ -23,20 +23,19 @@ import {
 import { useTranslations } from 'next-intl';
 
 import { useLogout } from '@/hooks/useLogout';
-import { LOCALES, LOCALE_LABELS, Locale, isLocale } from '@/i18n/config';
+import { LOCALES, LOCALE_LABELS } from '@/i18n/config';
 import {
 	LOCALE_ICON,
 	useLocalePreference,
 	resolveAutoLabel,
 } from '@/components/preferences/useLocalePreference';
-import { THEMES, Theme, isTheme } from '@/components/theme/config';
+import { THEMES } from '@/components/theme/config';
 import {
 	THEME_ICON,
 	useThemePreference,
 } from '@/components/preferences/useThemePreference';
 
 const AUTO_THEME_KEY = 'auto' as const;
-type ThemeKey = typeof AUTO_THEME_KEY | Theme;
 
 const AUTO_LOCALE_KEY = 'auto' as const;
 
@@ -56,8 +55,11 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 
 	const { selectedKey: selectedThemeKey, onSelectionChange: onThemeChange } =
 		useThemePreference();
-	const { selectedKey: selectedLocaleKey, browserLocale, onSelectionChange: onLocaleChange } =
-		useLocalePreference();
+	const {
+		selectedKey: selectedLocaleKey,
+		browserLocale,
+		onSelectionChange: onLocaleChange,
+	} = useLocalePreference();
 
 	const onThemeSelectionChange = (keys: Selection) => {
 		const rawKey = Array.from(keys)[0]?.toString();

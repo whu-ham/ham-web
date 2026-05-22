@@ -1,19 +1,19 @@
 /**
  * @author Claude
- * @version 2.0
+ * @version 2.1
  * @date 2026/5/22
  *
  * OAuth2 callback page for mobile app login.
  *
  * Flow:
- *   1. /login page builds deep link with redirect_uri=/login/callback
- *      and writes OAuth2 state to an HttpOnly cookie (ham_login_state).
+ *   1. /login page calls POST /api/auth/login-init, which writes
+ *      OAuth2 state and redirect target to HttpOnly cookies.
  *   2. App authorizes and redirects back here with ?code=xxx&state=yyy
- *   3. This SSR page validates state against the cookie BEFORE
+ *   3. This SSR page validates state against the HttpOnly cookie BEFORE
  *      exchanging the code, preventing OAuth2 Login CSRF.
  *   4. On success, redirects to the original `from` URL (stored in
  *      ham_login_from cookie).
- *   5. On failure, redirects to /login.
+ *   5. On failure, redirects to /login with error details.
  */
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -54,12 +54,15 @@ const Page = async ({ searchParams }: PageProps) => {
 	}
 
 	// Process the code exchange (only after state validation passes)
-	const success = await processAppCallback(code);
-	if (!success) {
-		redirect('/login');
+	const result = await processAppCallback(code);
+	if (!result.ok) {
+		cookieStore.delete(FROM_COOKIE);
+		redirect(
+			`/login?error=${encodeURIComponent(result.reason || 'callback_failed')}`
+		);
 	}
 
-	// Read the `from` redirect target from cookie (set by /login page)
+	// Read the `from` redirect target from cookie (set by /api/auth/login-init)
 	const storedFrom = cookieStore.get(FROM_COOKIE)?.value;
 	cookieStore.delete(FROM_COOKIE);
 

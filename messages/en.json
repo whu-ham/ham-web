@@ -220,7 +220,8 @@
 			"warning": "Copy this key now. It will not be shown again.",
 			"copy": "Copy",
 			"copied": "Copied",
-			"close": "Close"
+			"close": "Close",
+			"copyFailed": "Failed to copy to clipboard"
 		},
 		"validation": {
 			"nameRequired": "Name is required",
@@ -233,7 +234,8 @@
 			"fetchFailed": "Failed to fetch API keys",
 			"createFailed": "Failed to create",
 			"rotateFailed": "Failed to rotate",
-			"revokeFailed": "Failed to revoke"
+			"revokeFailed": "Failed to revoke",
+			"retry": "Retry"
 		}
 	}
 }

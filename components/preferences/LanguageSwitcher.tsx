@@ -11,7 +11,7 @@ import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import type { Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
-import { LOCALES, LOCALE_LABELS, Locale, isLocale } from '@/i18n/config';
+import { LOCALES, LOCALE_LABELS, Locale } from '@/i18n/config';
 import {
 	LOCALE_ICON,
 	useLocalePreference,
@@ -23,7 +23,6 @@ interface LanguageSwitcherProps {
 }
 
 const AUTO_KEY = 'auto' as const;
-type MenuKey = typeof AUTO_KEY | Locale;
 
 const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 	const t = useTranslations('language');
@@ -41,7 +40,9 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 	const autoTriggerLabel =
 		browserLocale === null ? t('switcher.autoUnsupported') : autoLabel;
 	const triggerLabel =
-		selectedKey !== AUTO_KEY ? LOCALE_LABELS[selectedKey as Locale] : autoTriggerLabel;
+		selectedKey !== AUTO_KEY
+			? LOCALE_LABELS[selectedKey as Locale]
+			: autoTriggerLabel;
 
 	return (
 		<Dropdown>

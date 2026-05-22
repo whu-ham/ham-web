@@ -1,32 +1,22 @@
 /**
- * @author Claude
- * @version 1.1
- * @date 2026/5/22
- *
  * Custom hook for QR login flow:
  *   1. POST /api/auth/qr/ticket → get ticket
  *   2. GET /api/auth/qr/ticket/:ticket → poll state
- *   3. On CONFIRMED → call /api/auth/me → setLoginMe(me)
+ *   3. On CONFIRMED → session cookie is set by backend → call onLoginSucceeded()
  *
  * Visibility-aware polling:
  *   - The poll interval is paused while `document.hidden` is true.
  *   - When the tab becomes visible again the hook immediately fires one
  *     poll. If the ticket had expired while hidden it is automatically
  *     refreshed.
- *
- * M5 fix: Uses useRef to track latest poll result instead of reading
- * state inside a setState updater (which is impure). Avoids side effects
- * in updater functions and prevents concurrent interval issues.
  */
 
 'use client';
 
 import toast from 'react-hot-toast';
-import { useSetAtom } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { loginMeAtom } from '@/app/login/store';
 import {
 	CheckTicketResponse,
 	QR_TICKET_STATE,
@@ -35,9 +25,10 @@ import {
 
 const POLL_INTERVAL_MS = 2000;
 
-const isDocumentHidden = (): boolean => {
-	return typeof document !== 'undefined' && document.hidden;
-};
+interface PollEntry {
+	ticket: string;
+	poll: () => Promise<void>;
+}
 
 export interface UseQrLoginReturn {
 	ticket: string;
@@ -51,9 +42,8 @@ export interface UseQrLoginReturn {
 	isScanned: boolean;
 }
 
-export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
+export const useQrLogin = (onLoginSucceeded?: () => void): UseQrLoginReturn => {
 	const t = useTranslations('sso.qr');
-	const setLoginMe = useSetAtom(loginMeAtom);
 	const [ticket, setTicket] = useState<string>('');
 	const [check, setCheck] = useState<CheckTicketResponse | null>(null);
 	const [creating, setCreating] = useState(false);
@@ -61,8 +51,7 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 	const [refreshing, setRefreshing] = useState(false);
 	const timerRef = useRef<number | null>(null);
 	const creatingRef = useRef(false);
-	const pollRef = useRef<(() => Promise<void>) | null>(null);
-	// M5: Track latest poll result via ref to avoid setState updater side effects
+	const pollRef = useRef<PollEntry | null>(null);
 	const lastCheckRef = useRef<CheckTicketResponse | null>(null);
 
 	const clearTimer = useCallback(() => {
@@ -95,68 +84,18 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 
 	useEffect(() => {
 		refresh();
-		return () => clearTimer();
-	}, [refresh, clearTimer]);
 
-	useEffect(() => {
-		if (!ticket) {
-			return;
-		}
-		clearTimer();
-
-		const poll = async () => {
-			try {
-				const resp = await WebAuthApi.checkQrTicket(ticket);
-				lastCheckRef.current = resp;
-				setCheck(resp);
-
-				if (resp.state === QR_TICKET_STATE.CONFIRMED) {
-					clearTimer();
-					window.setTimeout(async () => {
-						try {
-							const me = await WebAuthApi.me();
-							setLoginMe(me);
-						} catch {
-							onLoginFailed?.();
-						}
-					}, 500);
-				} else if (
-					resp.state === QR_TICKET_STATE.EXPIRED ||
-					resp.state === QR_TICKET_STATE.INVALID
-				) {
-					clearTimer();
-				}
-			} catch {
-				// Network blip — keep polling
-			}
-		};
-
-		pollRef.current = poll;
-
-		if (!isDocumentHidden()) {
-			poll();
-		}
-
-		if (!isDocumentHidden()) {
-			timerRef.current = window.setInterval(poll, POLL_INTERVAL_MS);
-		}
-
-		return () => clearTimer();
-	}, [ticket, clearTimer, setLoginMe, onLoginFailed, t]);
-
-	useEffect(() => {
 		const onVisibilityChange = () => {
 			if (document.hidden) {
 				clearTimer();
 				return;
 			}
 
-			const currentPoll = pollRef.current;
-			if (!currentPoll) return;
+			const entry = pollRef.current;
+			if (!entry) return;
 
-			// M5: Read lastCheckRef instead of using setState updater for side effects
-			currentPoll().then(() => {
-				if (timerRef.current !== null) return; // Already restarted
+			entry.poll().then(() => {
+				if (timerRef.current !== null) return;
 
 				const last = lastCheckRef.current;
 				if (
@@ -168,19 +107,53 @@ export const useQrLogin = (onLoginFailed?: () => void): UseQrLoginReturn => {
 					return;
 				}
 
-				// Only start interval if we're still visible
 				if (!document.hidden) {
 					clearTimer();
-					timerRef.current = window.setInterval(currentPoll, POLL_INTERVAL_MS);
+					timerRef.current = window.setInterval(entry.poll, POLL_INTERVAL_MS);
 				}
 			});
 		};
 
 		document.addEventListener('visibilitychange', onVisibilityChange);
 		return () => {
+			clearTimer();
 			document.removeEventListener('visibilitychange', onVisibilityChange);
 		};
-	}, [clearTimer, refresh]);
+	}, [refresh, clearTimer]);
+
+	useEffect(() => {
+		if (!ticket) return;
+
+		clearTimer();
+
+		const poll = async () => {
+			try {
+				const resp = await WebAuthApi.checkQrTicket(ticket);
+				lastCheckRef.current = resp;
+				setCheck(resp);
+
+				if (resp.state === QR_TICKET_STATE.CONFIRMED) {
+					clearTimer();
+					// Session cookie is already set by backend — just signal success
+					onLoginSucceeded?.();
+				} else if (
+					resp.state === QR_TICKET_STATE.EXPIRED ||
+					resp.state === QR_TICKET_STATE.INVALID
+				) {
+					clearTimer();
+				}
+			} catch {
+				// Network blip — keep polling
+			}
+		};
+
+		pollRef.current = { ticket, poll };
+
+		if (!document.hidden) {
+			poll();
+			timerRef.current = window.setInterval(poll, POLL_INTERVAL_MS);
+		}
+	}, [ticket, clearTimer, onLoginSucceeded]);
 
 	const state = check?.state ?? QR_TICKET_STATE.PENDING;
 	const isExpired =

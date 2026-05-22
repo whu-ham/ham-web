@@ -14,7 +14,7 @@ import type { Selection } from '@heroui/react';
 import { Dropdown, Label, buttonVariants } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
-import { THEMES, Theme, isTheme } from '@/components/theme/config';
+import { THEMES } from '@/components/theme/config';
 import {
 	THEME_ICON,
 	useThemePreference,
@@ -25,7 +25,6 @@ interface ThemeSwitcherProps {
 }
 
 const AUTO_KEY = 'auto' as const;
-type MenuKey = typeof AUTO_KEY | Theme;
 
 const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 	const t = useTranslations('theme');
