@@ -26,7 +26,8 @@ export const THEMES = ['light', 'dark'] as const;
 
 export type Theme = (typeof THEMES)[number];
 
-export const THEME_COOKIE = 'NEXT_THEME';
+import { THEME_COOKIE } from '@/services/cookies';
+export { THEME_COOKIE };
 
 // Key on `<html>` used by the inline bootstrap script to avoid a
 // flash of incorrect theme on first paint. Keeping it named is

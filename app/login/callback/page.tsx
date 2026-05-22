@@ -22,7 +22,7 @@ import { redirect } from 'next/navigation';
 
 import { processAppCallback } from '@/app/lib/auth';
 import { safeRedirect } from '@/services/redirect';
-import { FROM_COOKIE, STATE_COOKIE } from '@/services/auth-cookies';
+import { FROM_COOKIE, STATE_COOKIE } from '@/services/cookies';
 
 export const generateMetadata = async (): Promise<Metadata> => {
 	const t = await getTranslations('console');

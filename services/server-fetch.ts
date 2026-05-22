@@ -20,7 +20,12 @@
  */
 import { cookies } from 'next/headers';
 
-import { LOCALE_COOKIE } from '@/i18n/config';
+import {
+	SESSION_COOKIE,
+	REFRESH_COOKIE,
+	LOCALE_COOKIE,
+	THEME_COOKIE,
+} from '@/services/cookies';
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 
@@ -30,9 +35,10 @@ const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
  * All other cookies (theme, locale UI pref, analytics, etc.) are stripped.
  */
 const FORWARDABLE_COOKIES = new Set([
-	'ham_session',
-	'ham_refresh',
+	SESSION_COOKIE,
+	REFRESH_COOKIE,
 	LOCALE_COOKIE,
+	THEME_COOKIE,
 ]);
 
 /**
