@@ -28,10 +28,10 @@ import { forwardSetCookies, serverFetch } from '@/services/server-fetch';
  * unauthenticated.
  */
 export const fetchMe = async (): Promise<MeResponse | null> => {
-	const res = await serverFetch('/web/auth/me');
-	if (res.status === 401 || res.status === 403) return null;
-	if (!res.ok) throw new Error(`fetchMe failed: ${res.status}`);
-	return (await res.json()) as MeResponse;
+	const { response, data } = await serverFetch<MeResponse>('/web/auth/me');
+	if (response.status === 401 || response.status === 403) return null;
+	if (!response.ok) throw new Error(`fetchMe failed: ${response.status}`);
+	return data;
 };
 
 /**
@@ -73,23 +73,17 @@ export const processAppCallback = async (
 	code: string
 ): Promise<AppCallbackResult> => {
 	try {
-		const res = await serverFetch('/web/auth/app-callback', {
+		const { response, envelope } = await serverFetch('/web/auth/app-callback', {
 			method: 'POST',
 			body: JSON.stringify({ code }),
 		});
 
-		if (!res.ok) {
-			let reason = `HTTP ${res.status}`;
-			try {
-				const body = (await res.json()) as { error?: string; message?: string };
-				reason = body.error || body.message || reason;
-			} catch {
-				// Response body not JSON — use HTTP status
-			}
+		if (!response.ok) {
+			const reason = envelope.message || `HTTP ${response.status}`;
 			return { ok: false, reason };
 		}
 
-		await forwardSetCookies(res);
+		await forwardSetCookies(response);
 		return { ok: true };
 	} catch (e) {
 		return {

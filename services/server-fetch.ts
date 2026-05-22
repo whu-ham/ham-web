@@ -116,16 +116,44 @@ export const forwardSetCookies = async (res: Response) => {
 };
 
 /**
+ * Backend response envelope. The backend always wraps responses in
+ * { code, data, message }. We unwrap the `data` field so callers
+ * get the actual payload directly, consistent with what the BFF
+ * proxy transparently streams to the browser (where the client-side
+ * request<T>() also sees the raw unwrapped body after proxy).
+ */
+interface BackendEnvelope<T = unknown> {
+	code: number;
+	data: T;
+	message?: string;
+}
+
+/**
+ * Result of serverFetch: the raw Response (for status/headers access)
+ * plus the unwrapped `data` payload and the full envelope (for error
+ * message extraction).
+ */
+export interface ServerFetchResult<T = unknown> {
+	response: Response;
+	data: T;
+	envelope: BackendEnvelope<T>;
+}
+
+/**
  * Make a server-side fetch to the backend, forwarding browser cookies.
  * Only auth-related cookies are forwarded to minimize information exposure.
+ *
+ * Unwraps the backend's `{code, data}` envelope so callers receive the
+ * inner `data` payload directly — matching the pattern of _proxy.ts
+ * which streams the raw backend body to the client.
  *
  * C2 fix: Cookie header is only included when relevant cookies exist,
  * avoiding sending an empty `Cookie: ` header that could mislead the backend.
  */
-export const serverFetch = async (
+export const serverFetch = async <T = unknown>(
 	path: string,
 	init?: RequestInit
-): Promise<Response> => {
+): Promise<ServerFetchResult<T>> => {
 	const cookieStore = await cookies();
 	const locale = cookieStore.get(LOCALE_COOKIE)?.value;
 	// M2: Only forward whitelisted cookies
@@ -137,6 +165,7 @@ export const serverFetch = async (
 
 	// C2: Only include Cookie header when there are relevant cookies
 	const headers: Record<string, string> = {
+		Accept: 'application/json',
 		...(init?.body ? { 'Content-Type': 'application/json' } : {}),
 		...(locale ? { 'Accept-Language': locale } : {}),
 		...((init?.headers as Record<string, string>) ?? {}),
@@ -145,8 +174,11 @@ export const serverFetch = async (
 		headers.Cookie = relevantCookies;
 	}
 
-	return fetch(`${BACKEND_ORIGIN}${path}`, {
+	const response = await fetch(`${BACKEND_ORIGIN}${path}`, {
 		...init,
 		headers,
 	});
+
+	const envelope = (await response.json()) as BackendEnvelope<T>;
+	return { response, data: envelope.data, envelope };
 };

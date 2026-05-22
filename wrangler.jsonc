@@ -38,5 +38,11 @@
 	"placement": {
 		"mode": "smart",
 		"hint": "apac"
+	},
+	"observability": {
+		"logs": {
+			"enabled": true,
+			"invocation_logs": true
+		}
 	}
 }

@@ -32,7 +32,7 @@ export interface SsoAuthorizeParams {
 export type Stage =
 	| { kind: 'loading' }
 	| { kind: 'deep-link-trying' }
-	| { kind: 'deep-link-fallback' }
+	| { kind: 'deep-link-fallback'; authenticated: boolean }
 	| { kind: 'consent'; me: MeResponse };
 
 // ---------------------------------------------------------------------------

@@ -1,18 +1,24 @@
 /**
  * @author Claude
- * @version 2.0
+ * @version 2.1
  * @date 2026/5/22
  *
  * Mobile fallback view shown when the `ham://sso-authorize` deep link did
- * not switch the user to the native HAM App. Offers three exit doors,
- * laid out vertically on the same card (no page switch):
- *   1. Download HAM App (platform-aware store link) — primary CTA.
+ * not switch the user to the native HAM App.
+ *
+ * When the user IS authenticated:
+ *   1. Download HAM App — primary CTA.
  *   2. Retry the deep link — useful when the user just installed the App.
  *   3. Sign in with browser — navigates to /login with the current URL
  *      as the return destination.
  *
- * M7 fix: Reads deviceKind from store atom instead of computing locally.
+ * When the user is NOT authenticated:
+ *   1. Download HAM App — primary CTA.
+ *   2. Retry the deep link.
+ *   3. Passkey login — inline passkey sign-in; on success, reloads the
+ *      page so the server can pick up the new session.
  */
+
 'use client';
 
 import Image from 'next/image';
@@ -21,11 +27,16 @@ import { useAtomValue } from 'jotai';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
+import PasskeyLoginView from '@/app/login/PasskeyLoginView';
 import icon from '@/public/icon-1024.png';
 import { getAppStoreURL } from '@/services/sso/ua';
 import { deepLinkUrlAtom, deviceKindAtom } from '@/app/sso-authorize/store';
 
-const DeepLinkFallback = () => {
+interface DeepLinkFallbackProps {
+	isAuthenticated: boolean;
+}
+
+const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
 	const deviceKind = useAtomValue(deviceKindAtom);
@@ -42,6 +53,11 @@ const DeepLinkFallback = () => {
 			window.location.pathname + window.location.search
 		);
 		window.location.href = `/login?from=${from}`;
+	};
+
+	const onPasskeyLoginSucceeded = () => {
+		// Reload so the server re-checks auth and renders consent view
+		window.location.reload();
 	};
 
 	return (
@@ -89,15 +105,20 @@ const DeepLinkFallback = () => {
 				</span>
 				<Separator className={'w-16 shrink'} />
 			</div>
-			<Button variant={'tertiary'} className={'w-full'} onPress={goToLogin}>
-				<span
-					className={'material-icons-round text-[18px]! leading-none!'}
-					aria-hidden={true}
-				>
-					login
-				</span>
-				{t('login.signInBrowser')}
-			</Button>
+
+			{isAuthenticated ? (
+				<Button variant={'tertiary'} className={'w-full'} onPress={goToLogin}>
+					<span
+						className={'material-icons-round text-[18px]! leading-none!'}
+						aria-hidden={true}
+					>
+						login
+					</span>
+					{t('login.signInBrowser')}
+				</Button>
+			) : (
+				<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+			)}
 		</>
 	);
 };
