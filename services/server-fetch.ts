@@ -24,14 +24,6 @@ import { LOCALE_COOKIE } from '@/i18n/config';
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
 
-// M6: Validate at module load to catch deployment misconfig early
-if (!BACKEND_ORIGIN && process.env.NODE_ENV !== 'test') {
-	throw new Error(
-		'[server-fetch] HAM_BACKEND_ORIGIN env var is required. ' +
-			'The BFF cannot function without a backend origin to proxy to.'
-	);
-}
-
 /**
  * Cookie names that are relevant to the backend.
  * Only these will be forwarded in the Cookie header.
