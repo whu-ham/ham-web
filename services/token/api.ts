@@ -29,12 +29,15 @@ export interface CreateTokenRequest {
 }
 
 export interface CreateTokenResponse {
-	id: string;
-	name: string;
-	token: string; // Only returned on create/rotate
-	scopes: string[];
-	expires_at: string;
-	created_at: string;
+	raw_token: string;
+	token: {
+		id: string;
+		name: string;
+		last4: string;
+		scopes: string[];
+		expires_at: string;
+		created_at: string;
+	};
 }
 
 export interface TokenListItem {
@@ -47,10 +50,6 @@ export interface TokenListItem {
 	created_at: string;
 }
 
-export interface ListTokensResponse {
-	tokens: TokenListItem[];
-}
-
 export interface RotateTokenRequest {
 	ttl_days: number;
 }
@@ -60,7 +59,7 @@ export interface RotateTokenRequest {
 // ---------------------------------------------------------------------------
 
 export const TokenApi = {
-	list: () => request<ListTokensResponse>('/tokens'),
+	list: () => request<TokenListItem[]>('/tokens'),
 	create: (body: CreateTokenRequest) =>
 		request<CreateTokenResponse>('/tokens', {
 			method: 'POST',

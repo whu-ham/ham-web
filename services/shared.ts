@@ -67,5 +67,15 @@ export const request = async <T>(
 	if (res.status === 204) {
 		return undefined as unknown as T;
 	}
-	return (await res.json()) as T;
+	const body: unknown = await res.json();
+	// Unwrap the standard backend envelope { code, message, data }.
+	// The BFF proxy streams the raw backend response, so client-side
+	// responses carry the same envelope as the backend.
+	const isEnvelope =
+		typeof body === 'object' &&
+		body !== null &&
+		'code' in body &&
+		'message' in body &&
+		'data' in body;
+	return (isEnvelope ? (body as { data: T }).data : body) as T;
 };

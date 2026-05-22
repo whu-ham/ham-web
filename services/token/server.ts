@@ -13,10 +13,7 @@
  */
 import { serverFetch } from '@/services/server-fetch';
 
-import type { ListTokensResponse, TokenListItem } from '@/services/token/api';
-
-const isMswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === 'true';
-
+import type { TokenListItem } from '@/services/token/api';
 /**
  * Fetch the token list on the server.
  * When MSW is enabled, returns mock data directly (MSW is browser-only).
@@ -24,16 +21,11 @@ const isMswEnabled = process.env.NEXT_PUBLIC_ENABLE_MSW === 'true';
  * Returns null on error so the client can distinguish "no tokens" from "fetch failed".
  */
 export const fetchTokenList = async (): Promise<TokenListItem[] | null> => {
-	if (isMswEnabled) {
-		const { mockTokenList } = await import('@/mocks/data');
-		return structuredClone(mockTokenList);
-	}
-
 	try {
 		const { response, data } =
-			await serverFetch<ListTokensResponse>('/web/tokens');
+			await serverFetch<TokenListItem[]>('/web/tokens');
 		if (!response.ok) return null;
-		return data.tokens ?? [];
+		return Array.isArray(data) ? data : [];
 	} catch {
 		return null;
 	}

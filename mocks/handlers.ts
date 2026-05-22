@@ -42,7 +42,7 @@ export const authHandlers = [
 	// GET /api/auth/me — return mock logged-in user
 	http.get('*/api/auth/me', async () => {
 		await delay(200);
-		return HttpResponse.json(mockMe);
+		return HttpResponse.json(envelope(mockMe));
 	}),
 
 	// POST /api/auth/logout — no-op
@@ -62,11 +62,14 @@ export const authHandlers = [
 // Token handlers
 // ---------------------------------------------------------------------------
 
+/** Wrap mock data in the standard backend envelope { code, message, data }. */
+const envelope = <T>(data: T) => ({ code: '200', message: '', data });
+
 export const tokenHandlers = [
 	// GET /api/tokens — list all tokens
 	http.get('*/api/tokens', async () => {
 		await delay(300);
-		return HttpResponse.json({ tokens: mockTokens });
+		return HttpResponse.json(envelope(mockTokens));
 	}),
 
 	// POST /api/tokens — create a token
@@ -93,11 +96,11 @@ export const tokenHandlers = [
 		}
 
 		const id = `tk_${nextId++}`;
-		const token = generateTokenValue();
+		const rawToken = generateTokenValue();
 		const item = {
 			id,
 			name: body.name.trim(),
-			last4: token.slice(-4),
+			last4: rawToken.slice(-4),
 			scopes: body.scopes,
 			last_used_at: null,
 			expires_at: futureDate(body.ttl_days),
@@ -105,14 +108,19 @@ export const tokenHandlers = [
 		};
 		mockTokens.push(item);
 
-		return HttpResponse.json({
-			id,
-			name: body.name.trim(),
-			token,
-			scopes: body.scopes,
-			expires_at: item.expires_at,
-			created_at: item.created_at,
-		});
+		return HttpResponse.json(
+			envelope({
+				raw_token: rawToken,
+				token: {
+					id,
+					name: body.name.trim(),
+					last4: rawToken.slice(-4),
+					scopes: body.scopes,
+					expires_at: item.expires_at,
+					created_at: item.created_at,
+				},
+			})
+		);
 	}),
 
 	// DELETE /api/tokens/:id — revoke a token
@@ -147,13 +155,18 @@ export const tokenHandlers = [
 		item.last4 = newToken.slice(-4);
 		item.expires_at = futureDate(body.ttl_days);
 
-		return HttpResponse.json({
-			id: item.id,
-			name: item.name,
-			token: newToken,
-			scopes: item.scopes,
-			expires_at: item.expires_at,
-			created_at: new Date().toISOString(),
-		});
+		return HttpResponse.json(
+			envelope({
+				raw_token: newToken,
+				token: {
+					id: item.id,
+					name: item.name,
+					last4: newToken.slice(-4),
+					scopes: item.scopes,
+					expires_at: item.expires_at,
+					created_at: new Date().toISOString(),
+				},
+			})
+		);
 	}),
 ];

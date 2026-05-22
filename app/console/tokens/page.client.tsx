@@ -14,7 +14,6 @@
 'use client';
 
 import { Button, Spinner } from '@heroui/react';
-import { useHydrateAtoms } from 'jotai/utils';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 
@@ -22,11 +21,6 @@ import CreateTokenModal from '@/app/console/tokens/CreateTokenModal';
 import RotateTokenModal from '@/app/console/tokens/RotateTokenModal';
 import TokenCard from '@/app/console/tokens/TokenCard';
 import TokenRevealModal from '@/app/console/tokens/TokenRevealModal';
-import {
-	tokenListAtom,
-	tokenListErrorAtom,
-	tokenListLoadingAtom,
-} from '@/app/console/tokens/store';
 import { useTokenList } from '@/app/console/tokens/useTokenList';
 import LanguageSwitcher from '@/components/preferences/LanguageSwitcher';
 import ThemeSwitcher from '@/components/preferences/ThemeSwitcher';
@@ -38,13 +32,6 @@ interface TokensPageProps {
 }
 
 const TokensPage = ({ initialTokens }: TokensPageProps) => {
-	// M1: null initialTokens means SSR failed — enter loading state
-	useHydrateAtoms([
-		[tokenListAtom, initialTokens ?? []],
-		[tokenListLoadingAtom, !initialTokens],
-		[tokenListErrorAtom, false],
-	]);
-
 	const t = useTranslations('apikey');
 	const router = useRouter();
 	const {

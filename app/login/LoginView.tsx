@@ -99,11 +99,7 @@ const LoginView = ({
 							</span>
 							<Separator className={'w-16 shrink'} />
 						</div>
-						<Button
-							variant={'primary'}
-							className={'w-full'}
-							onPress={handleOpenApp}
-						>
+						<Button variant={'primary'} onPress={handleOpenApp}>
 							<span
 								className={'material-icons-round text-[18px]! leading-none!'}
 								aria-hidden={true}

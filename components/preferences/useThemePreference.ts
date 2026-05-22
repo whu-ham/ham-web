@@ -9,9 +9,10 @@
 'use client';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
+import { useEffect, useState, startTransition } from 'react';
 
 import { THEME_CLASSES, Theme, isTheme } from '@/components/theme/config';
+import { THEME_COOKIE } from '@/components/theme/config';
 import {
 	resolvedThemeAtom,
 	systemThemeAtom,
@@ -46,11 +47,30 @@ export const useThemePreference = () => {
 	const setSystemTheme = useSetAtom(systemThemeAtom);
 	const resolvedTheme = useAtomValue(resolvedThemeAtom);
 
+	// Track whether the cookie has been read so we can suppress the
+	// hydration-sensitive derived values until the client is ready.
+	const [hydrated, setHydrated] = useState(false);
+
+	// Read the persisted theme cookie AFTER hydration so the first
+	// client render matches the server (which always sees `null`).
+	useEffect(() => {
+		const raw = document.cookie
+			.split(';')
+			.map((c) => c.trim())
+			.find((c) => c.startsWith(`${THEME_COOKIE}=`));
+		if (raw) {
+			const value = decodeURIComponent(raw.slice(THEME_COOKIE.length + 1));
+			if (isTheme(value)) startTransition(() => setOverride(value));
+		}
+		startTransition(() => setHydrated(true));
+	}, [setOverride]);
+
 	// Keep systemThemeAtom in sync with the OS preference.
 	useEffect(() => {
 		if (typeof window === 'undefined' || !window.matchMedia) return;
 		const mql = window.matchMedia('(prefers-color-scheme: dark)');
 		const handler = () => setSystemTheme(mql.matches ? 'dark' : 'light');
+		handler(); // sync on mount
 		mql.addEventListener('change', handler);
 		return () => mql.removeEventListener('change', handler);
 	}, [setSystemTheme]);
@@ -60,7 +80,9 @@ export const useThemePreference = () => {
 		applyThemeToDocument(resolvedTheme);
 	}, [resolvedTheme]);
 
-	const selectedKey: ThemeKey = override ?? AUTO_KEY;
+	// Until hydrated, `selectedKey` must be `'auto'` to match the
+	// server render (override is always `null` on the server).
+	const selectedKey: ThemeKey = hydrated ? (override ?? AUTO_KEY) : AUTO_KEY;
 
 	const onSelectionChange = (key: string) => {
 		if (key === AUTO_KEY) {

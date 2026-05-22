@@ -106,19 +106,21 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 				<Separator className={'w-16 shrink'} />
 			</div>
 
-			{isAuthenticated ? (
-				<Button variant={'tertiary'} className={'w-full'} onPress={goToLogin}>
-					<span
-						className={'material-icons-round text-[18px]! leading-none!'}
-						aria-hidden={true}
-					>
-						login
-					</span>
-					{t('login.signInBrowser')}
-				</Button>
-			) : (
-				<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
-			)}
+			<div className={'flex flex-col items-center'}>
+				{isAuthenticated ? (
+					<Button variant={'tertiary'} onPress={goToLogin}>
+						<span
+							className={'material-icons-round text-[18px]! leading-none!'}
+							aria-hidden={true}
+						>
+							login
+						</span>
+						{t('login.signInBrowser')}
+					</Button>
+				) : (
+					<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+				)}
+			</div>
 		</>
 	);
 };

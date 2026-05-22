@@ -7,20 +7,9 @@
 
 import { atom } from 'jotai';
 
-import { THEME_COOKIE, Theme, isTheme } from '@/components/theme/config';
+import { THEME_COOKIE, Theme } from '@/components/theme/config';
 
 // --- Cookie helpers -------------------------------------------------
-
-const readThemeCookie = (): Theme | null => {
-	if (typeof document === 'undefined') return null;
-	const raw = document.cookie
-		.split(';')
-		.map((c) => c.trim())
-		.find((c) => c.startsWith(`${THEME_COOKIE}=`));
-	if (!raw) return null;
-	const value = decodeURIComponent(raw.slice(THEME_COOKIE.length + 1));
-	return isTheme(value) ? value : null;
-};
 
 const writeThemeCookie = (theme: Theme) => {
 	document.cookie = `${THEME_COOKIE}=${theme}; path=/; max-age=31536000; SameSite=Lax`;
@@ -59,12 +48,10 @@ const detectSystemTheme = (): Theme => {
  * Use `themeOverrideAtom` (the writable derived atom below) to
  * update this value — it handles cookie persistence automatically.
  */
-const _themeOverrideBaseAtom = atom<Theme | null>(
-	// Lazy initialiser: called once when the atom is first read.
-	// On the server `readThemeCookie` returns `null`, which is the
-	// correct "no override" default.
-	readThemeCookie()
-);
+// Always initialise with `null` so the first client render matches the
+// server (where `document.cookie` is unavailable). The real cookie value
+// is read inside a `useEffect` in `useThemePreference` after hydration.
+const _themeOverrideBaseAtom = atom<Theme | null>(null);
 _themeOverrideBaseAtom.debugLabel = 'themeOverrideBase';
 
 /**

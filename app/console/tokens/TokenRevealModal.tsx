@@ -27,7 +27,7 @@ import { useCopyToken } from '@/app/console/tokens/useCopyToken';
 const TokenRevealModal = () => {
 	const t = useTranslations('apikey');
 	const [newlyCreated, setNewlyCreated] = useAtom(newlyCreatedTokenAtom);
-	const { copied, handleCopy, reset } = useCopyToken(newlyCreated?.token);
+	const { copied, handleCopy, reset } = useCopyToken(newlyCreated?.raw_token);
 
 	const handleClose = useCallback(() => {
 		setNewlyCreated(null);
@@ -54,7 +54,7 @@ const TokenRevealModal = () => {
 								<InputGroup variant='secondary'>
 									<InputGroup.Input
 										className={'w-full font-mono text-sm select-all'}
-										value={newlyCreated?.token ?? ''}
+										value={newlyCreated?.raw_token ?? ''}
 										readOnly
 									/>
 									<InputGroup.Suffix className={'pr-0'}>

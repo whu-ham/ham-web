@@ -10,7 +10,7 @@
 
 import { useAtom } from 'jotai';
 import { useLocale } from 'next-intl';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { LOCALE_COOKIE, LOCALE_LABELS, Locale, isLocale } from '@/i18n/config';
 import { localeOverrideAtom } from '@/store/localeAtom';
@@ -90,9 +90,30 @@ export const useLocalePreference = () => {
 	const currentLocale = useLocale() as Locale;
 	const [, startTransition] = useTransition();
 	const [hasOverride, setHasOverride] = useAtom(localeOverrideAtom);
-	const [browserLocale] = useState<Locale | null>(() => detectBrowserLocale());
+	const [browserLocale, setBrowserLocale] = useState<Locale | null>(null);
+	const [hydrated, setHydrated] = useState(false);
 
-	const selectedKey: LocaleKey = hasOverride ? currentLocale : AUTO_KEY;
+	// Read cookie & browser locale AFTER hydration to avoid mismatch.
+	useEffect(() => {
+		// Detect browser locale
+		const detected = detectBrowserLocale();
+		if (detected) startTransition(() => setBrowserLocale(detected));
+
+		// Read locale override cookie
+		const raw = document.cookie
+			.split(';')
+			.map((c) => c.trim())
+			.find((c) => c.startsWith(`${LOCALE_COOKIE}=`));
+		if (raw) {
+			const value = decodeURIComponent(raw.slice(LOCALE_COOKIE.length + 1));
+			if (isLocale(value)) startTransition(() => setHasOverride(true));
+		}
+		startTransition(() => setHydrated(true));
+	}, [setHasOverride, startTransition]);
+
+	// Until hydrated, treat as "auto" to match server render.
+	const selectedKey: LocaleKey =
+		hydrated && hasOverride ? currentLocale : AUTO_KEY;
 
 	const onSelectionChange = (rawKey: string) => {
 		if (rawKey === AUTO_KEY) {
