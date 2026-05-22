@@ -2,6 +2,10 @@
  * Combined login surface for the /login page.
  * Shows the QR code as the primary login method, with a Passkey button
  * below as a secondary option (hidden automatically when unsupported).
+ *
+ * Mobile app login: before launching the deep link, calls the
+ * setLoginCookies server action to write HttpOnly cookies (state + from),
+ * then builds the deep-link URL with the returned state.
  */
 
 'use client';
@@ -12,27 +16,46 @@ import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 
+import { setLoginCookies } from '@/app/login/actions';
 import icon from '@/public/icon-1024.png';
 import PasskeyLoginView from '@/app/login/PasskeyLoginView';
 import QRLoginView from '@/app/login/QRLoginView';
-import { deepLinkUrlAtom, mobileAtom } from '@/app/login/store';
-import { tryLaunchDeepLink } from '@/services/sso/deepLink';
+import { APP_CALLBACK_PATH, mobileAtom } from '@/app/login/store';
+import {
+	buildSsoAuthorizeDeepLink,
+	tryLaunchDeepLink,
+} from '@/services/sso/deepLink';
 
 interface LoginViewProps {
 	/** i18n namespace for title/subtitle, default 'sso' */
 	namespace?: string;
+	/** Redirect target after login (used to set FROM_COOKIE). */
+	from: string;
 	/** Called when login succeeds (session cookie already set by backend) */
 	onLoginSucceeded?: () => void;
 }
 
-const LoginView = ({ namespace = 'sso', onLoginSucceeded }: LoginViewProps) => {
+const LoginView = ({
+	namespace = 'sso',
+	from,
+	onLoginSucceeded,
+}: LoginViewProps) => {
 	const t = useTranslations(namespace);
 	const mobile = useAtomValue(mobileAtom);
-	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
 
-	const handleOpenApp = useCallback(() => {
-		tryLaunchDeepLink({ url: deepLinkUrl });
-	}, [deepLinkUrl]);
+	const handleOpenApp = useCallback(async () => {
+		// 1. Set HttpOnly cookies (state + from) via server action
+		const state = await setLoginCookies(from);
+		// 2. Build the deep-link URL with the server-generated state
+		const url = buildSsoAuthorizeDeepLink({
+			appId: process.env.NEXT_PUBLIC_CONSOLE_CLIENT_ID ?? '',
+			scope: [],
+			state,
+			redirectUri: `${window.location.origin}${APP_CALLBACK_PATH}`,
+		});
+		// 3. Launch the app
+		tryLaunchDeepLink({ url });
+	}, [from]);
 
 	return (
 		<>

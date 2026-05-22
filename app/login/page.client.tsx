@@ -1,15 +1,11 @@
 /**
- * @author Claude
- * @version 3.5
- * @date 2026/5/22
- *
  * Client-side login page. Handles QR, passkey, and mobile app login.
  * After successful login, redirects to the URL specified in the
  * `from` prop (set by SSR page.tsx).
  *
- * C1 fix: OAuth2 state and HttpOnly cookies are set in SSR page.tsx.
- * State and from are passed as props — no client-side fetch needed.
- * Login success is a simple boolean signal — no redundant me() call.
+ * OAuth2 state is NOT generated here — it is created on-demand by the
+ * setLoginCookies server action when the user taps the mobile app
+ * login button.
  */
 'use client';
 
@@ -17,25 +13,22 @@ import { useSetAtom, useAtomValue } from 'jotai';
 import { useEffect } from 'react';
 
 import LoginView from '@/app/login/LoginView';
-import { loginSucceededAtom, mobileAtom, stateAtom } from '@/app/login/store';
+import { loginSucceededAtom, mobileAtom } from '@/app/login/store';
 import PageFrame from '@/components/layout/PageFrame';
 import { isMobile } from '@/services/sso/ua';
 
 interface LoginPageProps {
-	initialState: string;
 	from: string;
 }
 
-const LoginPage = ({ initialState, from }: LoginPageProps) => {
+const LoginPage = ({ from }: LoginPageProps) => {
 	const setMobile = useSetAtom(mobileAtom);
-	const setState = useSetAtom(stateAtom);
 	const setLoginSucceeded = useSetAtom(loginSucceededAtom);
 	const loginSucceeded = useAtomValue(loginSucceededAtom);
 
 	useEffect(() => {
-		setState(initialState);
 		setMobile(isMobile(navigator.userAgent));
-	}, [initialState, setState, setMobile]);
+	}, [setMobile]);
 
 	// Redirect when login succeeds — session cookie is already set by backend
 	useEffect(() => {
@@ -48,6 +41,7 @@ const LoginPage = ({ initialState, from }: LoginPageProps) => {
 		<PageFrame>
 			<LoginView
 				namespace='console'
+				from={from}
 				onLoginSucceeded={() => setLoginSucceeded(true)}
 			/>
 		</PageFrame>
