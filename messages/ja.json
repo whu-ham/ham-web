@@ -118,6 +118,20 @@
 		},
 		"consent": {
 			"scopeHeader": "次の権限が付与されます：",
+			"scopeGroups": {
+				"identity": {
+					"title": "ID・プロフィール権限",
+					"description": "本人確認または基本プロフィールの読み取りに使用されます。"
+				},
+				"mcp": {
+					"title": "ツール・API 権限",
+					"description": "MCP ツールの呼び出しまたは関連 API へのアクセスに使用されます。"
+				},
+				"other": {
+					"title": "その他の権限",
+					"description": "このアプリが要求するその他のアクセス権限です。"
+				}
+			},
 			"alreadyGranted": "以前に許可済み",
 			"required": "必須",
 			"switchAccount": "アカウントを切り替える",

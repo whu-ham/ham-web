@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { ApiError, ConsentInfoResponse, WebAuthApi } from '@/services/sso/api';
+import { withRequiredConsentScopes } from '@/app/sso-authorize/consentScopes';
 import { paramsAtom, stageAtom } from '@/app/sso-authorize/store';
 
 export interface UseConsentReturn {
@@ -41,7 +42,7 @@ export const useConsent = (): UseConsentReturn => {
 
 	useEffect(() => {
 		if (!info) return;
-		setCheckedScopes(info.scopes.map((s) => s.scope));
+		setCheckedScopes(info.scopes.map((scope) => scope.scope));
 	}, [info]);
 
 	const onSwitchAccount = useCallback(async () => {
@@ -79,7 +80,9 @@ export const useConsent = (): UseConsentReturn => {
 			try {
 				const resp = await WebAuthApi.consentConfirm({
 					client_id: params.appId,
-					scope: checkedScopes,
+					scope: info
+						? withRequiredConsentScopes(checkedScopes, info.scopes)
+						: checkedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
 					nonce,
@@ -96,7 +99,15 @@ export const useConsent = (): UseConsentReturn => {
 				setSubmitting(false);
 			}
 		},
-		[bail, checkedScopes, params.appId, params.redirectUri, params.state, t]
+		[
+			bail,
+			checkedScopes,
+			info,
+			params.appId,
+			params.redirectUri,
+			params.state,
+			t,
+		]
 	);
 
 	useEffect(() => {
@@ -114,7 +125,7 @@ export const useConsent = (): UseConsentReturn => {
 			.catch((e: unknown) => {
 				if (cancelled) return;
 				if (e instanceof ApiError) {
-					setError(e.message || t('fetchFailed'));
+					setError(t('fetchFailed'));
 				} else {
 					setError(t('fetchFailed'));
 				}

@@ -118,6 +118,20 @@
 		},
 		"consent": {
 			"scopeHeader": "The app will receive the following permissions:",
+			"scopeGroups": {
+				"identity": {
+					"title": "Identity and profile permissions",
+					"description": "Used to confirm who you are or read basic profile details."
+				},
+				"mcp": {
+					"title": "Tool and API permissions",
+					"description": "Used to call MCP tools or access related APIs."
+				},
+				"other": {
+					"title": "Other permissions",
+					"description": "Other access requested by this app."
+				}
+			},
 			"alreadyGranted": "Previously granted",
 			"required": "Required",
 			"switchAccount": "Switch account",
