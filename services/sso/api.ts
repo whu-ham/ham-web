@@ -63,7 +63,9 @@ export interface MeResponse {
 
 export interface ConsentScopeDetail {
 	scope: string;
+	label?: string;
 	description: string;
+	category?: 'identity' | 'profile' | 'mcp' | string;
 	already_granted: boolean;
 	required: boolean;
 }

@@ -19,6 +19,10 @@ import {
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 
+import {
+	groupConsentScopes,
+	withRequiredConsentScopes,
+} from '@/app/sso-authorize/consentScopes';
 import { useConsent } from '@/app/sso-authorize/useConsent';
 
 const ConsentView = () => {
@@ -61,6 +65,8 @@ const ConsentView = () => {
 			</div>
 		);
 	}
+
+	const scopeGroups = groupConsentScopes(info.scopes);
 
 	return (
 		<>
@@ -116,43 +122,74 @@ const ConsentView = () => {
 				<CheckboxGroup
 					value={checkedScopes}
 					onChange={(v) => {
-						const next = new Set(v as string[]);
-						info.scopes.forEach((s) => {
-							if (s.required) next.add(s.scope);
-						});
-						setCheckedScopes(Array.from(next));
+						setCheckedScopes(
+							withRequiredConsentScopes(v as string[], info.scopes)
+						);
 					}}
 					className={'flex flex-col gap-0'}
 				>
-					{info.scopes.map((s) => (
-						<Checkbox
-							key={s.scope}
-							value={s.scope}
-							isDisabled={s.required || s.already_granted}
-							className={
-								'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
-							}
-						>
-							<Checkbox.Control className={'mt-0.5 shrink-0'}>
-								<Checkbox.Indicator />
-							</Checkbox.Control>
-							<Checkbox.Content className={'flex flex-col min-w-0 text-left'}>
+					{scopeGroups.map((group) => (
+						<div key={group.category} className={'flex flex-col gap-2'}>
+							<div className={'flex items-center gap-2 px-1 pt-2'}>
 								<span
-									className={'text-sm font-medium text-foreground break-words'}
+									className={
+										'material-icons-round text-[16px]! leading-none! text-muted shrink-0'
+									}
+									aria-hidden={true}
 								>
-									{s.description}
+									{group.category === 'mcp' ? 'api' : 'account_circle'}
 								</span>
-								{s.required ? (
-									<span className={'text-xs text-muted'}>{t('required')}</span>
-								) : (
-									s.already_granted && (
-										<span className={'text-xs text-muted'}>
-											{t('alreadyGranted')}
+								<div className={'flex flex-col min-w-0'}>
+									<span className={'text-xs font-semibold text-foreground'}>
+										{t(`scopeGroups.${group.category}.title`)}
+									</span>
+									<span className={'text-xs text-muted break-words'}>
+										{t(`scopeGroups.${group.category}.description`)}
+									</span>
+								</div>
+							</div>
+							{group.scopes.map((s) => (
+								<Checkbox
+									key={s.scope}
+									value={s.scope}
+									isDisabled={s.required || s.already_granted}
+									className={
+										'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
+									}
+								>
+									<Checkbox.Control className={'mt-0.5 shrink-0'}>
+										<Checkbox.Indicator />
+									</Checkbox.Control>
+									<Checkbox.Content
+										className={'flex flex-col min-w-0 text-left'}
+									>
+										<span
+											className={
+												'text-sm font-medium text-foreground break-words'
+											}
+										>
+											{s.label ?? s.description}
 										</span>
-									)
-								)}
-							</Checkbox.Content>
-						</Checkbox>
+										{s.label && (
+											<span className={'text-xs text-muted break-words'}>
+												{s.description}
+											</span>
+										)}
+										{s.required ? (
+											<span className={'text-xs text-muted'}>
+												{t('required')}
+											</span>
+										) : (
+											s.already_granted && (
+												<span className={'text-xs text-muted'}>
+													{t('alreadyGranted')}
+												</span>
+											)
+										)}
+									</Checkbox.Content>
+								</Checkbox>
+							))}
+						</div>
 					))}
 				</CheckboxGroup>
 			</section>

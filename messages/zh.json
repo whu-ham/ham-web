@@ -118,6 +118,20 @@
 		},
 		"consent": {
 			"scopeHeader": "将获得以下权限：",
+			"scopeGroups": {
+				"identity": {
+					"title": "身份与资料权限",
+					"description": "用于确认你的身份或读取基础资料。"
+				},
+				"mcp": {
+					"title": "工具与 API 权限",
+					"description": "用于调用 MCP 工具或访问相关 API。"
+				},
+				"other": {
+					"title": "其他权限",
+					"description": "此应用请求的其他访问权限。"
+				}
+			},
 			"alreadyGranted": "你此前已授予",
 			"required": "必选",
 			"switchAccount": "切换账号",
