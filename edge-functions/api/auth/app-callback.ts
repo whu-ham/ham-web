@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.1
+ * @date 2026/5/25 10:42:55
  *
  * EdgeOne Edge Function: POST /api/auth/app-callback
  * Proxies app login callback to the backend.
@@ -12,7 +12,7 @@ export const onRequestPost = async (context: {
 	request: Request;
 	env: Record<string, string>;
 }): Promise<Response> => {
-	return proxyToBackend(context.request, '/api/auth/app-callback', context.env);
+	return proxyToBackend(context.request, '/web/auth/app-callback', context.env);
 };
 
 export const onRequestOptions = handlePreflight;
