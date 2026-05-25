@@ -23,12 +23,12 @@ export const generateMetadata = async (): Promise<Metadata> => {
 };
 
 interface PageProps {
-	searchParams: Promise<{ from?: string }>;
+	searchParams: Promise<{ from?: string; error?: string }>;
 }
 
 const Page = async ({ searchParams }: PageProps) => {
 	const me = await fetchMe();
-	const { from } = await searchParams;
+	const { from, error } = await searchParams;
 
 	if (me) {
 		const headersList = await headers();
@@ -45,7 +45,7 @@ const Page = async ({ searchParams }: PageProps) => {
 
 	return (
 		<Suspense>
-			<LoginPage from={safeFrom} />
+			<LoginPage from={safeFrom} error={error} />
 		</Suspense>
 	);
 };
