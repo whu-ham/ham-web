@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/25 10:46:43
+ * @version 1.2
+ * @date 2026/5/25 10:51:37
  *
  * Client-side login page. Handles QR, passkey, and mobile app login.
  * After successful login, redirects to the URL specified in the
@@ -39,7 +39,7 @@ const LoginPage = ({ from, error }: LoginPageProps) => {
 	// Show toast when redirected back with an error from OAuth callback
 	useEffect(() => {
 		if (error) {
-			toast.error(decodeURIComponent(error));
+			toast.error(error);
 		}
 	}, [error]);
 
