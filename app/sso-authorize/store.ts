@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/21 14:51:13
+ * @version 1.2
+ * @date 2026/5/26 10:42:28
  *
  * Jotai atoms for the /sso-authorize page.
  *
@@ -27,6 +27,9 @@ export interface SsoAuthorizeParams {
 	scope: string[];
 	state: string;
 	redirectUri: string;
+	codeChallenge?: string;
+	codeChallengeMethod?: string;
+	nonce?: string;
 }
 
 export type Stage =

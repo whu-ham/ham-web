@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.3
- * @date 2026/5/21
+ * @version 2.4
+ * @date 2026/5/26 10:42:28
  *
  * HTTP client for the BFF /api/auth/** endpoints (SSO & session).
  *
@@ -118,6 +118,9 @@ export const WebAuthApi = {
 		scope: string[];
 		redirect_uri: string;
 		state: string;
+		code_challenge?: string;
+		code_challenge_method?: string;
+		nonce?: string;
 	}) =>
 		request<ConsentInfoResponse>('/sso/consent/info', {
 			method: 'POST',
