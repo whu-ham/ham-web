@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.1
+ * @date 2026/5/26 10:42:28
  *
  * Custom hook for SSO consent view logic.
  * Handles consent info fetching, scope selection, confirm/reject/switch account.
@@ -117,6 +117,11 @@ export const useConsent = (): UseConsentReturn => {
 			scope: params.scope,
 			redirect_uri: params.redirectUri,
 			state: params.state,
+			...(params.codeChallenge && { code_challenge: params.codeChallenge }),
+			...(params.codeChallengeMethod && {
+				code_challenge_method: params.codeChallengeMethod,
+			}),
+			...(params.nonce && { nonce: params.nonce }),
 		})
 			.then((resp) => {
 				if (cancelled) return;
@@ -133,7 +138,16 @@ export const useConsent = (): UseConsentReturn => {
 		return () => {
 			cancelled = true;
 		};
-	}, [params.appId, params.redirectUri, params.scope, params.state, t]);
+	}, [
+		params.appId,
+		params.codeChallenge,
+		params.codeChallengeMethod,
+		params.nonce,
+		params.redirectUri,
+		params.scope,
+		params.state,
+		t,
+	]);
 
 	return {
 		me,

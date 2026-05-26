@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.2
- * @date 2026/5/22
+ * @version 2.3
+ * @date 2026/5/26 10:42:28
  *
  * Custom hook for /sso-authorize page orchestration.
  *
@@ -49,7 +49,19 @@ const parseParams = (): SsoAuthorizeParams | null => {
 		.map((s) => s.trim())
 		.filter(Boolean);
 	const state = usp.get('state') ?? '';
-	return { appId, scope, state, redirectUri };
+	const codeChallenge = usp.get('code_challenge')?.trim() || undefined;
+	const codeChallengeMethod =
+		usp.get('code_challenge_method')?.trim() || undefined;
+	const nonce = usp.get('nonce')?.trim() || undefined;
+	return {
+		appId,
+		scope,
+		state,
+		redirectUri,
+		codeChallenge,
+		codeChallengeMethod,
+		nonce,
+	};
 };
 
 export const useSsoAuthorize = (me: MeResponse | null) => {
