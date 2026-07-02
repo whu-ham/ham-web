@@ -120,7 +120,7 @@ const Page = async ({ searchParams }: PageProps) => {
 		}
 	}
 
-	return <SsoAuthorizePage me={me} />;
+	return <SsoAuthorizePage me={me} from={from} />;
 };
 
 export default Page;

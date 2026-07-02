@@ -21,9 +21,10 @@ import type { MeResponse } from '@/services/sso/api';
 
 interface SsoAuthorizePageProps {
 	me: MeResponse | null;
+	from: string;
 }
 
-const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
+const SsoAuthorizePage = ({ me, from }: SsoAuthorizePageProps) => {
 	const { stage } = useSsoAuthorize(me);
 
 	if (stage.kind === 'loading') {
@@ -41,7 +42,7 @@ const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
 	if (stage.kind === 'deep-link-fallback') {
 		return (
 			<PageFrame>
-				<DeepLinkFallback isAuthenticated={stage.authenticated} />
+				<DeepLinkFallback isAuthenticated={stage.authenticated} from={from} />
 			</PageFrame>
 		);
 	}

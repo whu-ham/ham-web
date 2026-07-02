@@ -17,6 +17,7 @@
  *   2. Retry the deep link.
  *   3. Passkey login — inline passkey sign-in; on success, reloads the
  *      page so the server can pick up the new session.
+ *   4. Browser OAuth providers — QQ / GitHub / Apple browser logins.
  */
 
 'use client';
@@ -28,15 +29,17 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import PasskeyLoginView from '@/app/login/PasskeyLoginView';
+import OAuthProviderButtons from '@/components/login/OAuthProviderButtons';
 import icon from '@/public/icon-1024.png';
 import { getAppStoreURL } from '@/services/sso/ua';
 import { deepLinkUrlAtom, deviceKindAtom } from '@/app/sso-authorize/store';
 
 interface DeepLinkFallbackProps {
 	isAuthenticated: boolean;
+	from: string;
 }
 
-const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
+const DeepLinkFallback = ({ isAuthenticated, from }: DeepLinkFallbackProps) => {
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
 	const deviceKind = useAtomValue(deviceKindAtom);
@@ -49,10 +52,7 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 	};
 
 	const goToLogin = () => {
-		const from = encodeURIComponent(
-			window.location.pathname + window.location.search
-		);
-		window.location.href = `/login?from=${from}`;
+		window.location.href = `/login?from=${encodeURIComponent(from)}`;
 	};
 
 	const onPasskeyLoginSucceeded = () => {
@@ -118,7 +118,10 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 						{t('login.signInBrowser')}
 					</Button>
 				) : (
-					<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+					<div className={'w-full flex flex-col items-center gap-6'}>
+						<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+						<OAuthProviderButtons from={from} namespace={'sso'} />
+					</div>
 				)}
 			</div>
 		</>

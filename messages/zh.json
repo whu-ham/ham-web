@@ -43,6 +43,15 @@
 		"divider": {
 			"other": "其它登录方式"
 		},
+		"oauth": {
+			"prompt": "选择浏览器登录方式",
+			"cta": "登录",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		},
 		"passkey": {
 			"cta": "通过Passkey登录"
 		}
@@ -95,10 +104,19 @@
 			"title": "登录Ham以继续授权",
 			"subtitle": "授权前需要先完成Ham账号登录",
 			"signInBrowser": "使用浏览器登录",
-			"divider": {
-				"other": "或选择以下方式登录"
-			}
+		"divider": {
+			"other": "或选择以下方式登录"
 		},
+		"oauth": {
+			"prompt": "选择浏览器登录方式",
+			"cta": "登录",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		}
+	},
 		"qr": {
 			"tip": "使用Ham或相机扫描二维码登录",
 			"scanned": "扫码成功，等待确认",

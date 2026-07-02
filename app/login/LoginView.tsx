@@ -1,8 +1,9 @@
 /**
  * Combined login surface for the /login page.
  *
- * Desktop: QR code (primary) + Passkey (secondary)
- * Mobile:  Open App (primary) + Passkey (secondary). QR is hidden.
+ * Desktop: QR code (primary) + Passkey (secondary) + browser OAuth providers.
+ * Mobile:  Open App (primary) + Passkey (secondary) + browser OAuth providers.
+ * QR is hidden on mobile.
  *
  * Mobile app login: before launching the deep link, calls the
  * setLoginCookies server action to write HttpOnly cookies (state + from),
@@ -18,6 +19,7 @@ import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
 
 import { setLoginCookies } from '@/app/login/actions';
+import OAuthProviderButtons from '@/components/login/OAuthProviderButtons';
 import icon from '@/public/icon-1024.png';
 import PasskeyLoginView from '@/app/login/PasskeyLoginView';
 import QRLoginView from '@/app/login/QRLoginView';
@@ -110,6 +112,8 @@ const LoginView = ({
 						</Button>
 					</>
 				)}
+
+				<OAuthProviderButtons from={from} namespace={'console'} />
 			</section>
 		</>
 	);
