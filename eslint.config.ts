@@ -9,6 +9,13 @@ export default defineConfig([
 	...nextVitals,
 	...nextTs,
 	reactPlugin.configs.flat.recommended,
+	{
+		settings: {
+			react: {
+				version: '19.0',
+			},
+		},
+	},
 	reactPlugin.configs.flat['jsx-runtime'],
 	reactHooks.configs.flat.recommended,
 	{

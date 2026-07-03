@@ -8,7 +8,7 @@
 
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
 	base64ToArrayBuffer,
@@ -28,15 +28,11 @@ export const usePasskeyLogin = (
 ): UsePasskeyLoginReturn => {
 	const t = useTranslations('sso.passkey');
 	const [loading, setLoading] = useState(false);
-	// Start as null to avoid hydration mismatch — isPasskeySupported()
-	// returns false on the server but may return true on the client.
-	// We detect the real value in useEffect (client-only).
-	const [supported, setSupported] = useState<boolean | null>(null);
-	const cancelledRef = useRef(false);
-
-	useEffect(() => {
-		setSupported(isPasskeySupported());
+	const supported = useMemo<boolean | null>(() => {
+		if (typeof window === 'undefined') return null;
+		return isPasskeySupported();
 	}, []);
+	const cancelledRef = useRef(false);
 
 	useEffect(() => {
 		return () => {
