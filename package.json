@@ -20,7 +20,7 @@
 		"@heroui/styles": "^3",
 		"@material-design-icons/font": "^0.14.13",
 		"@material-design-icons/svg": "^0.14.13",
-		"@opennextjs/cloudflare": "^1.19.3",
+		"@opennextjs/cloudflare": "^1.19.4",
 		"classnames": "^2.5.1",
 		"dayjs": "^1.11.13",
 		"jotai": "^2.16.2",
