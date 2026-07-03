@@ -113,7 +113,7 @@ const LoginView = ({
 					</>
 				)}
 
-				<OAuthProviderButtons from={from} namespace={'console'} />
+				<OAuthProviderButtons from={from} />
 			</section>
 		</>
 	);

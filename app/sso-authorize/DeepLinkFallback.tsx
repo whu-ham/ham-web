@@ -120,7 +120,7 @@ const DeepLinkFallback = ({ isAuthenticated, from }: DeepLinkFallbackProps) => {
 				) : (
 					<div className={'w-full flex flex-col items-center gap-6'}>
 						<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
-						<OAuthProviderButtons from={from} namespace={'sso'} />
+						<OAuthProviderButtons from={from} />
 					</div>
 				)}
 			</div>

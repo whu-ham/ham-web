@@ -44,7 +44,7 @@
 			"other": "其它登录方式"
 		},
 		"oauth": {
-			"prompt": "选择浏览器登录方式",
+			"prompt": "选择登录方式",
 			"cta": "登录",
 			"providers": {
 				"qq": "QQ",
@@ -108,7 +108,7 @@
 			"other": "或选择以下方式登录"
 		},
 		"oauth": {
-			"prompt": "选择浏览器登录方式",
+			"prompt": "选择登录方式",
 			"cta": "登录",
 			"providers": {
 				"qq": "QQ",
@@ -179,6 +179,15 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "其它登录方式"
+			},
+			"oauth": {
+				"prompt": "选择登录方式",
+				"cta": "登录",
+				"providers": {
+					"qq": "QQ",
+					"github": "GitHub",
+					"apple": "Apple"
+				}
 			},
 			"openApp": "跳转到APP登录",
 			"appCallbackFailed": "App登录失败，请重试",

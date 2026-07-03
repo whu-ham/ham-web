@@ -44,7 +44,7 @@
 			"other": "その他のログイン方法"
 		},
 		"oauth": {
-			"prompt": "ブラウザのログイン方法を選択してください",
+			"prompt": "ログイン方法を選択してください",
 			"cta": "ログイン",
 			"providers": {
 				"qq": "QQ",
@@ -108,7 +108,7 @@
 			"other": "または他の方法でログイン"
 		},
 		"oauth": {
-			"prompt": "ブラウザのログイン方法を選択してください",
+			"prompt": "ログイン方法を選択してください",
 			"cta": "ログイン",
 			"providers": {
 				"qq": "QQ",
@@ -179,6 +179,15 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "その他のログイン方法"
+			},
+			"oauth": {
+				"prompt": "ログイン方法を選択してください",
+				"cta": "ログイン",
+				"providers": {
+					"qq": "QQ",
+					"github": "GitHub",
+					"apple": "Apple"
+				}
 			},
 			"openApp": "アプリでログイン",
 			"appCallbackFailed": "アプリログインに失敗しました。再試行してください",

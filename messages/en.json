@@ -44,7 +44,7 @@
 			"other": "Or sign in with"
 		},
 		"oauth": {
-			"prompt": "Choose a browser login provider",
+			"prompt": "Choose a login method",
 			"cta": "Sign in",
 			"providers": {
 				"qq": "QQ",
@@ -108,7 +108,7 @@
 			"other": "Or sign in with"
 		},
 		"oauth": {
-			"prompt": "Choose a browser login provider",
+			"prompt": "Choose a login method",
 			"cta": "Sign in",
 			"providers": {
 				"qq": "QQ",
@@ -179,6 +179,15 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "Or sign in with"
+			},
+			"oauth": {
+				"prompt": "Choose a login method",
+				"cta": "Sign in",
+				"providers": {
+					"qq": "QQ",
+					"github": "GitHub",
+					"apple": "Apple"
+				}
 			},
 			"openApp": "Sign in with App",
 			"appCallbackFailed": "App sign-in failed, please retry",
