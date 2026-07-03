@@ -11,7 +11,7 @@
 
 import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import { ApiError, ConsentInfoResponse, WebAuthApi } from '@/services/sso/api';
@@ -39,11 +39,13 @@ export const useConsent = (): UseConsentReturn => {
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [checkedScopes, setCheckedScopes] = useState<string[]>([]);
-
-	useEffect(() => {
-		if (!info) return;
-		setCheckedScopes(info.scopes.map((scope) => scope.scope));
-	}, [info]);
+	const effectiveCheckedScopes = useMemo(
+		() =>
+			checkedScopes.length > 0
+				? checkedScopes
+				: (info?.scopes.map((scope) => scope.scope) ?? []),
+		[checkedScopes, info]
+	);
 
 	const onSwitchAccount = useCallback(async () => {
 		try {
@@ -81,8 +83,8 @@ export const useConsent = (): UseConsentReturn => {
 				const resp = await WebAuthApi.consentConfirm({
 					client_id: params.appId,
 					scope: info
-						? withRequiredConsentScopes(checkedScopes, info.scopes)
-						: checkedScopes,
+						? withRequiredConsentScopes(effectiveCheckedScopes, info.scopes)
+						: effectiveCheckedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
 					nonce,
@@ -101,7 +103,7 @@ export const useConsent = (): UseConsentReturn => {
 		},
 		[
 			bail,
-			checkedScopes,
+			effectiveCheckedScopes,
 			info,
 			params.appId,
 			params.redirectUri,
