@@ -34,7 +34,7 @@
 		"react-dom": "^19.0.0",
 		"react-hot-toast": "^2.5.1",
 		"react-redux": "^9.2.0",
-		"react-use": "^17.6.0"
+		"react-use": "^17.6.1"
 	},
 	"devDependencies": {
 		"@eslint/eslintrc": "^3.3.3",
