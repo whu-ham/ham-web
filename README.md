@@ -2,7 +2,7 @@
 
 [![Build](https://github.com/whu-ham/ham-web/actions/workflows/build.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/build.yml)
 [![Unit Tests](https://github.com/whu-ham/ham-web/actions/workflows/test.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/test.yml)
-[![Coverage](https://codecov.io/gh/whu-ham/ham-web/graph/badge.svg)](https://codecov.io/gh/whu-ham/ham-web)
+[![codecov](https://codecov.io/gh/whu-ham/ham-web/graph/badge.svg?token=LOXQJAE6PO)](https://codecov.io/gh/whu-ham/ham-web)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/whu-ham/ham-web)
 
 Web frontend for **Ham** (WHU) — an SSO + academic toolkit companion to the Ham mobile app.
