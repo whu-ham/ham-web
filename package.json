@@ -41,7 +41,7 @@
 		"@eslint/eslintrc": "^3.3.6",
 		"@eslint/js": "^10.0.1",
 		"@next/eslint-plugin-next": "^16.2.12",
-		"@playwright/test": "^1.62.0",
+		"@playwright/test": "^1.62.1",
 		"@tailwindcss/postcss": "^4",
 		"@types/js-cookie": "^3.0.6",
 		"@types/lodash": "^4.17.24",
@@ -65,7 +65,7 @@
 		"typescript": "^6",
 		"typescript-eslint": "^8.65.0",
 		"vitest": "^4.1.10",
-		"wrangler": "^4.115.0"
+		"wrangler": "^4.117.0"
 	},
 	"msw": {
 		"workerDirectory": [
