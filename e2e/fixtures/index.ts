@@ -31,7 +31,7 @@ import { sessionCookie, VALID_SESSION } from './data.ts';
 /** Port the app is served from; see playwright.config.ts. */
 const APP_PORT = 3210;
 
-export const APP_ORIGIN = `http://127.0.0.1:${APP_PORT}`;
+export const APP_ORIGIN = `http://localhost:${APP_PORT}`;
 
 interface Fixtures {
 	/** Page in a context with no session cookie. */

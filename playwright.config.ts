@@ -24,7 +24,15 @@ import { STUB_ORIGIN } from './e2e/stub/port';
 /** Port the Next.js server listens on. Deliberately not 3000. */
 export const APP_PORT = 3210;
 
-export const APP_ORIGIN = `http://127.0.0.1:${APP_PORT}`;
+/**
+ * Origin the app is served from.
+ *
+ * Next normalises its absolute redirects to `localhost`, so the suite must
+ * reach the app on that exact host. Using 127.0.0.1 makes the app hand the
+ * browser a redirect to a different origin, which drops the session cookie
+ * and turns every authenticated flow into a bounce back to /login.
+ */
+export const APP_ORIGIN = `http://localhost:${APP_PORT}`;
 
 const isCI = Boolean(process.env.CI);
 

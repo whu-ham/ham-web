@@ -28,7 +28,7 @@ export const SESSION_COOKIE = 'ham_session';
 export const sessionCookie = (value: string) => ({
 	name: SESSION_COOKIE,
 	value,
-	domain: '127.0.0.1',
+	domain: 'localhost',
 	path: '/',
 	httpOnly: true,
 	sameSite: 'Lax' as const,

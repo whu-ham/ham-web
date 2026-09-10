@@ -110,6 +110,8 @@ export class TokensPage {
 export class TokenCreateModal {
 	readonly heading: Locator;
 	readonly nameInput: Locator;
+	/** Spinner input for the TTL in days. */
+	readonly ttlInput: Locator;
 	readonly submitButton: Locator;
 	readonly dialog: Locator;
 
@@ -117,6 +119,9 @@ export class TokenCreateModal {
 		this.dialog = page.getByRole('dialog');
 		this.heading = this.dialog.getByText('Create API Key');
 		this.nameInput = this.dialog.getByRole('textbox').first();
+		// HeroUI's NumberField renders a plain text input, so it cannot be
+		// found by type or spinbutton role — its slot attribute can.
+		this.ttlInput = this.dialog.locator('[data-slot="number-field-input"]');
 		this.submitButton = this.dialog.getByRole('button', {
 			name: 'Create',
 			exact: true,
@@ -128,6 +133,12 @@ export class TokenCreateModal {
 		await this.nameInput.fill(name);
 		await this.dialog.getByText(scopeLabel, { exact: true }).click();
 		await this.submitButton.click();
+	}
+
+	/** Override the TTL (days) before submitting. */
+	async setTtl(days: number): Promise<void> {
+		await this.ttlInput.fill(String(days));
+		await this.ttlInput.blur();
 	}
 }
 

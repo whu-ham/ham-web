@@ -99,6 +99,25 @@ test.describe('console header', () => {
 		expect(cookies.find((c) => c.name === 'NEXT_THEME')?.value).toBe('dark');
 	});
 
+	test('switching back to light updates the theme attribute', async ({
+		authedPage,
+	}) => {
+		const console_ = new ConsolePage(authedPage);
+		await console_.goto();
+
+		await console_.switchTheme('Dark');
+		await expect(authedPage.locator('html')).toHaveAttribute(
+			'data-theme',
+			'dark'
+		);
+
+		await console_.switchTheme('Light');
+		await expect(authedPage.locator('html')).toHaveAttribute(
+			'data-theme',
+			'light'
+		);
+	});
+
 	test('switching the language persists it and re-renders', async ({
 		authedPage,
 	}) => {

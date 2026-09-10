@@ -12,7 +12,7 @@
  * button is offered, not that sign-in succeeds.
  */
 import { expect, test } from '../fixtures/index.ts';
-import { readStub, setupStub } from '../stub/control.ts';
+import { patchStub, readStub, setupStub } from '../stub/control.ts';
 import { LoginPage } from '../pages/index.ts';
 
 test.describe('login screen', () => {
@@ -68,6 +68,26 @@ test.describe('login screen', () => {
 		// The QR block disappears entirely; the refresh affordance is the
 		// only recovery path the `login` namespace offers.
 		await expect(login.qrCode).toHaveCount(0);
+	});
+
+	test('refreshing an expired QR code issues a new ticket', async ({
+		anonPage,
+	}) => {
+		await setupStub({ qrState: 'EXPIRED' });
+
+		const login = new LoginPage(anonPage);
+		await login.goto();
+
+		await expect(login.qrRefresh).toBeVisible();
+		const expired = await readStub();
+
+		// Heal ticket creation and refresh from the UI.
+		await patchStub({ qrState: 'PENDING' });
+		await login.qrRefresh.click();
+
+		await expect(login.qrCode).toBeVisible();
+		const refreshed = await readStub();
+		expect(refreshed.qrTicket).not.toBe(expired.qrTicket);
 	});
 
 	test('signs the user in once the ticket is confirmed', async ({
