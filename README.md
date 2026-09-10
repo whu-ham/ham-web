@@ -1,10 +1,16 @@
 # Ham for Web
 
+[![Build](https://github.com/whu-ham/ham-web/actions/workflows/build.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/build.yml)
+[![Unit Tests](https://github.com/whu-ham/ham-web/actions/workflows/test.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/test.yml)
+[![E2E Tests](https://github.com/whu-ham/ham-web/actions/workflows/e2e.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/e2e.yml)
+[![codecov](https://codecov.io/gh/whu-ham/ham-web/graph/badge.svg?token=LOXQJAE6PO)](https://codecov.io/gh/whu-ham/ham-web)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/whu-ham/ham-web)
+
 Web frontend for **Ham** (WHU) — an SSO + academic toolkit companion to the Ham mobile app.
 
 > 🚧 Still work in progress.
 
-User documentation: [https://orangeboychen.github.io/whu-ham/](https://orangeboychen.github.io/whu-ham/)
+User documentation: [https://docs.ham.nowcent.cn](https://docs.ham.nowcent.cn)
 
 ## Tech Stack
 
@@ -34,36 +40,23 @@ pnpm build:cf
 
 # Lint
 pnpm lint
+pnpm lint:fix        # auto-fix what can be fixed
+
+# Formatting
+pnpm format          # write
+pnpm format:check    # verify
+
+# Type checking
+pnpm typecheck       # app + e2e
+
+# Unit tests (Vitest)
+pnpm test
+
+# End-to-end tests (Playwright)
+pnpm test:e2e
 ```
 
 Dev server runs at [http://localhost:3000](http://localhost:3000).
-
-## Repository Layout
-
-```
-app/                  # Next.js App Router pages & components
-  lib/auth.ts         # Server-side auth helpers (fetchMe, requireAuth, processAppCallback)
-  console/            # Authenticated console (API key management)
-    tokens/           # Token CRUD pages
-  login/              # Standalone login page
-    callback/         # OAuth2 app-callback (code → session)
-  sso-authorize/      # SSO consent + deep-link handoff
-  api/                # BFF route handlers (proxy to backend)
-components/           # Shared UI components (theme, language switcher, header bar, …)
-hooks/                # Shared React hooks
-services/             # Service layer
-  shared.ts           # Client-side HTTP infrastructure (ApiError, request<T>)
-  server-fetch.ts     # Server-side fetch (cookie forwarding, Set-Cookie relay)
-  redirect.ts         # Safe redirect URL validation
-  sso/                # SSO client API (WebAuthApi), deep-link builder, UA detection
-  token/              # Token client API & server-side data fetching
-store/                # Global Jotai atoms
-i18n/                 # next-intl runtime config
-messages/             # Locale message catalogues (en / zh / ja)
-mocks/                # MSW mock handlers & data (dev only)
-public/               # Static assets
-middleware.ts         # Locale + auth routing middleware
-```
 
 ## Features
 
@@ -82,13 +75,7 @@ middleware.ts         # Locale + auth routing middleware
 
 ## Contributing
 
-All contributors — human or AI — MUST follow the rules under [`.claude/rules/`](./.claude/rules/):
-
-1. **Pre-commit**: `pnpm lint` and `pnpm build` must both pass — see [`01-pre-commit.md`](./.claude/rules/01-pre-commit.md).
-2. **Commit style**: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — see [`02-commit-style.md`](./.claude/rules/02-commit-style.md).
-3. **Language**: commit messages, identifiers, and code comments must be in English — see [`03-language.md`](./.claude/rules/03-language.md). User-facing strings go through `messages/*.json`.
-
-AI pair-programming agents should additionally read [`CLAUDE.md`](./CLAUDE.md).
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 

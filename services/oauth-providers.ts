@@ -1,3 +1,16 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Browser OAuth provider registry.
+ *
+ * Holds the endpoint and scope details for each supported provider plus
+ * the URL builders for the web login entry and callback paths. Client
+ * ids come from build-time public env vars, so a provider left unset
+ * still routes — the upstream authorization request just fails there.
+ */
+
 export const OAUTH_PROVIDER_IDS = ['qq', 'github', 'apple'] as const;
 
 export type OAuthProvider = (typeof OAUTH_PROVIDER_IDS)[number];

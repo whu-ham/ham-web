@@ -1,3 +1,17 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Completes a browser OAuth login: /login/oauth/{provider}/callback
+ *
+ * Verifies the returned state against the stored cookie before
+ * exchanging the credential, forwards it to the backend, and replays the
+ * session cookies the backend issues. QQ returns its token in the URL
+ * fragment, which never reaches the server, so its callback is answered
+ * with an HTML shim that reposts the fragment as a form body.
+ */
+
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 

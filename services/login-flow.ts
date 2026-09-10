@@ -1,3 +1,17 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Shared login-flow cookie handling.
+ *
+ * Writes the OAuth2 state and the post-login destination into HttpOnly
+ * cookies so neither can be read or tampered with from the page. The
+ * store interfaces keep this module independent of `next/headers`,
+ * which is what lets it run under both server actions and route
+ * handlers.
+ */
+
 import { FROM_COOKIE, STATE_COOKIE } from '@/services/cookies';
 
 const LOGIN_COOKIE_MAX_AGE = 60 * 10;

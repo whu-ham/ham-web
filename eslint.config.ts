@@ -9,6 +9,13 @@ export default defineConfig([
 	...nextVitals,
 	...nextTs,
 	reactPlugin.configs.flat.recommended,
+	{
+		settings: {
+			react: {
+				version: '19.0',
+			},
+		},
+	},
 	reactPlugin.configs.flat['jsx-runtime'],
 	reactHooks.configs.flat.recommended,
 	{
@@ -23,6 +30,15 @@ export default defineConfig([
 			],
 			'no-console': ['error', { allow: ['warn', 'error'] }],
 			'func-style': ['error', 'expression', { allowArrowFunctions: true }],
+		},
+	},
+	{
+		// The e2e suite never renders React. Playwright fixtures take a
+		// `use` callback, which the hooks plugin misreads as a hook call
+		// inside a non-component function.
+		files: ['e2e/**/*.ts', 'playwright.config.ts'],
+		rules: {
+			'react-hooks/rules-of-hooks': 'off',
 		},
 	},
 	globalIgnores(['out/*', '.next/*', '.*/']),

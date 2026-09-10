@@ -15,9 +15,7 @@ import { MeResponse } from '@/services/sso/api';
 // ---------------------------------------------------------------------------
 
 export type ConsoleStage =
-	| { kind: 'loading' }
-	| { kind: 'login' }
-	| { kind: 'console'; me: MeResponse };
+	{ kind: 'loading' } | { kind: 'login' } | { kind: 'console'; me: MeResponse };
 
 // ---------------------------------------------------------------------------
 // Atoms

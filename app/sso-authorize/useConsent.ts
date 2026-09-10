@@ -10,10 +10,12 @@
 'use client';
 
 import { useAtomValue } from 'jotai';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { loginUrlWithFrom } from '@/services/redirect';
 import { ApiError, ConsentInfoResponse, WebAuthApi } from '@/services/sso/api';
 import { withRequiredConsentScopes } from '@/app/sso-authorize/consentScopes';
 import { paramsAtom, stageAtom } from '@/app/sso-authorize/store';
@@ -31,6 +33,7 @@ export interface UseConsentReturn {
 }
 
 export const useConsent = (): UseConsentReturn => {
+	const router = useRouter();
 	const params = useAtomValue(paramsAtom)!;
 	const stage = useAtomValue(stageAtom);
 	const me = stage.kind === 'consent' ? stage.me : null;
@@ -39,22 +42,24 @@ export const useConsent = (): UseConsentReturn => {
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [checkedScopes, setCheckedScopes] = useState<string[]>([]);
-
-	useEffect(() => {
-		if (!info) return;
-		setCheckedScopes(info.scopes.map((scope) => scope.scope));
-	}, [info]);
+	const effectiveCheckedScopes = useMemo(
+		() =>
+			checkedScopes.length > 0
+				? checkedScopes
+				: (info?.scopes.map((scope) => scope.scope) ?? []),
+		[checkedScopes, info]
+	);
 
 	const onSwitchAccount = useCallback(async () => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			const from = encodeURIComponent(
-				window.location.pathname + window.location.search
-			);
-			window.location.href = `/login?from=${from}`;
+			// Router navigation keeps this an in-app transition; a
+			// location.href assignment would reload the document.
+			const from = window.location.pathname + window.location.search;
+			router.push(loginUrlWithFrom(from));
 		}
-	}, []);
+	}, [router]);
 
 	const bail = useCallback(
 		(oauthError: 'access_denied' | 'server_error') => {
@@ -81,8 +86,8 @@ export const useConsent = (): UseConsentReturn => {
 				const resp = await WebAuthApi.consentConfirm({
 					client_id: params.appId,
 					scope: info
-						? withRequiredConsentScopes(checkedScopes, info.scopes)
-						: checkedScopes,
+						? withRequiredConsentScopes(effectiveCheckedScopes, info.scopes)
+						: effectiveCheckedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
 					nonce,
@@ -101,7 +106,7 @@ export const useConsent = (): UseConsentReturn => {
 		},
 		[
 			bail,
-			checkedScopes,
+			effectiveCheckedScopes,
 			info,
 			params.appId,
 			params.redirectUri,

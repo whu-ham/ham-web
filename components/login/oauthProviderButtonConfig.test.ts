@@ -1,3 +1,11 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Tests for the OAuth provider button visual configuration.
+ */
+
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 

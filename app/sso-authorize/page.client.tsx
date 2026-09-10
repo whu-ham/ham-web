@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 4.2
- * @date 2026/5/22
+ * @version 4.3
+ * @date 2026/9/10 18:55:06
  *
  * Client-side orchestrator for /sso-authorize.
  * Rendering-only — all orchestration logic lives in useSsoAuthorize.

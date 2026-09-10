@@ -61,6 +61,21 @@ export interface MeResponse {
 	avatar_url?: string;
 }
 
+/**
+ * Display name for a user, falling back to the id.
+ *
+ * `??` alone is not enough: the backend can return `nickname: ''`, and an
+ * empty string is not nullish, so `me.nickname ?? me.user_id` renders a
+ * blank name. Every call site that shows a user's name should go through
+ * this instead of open-coding the fallback.
+ */
+export const displayName = (
+	user: Pick<MeResponse, 'user_id' | 'nickname'> | null | undefined
+): string => {
+	if (!user) return '';
+	return user.nickname?.trim() || user.user_id;
+};
+
 export interface ConsentScopeDetail {
 	scope: string;
 	label?: string;

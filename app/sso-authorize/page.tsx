@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/5/22
+ * @version 1.4
+ * @date 2026/9/10 18:55:06
  *
  * SSO authorize page.
  * - Desktop + !me → redirect to /login (server-side)

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This file provides guidance to [Codex](https://docs.Codex.com/Codex) (and other AI pair-programming agents) when working in this repository.
+This file provides guidance to AI coding agents (Claude Code, Codex, and other AI pair-programming agents) when working in this repository.
 
 ## Project Overview
 
@@ -16,14 +16,14 @@ This file provides guidance to [Codex](https://docs.Codex.com/Codex) (and other 
 
 Use `pnpm` for all scripts.
 
-| Task                 | Command        |
-| -------------------- | -------------- |
-| Install dependencies | `pnpm install` |
-| Start dev server     | `pnpm dev`     |
-| Production build     | `pnpm build`   |
-| Start built server   | `pnpm start`   |
+| Task                   | Command        |
+| ---------------------- | -------------- |
+| Install dependencies   | `pnpm install` |
+| Start dev server       | `pnpm dev`     |
+| Production build       | `pnpm build`   |
+| Start built server     | `pnpm start`   |
 | Cloudflare Pages build | `pnpm build:cf` |
-| Lint                 | `pnpm lint`    |
+| Lint                   | `pnpm lint`    |
 
 ## Repository Layout
 
@@ -47,21 +47,21 @@ segments — do not add cross-cutting code there.
 
 ## Mandatory Rules
 
-All contributors — human or AI — MUST follow every rule under [`.Codex/rules/`](./.Codex/rules/). Key points:
+All contributors — human or AI — MUST follow the rules defined in the
+[`ham-web` agent](./.agents/ham-web.md) (mirrored into `.claude/agents/ham-web.md`
+for Claude Code). Key points:
 
 1. **Always run `pnpm lint` and `pnpm build` before committing.** Do not commit if either fails.
 2. **Commit messages MUST follow [Conventional Commits](https://www.conventionalcommits.org/).**
 3. **All commit messages and code comments MUST be written in English.**
+4. **Every file you create or modify MUST carry a JSDoc file header.**
 
-See [`.Codex/rules/`](./.Codex/rules/) for the full rule set:
-
-- [`01-pre-commit.md`](./.Codex/rules/01-pre-commit.md)
-- [`02-commit-style.md`](./.Codex/rules/02-commit-style.md)
-- [`03-language.md`](./.Codex/rules/03-language.md)
+The agent file is the single source of truth for these rules — read it before
+writing or committing any code.
 
 ## Notes for AI Agents
 
 - Prefer editing existing files over creating new ones.
 - Keep changes minimal and scoped to the user's request.
 - When adding new UI strings, add entries to every file under `messages/` (`en.json`, `zh.json`, `ja.json`).
-- Do not commit build artifacts (`.next/`, `out/`, `*.tsbuildinfo`) or local Codex state (see `.gitignore`).
+- Do not commit build artifacts (`.next/`, `out/`, `*.tsbuildinfo`) or local Claude state (see `.gitignore`).

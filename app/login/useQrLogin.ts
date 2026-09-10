@@ -83,7 +83,11 @@ export const useQrLogin = (onLoginSucceeded?: () => void): UseQrLoginReturn => {
 	}, [t]);
 
 	useEffect(() => {
-		refresh();
+		const start = () => {
+			void refresh();
+		};
+
+		const timer = window.setTimeout(start, 0);
 
 		const onVisibilityChange = () => {
 			if (document.hidden) {
@@ -116,6 +120,7 @@ export const useQrLogin = (onLoginSucceeded?: () => void): UseQrLoginReturn => {
 
 		document.addEventListener('visibilitychange', onVisibilityChange);
 		return () => {
+			window.clearTimeout(timer);
 			clearTimer();
 			document.removeEventListener('visibilitychange', onVisibilityChange);
 		};

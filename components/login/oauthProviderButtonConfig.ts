@@ -1,3 +1,15 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Visual configuration for the browser OAuth provider buttons.
+ *
+ * Kept apart from `services/oauth-providers` so the endpoint and state
+ * building stay free of presentation concerns. Array order drives the
+ * render order on every login surface.
+ */
+
 import type { OAuthProvider } from '@/services/oauth-providers';
 
 export type OAuthProviderButtonKind = 'circle' | 'image';

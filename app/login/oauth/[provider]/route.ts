@@ -1,3 +1,16 @@
+/**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
+ * Starts a browser OAuth login: /login/oauth/{provider}?from=...
+ *
+ * Validates the provider, stores the CSRF state and the return
+ * destination in HttpOnly cookies, then redirects to the provider's
+ * authorization endpoint. Rejects an unknown provider rather than
+ * falling through, so a typo cannot reach the upstream host.
+ */
+
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 

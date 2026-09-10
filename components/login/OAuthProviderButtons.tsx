@@ -1,5 +1,14 @@
 /**
+ * @author Claude
+ * @version 1.0
+ * @date 2026/9/10 18:55:06
+ *
  * Shared browser OAuth provider entry list for login surfaces.
+ *
+ * Rendering only — endpoints and state handling live in
+ * `services/oauth-providers`. Icon assets are picked per resolved
+ * theme rather than a CSS filter, because the brand marks have
+ * prescribed light and dark variants.
  */
 
 'use client';
