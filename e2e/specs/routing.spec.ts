@@ -11,6 +11,7 @@
  * assert on the URL the browser ends up at.
  */
 import { expect, test } from '../fixtures/index.ts';
+import { sessionCookie, VALID_SESSION } from '../fixtures/data.ts';
 
 test.describe('routing and auth guard', () => {
 	test('root redirects to the console', async ({ anonPage }) => {
@@ -61,17 +62,7 @@ test.describe('routing and auth guard', () => {
 		browser,
 	}) => {
 		const context = await browser.newContext();
-		await context.addCookies([
-			{
-				name: 'ham_session',
-				value: 'not-a-real-session',
-				domain: '127.0.0.1',
-				path: '/',
-				httpOnly: true,
-				sameSite: 'Lax',
-				secure: false,
-			},
-		]);
+		await context.addCookies([sessionCookie('not-a-real-session')]);
 		const page = await context.newPage();
 		await page.goto('/console');
 		await expect(page).toHaveURL(/\/login\?from=%2Fconsole/);
@@ -87,17 +78,7 @@ test.describe('routing and auth guard', () => {
 
 		// Simulate the session the backend would set after a real login.
 		const context = anonPage.context();
-		await context.addCookies([
-			{
-				name: 'ham_session',
-				value: 'e2e-session',
-				domain: '127.0.0.1',
-				path: '/',
-				httpOnly: true,
-				sameSite: 'Lax',
-				secure: false,
-			},
-		]);
+		await context.addCookies([sessionCookie(VALID_SESSION)]);
 
 		// Reloading /login now redirects to the `from` target.
 		await anonPage.reload();

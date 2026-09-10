@@ -26,7 +26,7 @@
 import { test as base, expect, type Page } from '@playwright/test';
 
 import { resetStub } from '../stub/control.ts';
-import { SESSION_COOKIE, VALID_SESSION } from './data.ts';
+import { sessionCookie, VALID_SESSION } from './data.ts';
 
 /** Port the app is served from; see playwright.config.ts. */
 const APP_PORT = 3210;
@@ -52,18 +52,7 @@ export const test = base.extend<Fixtures>({
 	authedPage: async ({ browser }, use) => {
 		await resetStub();
 		const context = await browser.newContext();
-		await context.addCookies([
-			{
-				name: SESSION_COOKIE,
-				value: VALID_SESSION,
-				domain: '127.0.0.1',
-				path: '/',
-				httpOnly: true,
-				sameSite: 'Lax',
-				// httpOnly cookies may not be `secure` over plain HTTP.
-				secure: false,
-			},
-		]);
+		await context.addCookies([sessionCookie(VALID_SESSION)]);
 		const page = await context.newPage();
 		await use(page);
 		await context.close();

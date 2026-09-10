@@ -19,6 +19,22 @@ export const VALID_SESSION = 'e2e-session';
 /** Cookie name the app sends as its session. Mirrors SESSION_COOKIE. */
 export const SESSION_COOKIE = 'ham_session';
 
+/**
+ * A session cookie for the app origin.
+ *
+ * `httpOnly` cookies may not be marked `secure` over plain HTTP, which is
+ * what the locally served app uses.
+ */
+export const sessionCookie = (value: string) => ({
+	name: SESSION_COOKIE,
+	value,
+	domain: '127.0.0.1',
+	path: '/',
+	httpOnly: true,
+	sameSite: 'Lax' as const,
+	secure: false,
+});
+
 /** User returned by /web/auth/me for the seeded session. */
 export const ME = {
 	user_id: 'u_e2e',
