@@ -1,14 +1,16 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 18:55:06
+ * @version 1.1
+ * @date 2026/9/11 00:41:35
  *
  * Browser OAuth provider registry.
  *
  * Holds the endpoint and scope details for each supported provider plus
  * the URL builders for the web login entry and callback paths. Client
- * ids come from build-time public env vars, so a provider left unset
- * still routes — the upstream authorization request just fails there.
+ * ids are read from the Cloudflare Worker environment at request time,
+ * so they are deliberately not `NEXT_PUBLIC_*` — that prefix would
+ * inline them into the browser bundle. A provider left unset still
+ * routes; the upstream authorization request just fails there.
  */
 
 export const OAUTH_PROVIDER_IDS = ['qq', 'github', 'apple'] as const;
@@ -28,7 +30,11 @@ export interface OAuthProviderConfig {
 	crossSiteCallback: boolean;
 }
 
-const getPublicEnv = (name: string): string => process.env[name] ?? '';
+// Client ids arrive as Worker vars (see `vars` in wrangler.jsonc) and are
+// copied onto `process.env` per request by the OpenNext runtime shim, so
+// this must stay a dynamic lookup — a literal `process.env.QQ_CLIENT_ID`
+// would be statically inlined (as `undefined`) at build time.
+const getWorkerEnv = (name: string): string => process.env[name] ?? '';
 
 const buildCallbackQuery = (params: Record<string, string>) => {
 	const search = new URLSearchParams(params);
@@ -45,7 +51,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 		crossSiteCallback: false,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
-				client_id: getPublicEnv('NEXT_PUBLIC_QQ_CLIENT_ID'),
+				client_id: getWorkerEnv('QQ_CLIENT_ID'),
 				redirect_uri: callbackUrl,
 				response_type: 'token',
 				scope: 'get_user_info',
@@ -60,7 +66,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 		crossSiteCallback: false,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
-				client_id: getPublicEnv('NEXT_PUBLIC_GITHUB_CLIENT_ID'),
+				client_id: getWorkerEnv('GITHUB_CLIENT_ID'),
 				redirect_uri: callbackUrl,
 				scope: 'read:user',
 				state,
@@ -74,7 +80,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 		crossSiteCallback: true,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
-				client_id: getPublicEnv('NEXT_PUBLIC_APPLE_CLIENT_ID'),
+				client_id: getWorkerEnv('APPLE_CLIENT_ID'),
 				redirect_uri: callbackUrl,
 				response_mode: 'form_post',
 				response_type: 'code id_token',
