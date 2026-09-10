@@ -40,6 +40,14 @@ pnpm build:cf
 
 # Lint
 pnpm lint
+pnpm lint:fix        # auto-fix what can be fixed
+
+# Formatting
+pnpm format          # write
+pnpm format:check    # verify
+
+# Type checking
+pnpm typecheck       # app + e2e
 
 # Unit tests (Vitest)
 pnpm test
@@ -102,6 +110,11 @@ middleware.ts         # Locale + auth routing middleware
 - **Unit** (`pnpm test`) — Vitest, for pure logic and hooks.
 - **E2E** (`pnpm test:e2e`) — Playwright, driving the production build in a
   real browser.
+
+Both lint and formatting cover `e2e/`. The e2e suite is excluded from the
+app's `tsconfig.json` so `next build` never sees it, which means nothing
+else typechecks it — use `pnpm test:e2e:typecheck` (or `pnpm typecheck`,
+which does both) and CI enforces it.
 
 The e2e suite points `HAM_BACKEND_ORIGIN` at the stub server in `e2e/stub`,
 which stands in for the real backend. A stub is used rather than MSW because

@@ -36,8 +36,12 @@ export interface StubState {
 	sessionCookieName: string;
 	/** Session value the stub treats as authenticated. */
 	validSession: string;
-	/** Payload returned by /web/auth/me. */
-	me: { user_id: string; nickname: string; avatar_url: string | null };
+	/**
+	 * Payload returned by /web/auth/me.
+	 * `nickname` is optional to mirror the app's `MeResponse`, which lets
+	 * specs exercise the "no nickname" fallback path.
+	 */
+	me: { user_id: string; nickname?: string; avatar_url: string | null };
 
 	/** Token table, reset between tests. */
 	tokens: StubToken[];

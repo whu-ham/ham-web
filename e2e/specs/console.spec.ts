@@ -36,12 +36,11 @@ test.describe('console home', () => {
 		await expect(console_.greeting).toContainText('u_nonick');
 	});
 
-	test('renders an empty name when the nickname is a blank string', async ({
+	test('falls back to the user id when the nickname is a blank string', async ({
 		authedPage,
 	}) => {
-		// Documents current behaviour: ConsoleView uses `me.nickname ??
-		// me.user_id`, and `??` does not catch an empty string, so a blank
-		// nickname yields "Good morning, " rather than the user id.
+		// A blank nickname must not render an empty name. `??` alone
+		// would not catch '' — see displayName in services/sso/api.
 		await setupStub({
 			me: { user_id: 'u_nonick', nickname: '', avatar_url: null },
 		});
@@ -49,8 +48,20 @@ test.describe('console home', () => {
 		const console_ = new ConsolePage(authedPage);
 		await console_.goto();
 
-		await expect(console_.greeting).toHaveText(/,\s*$/);
-		await expect(console_.greeting).not.toContainText('u_nonick');
+		await expect(console_.greeting).toContainText('u_nonick');
+	});
+
+	test('falls back to the user id when the nickname is whitespace only', async ({
+		authedPage,
+	}) => {
+		await setupStub({
+			me: { user_id: 'u_nonick', nickname: '   ', avatar_url: null },
+		});
+
+		const console_ = new ConsolePage(authedPage);
+		await console_.goto();
+
+		await expect(console_.greeting).toContainText('u_nonick');
 	});
 
 	test('navigates to the token screen and back', async ({ authedPage }) => {

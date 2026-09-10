@@ -21,3 +21,7 @@ jobs:
           run_install: true
       - name: Run ESLint
         run: pnpm lint
+      - name: Check formatting
+        # ESLint already reports Prettier violations on .ts/.tsx, but this
+        # also covers the file types it does not lint.
+        run: pnpm format:check

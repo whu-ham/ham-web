@@ -14,4 +14,4 @@ export {
 	TokenRotateModal,
 	TokenRevealModal,
 } from './tokens.page.ts';
-export { iconButton, isCheckedIn, toggleIn } from './locators.ts';
+export { isCheckedIn, toggleIn } from './locators.ts';

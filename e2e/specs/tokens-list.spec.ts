@@ -95,6 +95,22 @@ test.describe('token list', () => {
 		await expect(authedPage.getByText('Never used')).toHaveCount(0);
 	});
 
+	test('gives every icon-only card action an accessible name', async ({
+		authedPage,
+	}) => {
+		await setupStub({ tokens: [makeToken({ name: 'Cursor IDE' })] });
+
+		const tokens = new TokensPage(authedPage);
+		await tokens.goto();
+
+		// Rotate and revoke render only an aria-hidden glyph, so without an
+		// aria-label they are invisible to screen readers. Locating them by
+		// role + name both drives them and proves the label exists.
+		const card = tokens.card('Cursor IDE');
+		await expect(card.locator('button[aria-label="Rotate"]')).toBeVisible();
+		await expect(card.locator('button[aria-label="Revoke"]')).toBeVisible();
+	});
+
 	test('shows the empty state with a retry button when the fetch fails', async ({
 		authedPage,
 	}) => {

@@ -16,7 +16,12 @@
 		"cf:upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
 		"test:e2e": "playwright test",
-		"test:e2e:ui": "playwright test --ui"
+		"test:e2e:ui": "playwright test --ui",
+		"lint:fix": "eslint . --fix",
+		"format": "prettier --write \"app/**/*.{ts,tsx,css}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"store/**/*.{ts,tsx}\" \"i18n/**/*.ts\" \"mocks/**/*.ts\" \"e2e/**/*.ts\" playwright.config.ts",
+		"format:check": "prettier --check \"app/**/*.{ts,tsx,css}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"store/**/*.{ts,tsx}\" \"i18n/**/*.ts\" \"mocks/**/*.ts\" \"e2e/**/*.ts\" playwright.config.ts",
+		"typecheck": "tsc --noEmit && tsc -p e2e/tsconfig.json --noEmit",
+		"test:e2e:typecheck": "tsc -p e2e/tsconfig.json --noEmit"
 	},
 	"dependencies": {
 		"@heroui/react": "^3",

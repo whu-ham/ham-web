@@ -54,7 +54,14 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 				<div className={'flex items-center gap-1 shrink-0'}>
 					<Tooltip>
 						<Tooltip.Trigger>
-							<Button variant={'tertiary'} size={'sm'} onPress={onRotate}>
+							{/* Icon-only: the glyph is aria-hidden, so the label is the
+							    button's entire accessible name. */}
+							<Button
+								variant={'tertiary'}
+								size={'sm'}
+								onPress={onRotate}
+								aria-label={t('card.rotate')}
+							>
 								<span
 									className={'material-icons-round text-[18px]! leading-none!'}
 									aria-hidden={true}
@@ -67,7 +74,11 @@ const TokenCard = ({ token, onRotate, onRevoke }: TokenCardProps) => {
 					</Tooltip>
 					<Popover isOpen={revokeOpen} onOpenChange={setRevokeOpen}>
 						<Popover.Trigger>
-							<Button variant={'danger-soft'} size={'sm'}>
+							<Button
+								variant={'danger-soft'}
+								size={'sm'}
+								aria-label={t('card.revoke')}
+							>
 								<span
 									className={'material-icons-round text-[18px]! leading-none!'}
 									aria-hidden={true}

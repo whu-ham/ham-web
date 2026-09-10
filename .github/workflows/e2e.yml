@@ -24,6 +24,10 @@ jobs:
         with:
           version: 10.11.1
       - run: pnpm install --frozen-lockfile
+      - name: Typecheck e2e suite
+        # The e2e project is excluded from the app tsconfig so `next build`
+        # does not see it, so nothing else would ever typecheck it.
+        run: pnpm test:e2e:typecheck
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
       - name: Run end-to-end tests

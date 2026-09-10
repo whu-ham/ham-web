@@ -11,8 +11,6 @@
  */
 import type { Locator, Page } from '@playwright/test';
 
-import { iconButton } from './locators.ts';
-
 export class TokensPage {
 	readonly page: Page;
 	readonly createButton: Locator;
@@ -54,7 +52,7 @@ export class TokensPage {
 
 	/** Open the rotate modal for the named token. */
 	async openRotate(name: string): Promise<TokenRotateModal> {
-		await iconButton(this.card(name), 'autorenew').click();
+		await this.cardButton(name, 'Rotate').click();
 		const modal = new TokenRotateModal(this.page);
 		await modal.heading.waitFor({ state: 'visible' });
 		return modal;
@@ -62,22 +60,39 @@ export class TokensPage {
 
 	/** Revoke the named token, confirming the popover. */
 	async revoke(name: string): Promise<void> {
-		await iconButton(this.card(name), 'delete_outline').click();
-		await this.page
-			.getByText('Are you sure you want to revoke this key?')
-			.waitFor({ state: 'visible' });
-		await this.page
-			.getByRole('button', { name: 'Revoke', exact: true })
-			.click();
+		const confirm = await this.openRevokeConfirm(name);
+		await confirm.getByRole('button', { name: 'Revoke' }).click();
 	}
 
 	/** Cancel the revoke popover without deleting anything. */
 	async cancelRevoke(name: string): Promise<void> {
-		await iconButton(this.card(name), 'delete_outline').click();
-		await this.page
+		const confirm = await this.openRevokeConfirm(name);
+		await confirm.getByRole('button', { name: 'Cancel' }).click();
+	}
+
+	/**
+	 * Open the revoke confirmation for the named token and return the
+	 * dialog. Both the card's trigger and the confirmation are labelled
+	 * "Revoke", so every follow-up click must be scoped to the dialog.
+	 */
+	private async openRevokeConfirm(name: string): Promise<Locator> {
+		await this.cardButton(name, 'Revoke').click();
+		const confirm = this.page.getByRole('dialog');
+		await confirm
 			.getByText('Are you sure you want to revoke this key?')
 			.waitFor({ state: 'visible' });
-		await this.page.getByRole('button', { name: 'Cancel' }).click();
+		return confirm;
+	}
+
+	/**
+	 * A named action on a token card.
+	 *
+	 * Scoped to real `<button>` elements: HeroUI's Tooltip.Trigger also
+	 * exposes `role="button"`, so `getByRole('button')` alone matches both
+	 * the wrapper and the control inside it.
+	 */
+	private cardButton(name: string, label: string): Locator {
+		return this.card(name).locator(`button[aria-label="${label}"]`);
 	}
 
 	/** Go back to /console via the header button. */
