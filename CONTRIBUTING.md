@@ -23,6 +23,30 @@ All contributions MUST follow the rules defined in the
 The agent file is the single source of truth for these rules — read it before
 writing or committing any code.
 
+## Tests
+
+- **Unit** (`pnpm test`) — Vitest, for pure logic and hooks.
+- **E2E** (`pnpm test:e2e`) — Playwright, driving the production build in a
+  real browser.
+
+Both lint and formatting cover `e2e/`. The e2e suite is excluded from the
+app's `tsconfig.json` so `next build` never sees it, which means nothing
+else typechecks it — use `pnpm test:e2e:typecheck` (or `pnpm typecheck`,
+which does both) and CI enforces it.
+
+The e2e suite points `HAM_BACKEND_ORIGIN` at the stub server in `e2e/stub`,
+which stands in for the real backend. A stub is used rather than MSW because
+Server Components call the backend directly (`/web/**`) and never touch
+`/api/**`, so a browser-side service worker cannot intercept them. The stub
+exposes `/__stub/**` control endpoints so specs can seed data and inject
+failures; `setupStub()` resets and patches that state in one atomic call.
+
+Browser binaries are installed separately:
+
+```bash
+pnpm exec playwright install --with-deps chromium
+```
+
 ## Before You Open a Pull Request
 
 ```bash
@@ -36,8 +60,8 @@ pnpm test:e2e        # Playwright, drives the production build
 
 CI runs `pnpm lint` and `pnpm format:check` on every pull request (see
 [`.github/workflows/lint.yml`](./.github/workflows/lint.yml)); PRs failing
-lint are rejected. See the [Testing section of the README](./README.md#testing)
-for details on the e2e suite and how to install browser binaries.
+lint are rejected. See [Tests](#tests) for how to install browser binaries
+and how the e2e stub works.
 
 ## Keeping the Agent Instruction Files in Sync
 
@@ -52,8 +76,7 @@ symlinks, so there is no second copy to keep in sync:
 | `.claude/agents/`           | Symlink → `../.agents/` (whole directory, not one file) |
 
 Git records symlinks as links rather than as content, so a fresh clone
-preserves them and there is no second copy to drift. Two consequences worth
-knowing:
+preserves them and the mirrors cannot drift. Two consequences worth knowing:
 
 - Edit `AGENTS.md` and `.agents/ham-web.md` only. Writing to the symlinked
   paths can replace the link with a regular file.

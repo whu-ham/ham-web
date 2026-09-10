@@ -73,35 +73,9 @@ Dev server runs at [http://localhost:3000](http://localhost:3000).
 - [ ] Course detail lookup
 - [ ] Course selection panel
 
-## Testing
-
-- **Unit** (`pnpm test`) — Vitest, for pure logic and hooks.
-- **E2E** (`pnpm test:e2e`) — Playwright, driving the production build in a
-  real browser.
-
-Both lint and formatting cover `e2e/`. The e2e suite is excluded from the
-app's `tsconfig.json` so `next build` never sees it, which means nothing
-else typechecks it — use `pnpm test:e2e:typecheck` (or `pnpm typecheck`,
-which does both) and CI enforces it.
-
-The e2e suite points `HAM_BACKEND_ORIGIN` at the stub server in `e2e/stub`,
-which stands in for the real backend. A stub is used rather than MSW because
-Server Components call the backend directly (`/web/**`) and never touch
-`/api/**`, so a browser-side service worker cannot intercept them. The stub
-exposes `/__stub/**` control endpoints so specs can seed data and inject
-failures; `setupStub()` resets and patches that state in one atomic call.
-
-Browser binaries are installed separately:
-
-```bash
-pnpm exec playwright install --with-deps chromium
-```
-
 ## Contributing
 
-All contributors — human or AI — MUST follow the rules defined in the
-[`ham-web` agent](./.agents/ham-web.md). See
-[`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full contribution guide.
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
 
 ## License
 
