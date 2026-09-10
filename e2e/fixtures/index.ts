@@ -16,10 +16,12 @@
  * `requireAuth` reads the forwarded cookie and only the backend's verdict
  * decides whether the page renders or redirects.
  *
- * Backend state is reset in a `beforeEach` hook rather than in a lazy
- * fixture, because Playwright only instantiates a fixture when a test
- * destructures it — a spec that seeds nothing would otherwise inherit the
- * previous test's rows and failure switches.
+ * Backend state is reset when the page fixtures are built, not in a
+ * `beforeEach` hook. A hook proved unreliable as an isolation boundary:
+ * it runs outside the fixture ordering that specs depend on, so a spec
+ * that seeds nothing could still inherit the previous test's rows or
+ * failure switches. Every spec destructures one of the page fixtures, so
+ * resetting there always happens before the test body runs.
  */
 import { test as base, expect, type Page } from '@playwright/test';
 
@@ -40,6 +42,7 @@ interface Fixtures {
 
 export const test = base.extend<Fixtures>({
 	anonPage: async ({ browser }, use) => {
+		await resetStub();
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		await use(page);
@@ -47,6 +50,7 @@ export const test = base.extend<Fixtures>({
 	},
 
 	authedPage: async ({ browser }, use) => {
+		await resetStub();
 		const context = await browser.newContext();
 		await context.addCookies([
 			{
@@ -64,13 +68,6 @@ export const test = base.extend<Fixtures>({
 		await use(page);
 		await context.close();
 	},
-});
-
-// Belt-and-braces reset: specs arrange their own state through
-// `setupStub`, which resets atomically, but a clean default matters for
-// the ones that seed nothing at all.
-test.beforeEach(async () => {
-	await resetStub();
 });
 
 export { expect };

@@ -77,6 +77,25 @@ export class SsoAuthorizePage {
 		await this.page.goto(query ? `/sso-authorize?${query}` : '/sso-authorize');
 	}
 
+	/**
+	 * Visit /sso-authorize and wait for a redirect to land.
+	 *
+	 * The page redirects from the server for anonymous desktop visitors,
+	 * so the URL is only meaningful once that navigation has settled.
+	 */
+	async gotoAndWaitFor(
+		params: {
+			clientId?: string;
+			redirectUri?: string;
+			scope?: string;
+			state?: string;
+		},
+		urlPattern: RegExp
+	): Promise<void> {
+		await this.goto(params);
+		await this.page.waitForURL(urlPattern, { timeout: 10_000 });
+	}
+
 	/** The consent checkbox row for a scope label. */
 	scopeRow(label: string): Locator {
 		return this.page

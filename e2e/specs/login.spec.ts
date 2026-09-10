@@ -82,7 +82,8 @@ test.describe('login screen', () => {
 		// navigates on. The "Signed in" confirmation is a transient state
 		// that usually renders for less than a poll interval, so assert on
 		// the durable outcome instead.
-		await expect(anonPage).toHaveURL(/\/console/, { timeout: 10_000 });
+		await anonPage.waitForURL(/\/console/, { timeout: 10_000 });
+		await expect(anonPage).toHaveURL(/\/console/);
 		await expect(anonPage.getByRole('heading', { level: 1 })).toContainText(
 			'E2E User'
 		);
@@ -101,9 +102,8 @@ test.describe('login screen', () => {
 		const login = new LoginPage(anonPage);
 		await login.goto('/console/tokens');
 
-		await expect(anonPage).toHaveURL(/\/console\/tokens/, {
-			timeout: 10_000,
-		});
+		await anonPage.waitForURL(/\/console\/tokens/, { timeout: 10_000 });
+		await expect(anonPage).toHaveURL(/\/console\/tokens/);
 		await expect(
 			anonPage.getByRole('heading', { name: 'API Keys', level: 1 })
 		).toBeVisible();

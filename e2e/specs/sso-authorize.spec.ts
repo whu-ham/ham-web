@@ -13,7 +13,7 @@
  */
 import { expect, test } from '../fixtures/index.ts';
 import { setupStub } from '../stub/control.ts';
-import { SsoAuthorizePage } from '../pages/index.ts';
+import { LoginPage, SsoAuthorizePage } from '../pages/index.ts';
 import { CONSENT_SCOPES, REDIRECT_URI } from '../fixtures/data.ts';
 
 test.describe('sso authorize — invalid request', () => {
@@ -54,14 +54,45 @@ test.describe('sso authorize — desktop', () => {
 		anonPage,
 	}) => {
 		const sso = new SsoAuthorizePage(anonPage);
-		await sso.goto({
-			clientId: 'stub-app',
-			redirectUri: REDIRECT_URI,
-			scope: 'identity',
-			state: 'xyz',
-		});
+		// The server already bounces anonymous desktop visitors; wait for
+		// the redirect to land rather than asserting mid-navigation, which
+		// races the 307 under load.
+		await sso.gotoAndWaitFor(
+			{
+				clientId: 'stub-app',
+				redirectUri: REDIRECT_URI,
+				scope: 'identity',
+				state: 'xyz',
+			},
+			/\/login\?from=%2Fsso-authorize/
+		);
 
 		await expect(anonPage).toHaveURL(/\/login\?from=%2Fsso-authorize/);
+		await expect(new LoginPage(anonPage).title).toHaveText('Sign in to Ham');
+	});
+
+	test('keeps the full authorize URL in the from parameter', async ({
+		anonPage,
+	}) => {
+		const sso = new SsoAuthorizePage(anonPage);
+		await sso.gotoAndWaitFor(
+			{
+				clientId: 'stub-app',
+				redirectUri: REDIRECT_URI,
+				scope: 'identity mcp',
+				state: 'xyz',
+			},
+			/\/login\?from=/
+		);
+
+		// The return target must carry the whole query string, otherwise
+		// signing in drops the client_id and the consent flow restarts.
+		const from = new URL(anonPage.url()).searchParams.get('from') ?? '';
+		const target = new URL(from, 'http://stub.local');
+		expect(target.searchParams.get('client_id')).toBe('stub-app');
+		expect(target.searchParams.get('redirect_uri')).toBe(REDIRECT_URI);
+		expect(target.searchParams.get('scope')).toBe('identity mcp');
+		expect(target.searchParams.get('state')).toBe('xyz');
 	});
 
 	test('renders the consent screen for an authenticated user', async ({
@@ -234,9 +265,12 @@ test.describe('sso authorize — desktop', () => {
 		await expect(sso.switchAccount).toBeVisible();
 		await sso.switchAccount.click();
 
-		await expect(authedPage).toHaveURL(/\/login\?from=%2Fsso-authorize/, {
+		// Also a client-side navigation: the hook signs out, then points
+		// the browser at /login with the current URL as the return target.
+		await authedPage.waitForURL(/\/login\?from=%2Fsso-authorize/, {
 			timeout: 10_000,
 		});
+		await expect(authedPage).toHaveURL(/\/login\?from=%2Fsso-authorize/);
 	});
 
 	test('shows an error view when consent details cannot be loaded', async ({
