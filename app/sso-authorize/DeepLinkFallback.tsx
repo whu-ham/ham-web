@@ -24,11 +24,13 @@
 import Image from 'next/image';
 import { Button, Link, Separator } from '@heroui/react';
 import { useAtomValue } from 'jotai';
+import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import PasskeyLoginView from '@/app/login/PasskeyLoginView';
 import icon from '@/public/icon-1024.png';
+import { loginUrlWithFrom } from '@/services/redirect';
 import { getAppStoreURL } from '@/services/sso/ua';
 import { deepLinkUrlAtom, deviceKindAtom } from '@/app/sso-authorize/store';
 
@@ -37,6 +39,7 @@ interface DeepLinkFallbackProps {
 }
 
 const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
+	const router = useRouter();
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
 	const deviceKind = useAtomValue(deviceKindAtom);
@@ -49,10 +52,10 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 	};
 
 	const goToLogin = () => {
-		const from = encodeURIComponent(
-			window.location.pathname + window.location.search
-		);
-		window.location.href = `/login?from=${from}`;
+		// Internal route: navigate through the router so this stays an
+		// in-app transition instead of a full document load.
+		const from = window.location.pathname + window.location.search;
+		router.push(loginUrlWithFrom(from));
 	};
 
 	const onPasskeyLoginSucceeded = () => {

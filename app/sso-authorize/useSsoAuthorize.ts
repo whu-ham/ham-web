@@ -17,6 +17,7 @@
 'use client';
 
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef } from 'react';
 
 import {
@@ -26,6 +27,7 @@ import {
 	SsoAuthorizeParams,
 	stageAtom,
 } from '@/app/sso-authorize/store';
+import { loginUrlWithFrom } from '@/services/redirect';
 import { ApiError, MeResponse, WebAuthApi } from '@/services/sso/api';
 import { tryLaunchDeepLink } from '@/services/sso/deepLink';
 import { detectDeviceKind } from '@/services/sso/ua';
@@ -65,6 +67,7 @@ const parseParams = (): SsoAuthorizeParams | null => {
 };
 
 export const useSsoAuthorize = (me: MeResponse | null) => {
+	const router = useRouter();
 	const [params, setParams] = useAtom(paramsAtom);
 	const [stage, setStage] = useAtom(stageAtom);
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
@@ -88,11 +91,12 @@ export const useSsoAuthorize = (me: MeResponse | null) => {
 	}, [setParams, setDeviceKind]);
 
 	const redirectToLogin = useCallback(() => {
-		const from = encodeURIComponent(
-			window.location.pathname + window.location.search
-		);
-		window.location.href = `/login?from=${from}`;
-	}, []);
+		// Navigate through the router rather than assigning location.href:
+		// /login is an internal route, and a full document load would drop
+		// the client-side session state this flow depends on.
+		const from = window.location.pathname + window.location.search;
+		router.push(loginUrlWithFrom(from));
+	}, [router]);
 
 	// Visibility-aware session refresh
 	useEffect(() => {
