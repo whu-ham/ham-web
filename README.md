@@ -2,6 +2,7 @@
 
 [![Build](https://github.com/whu-ham/ham-web/actions/workflows/build.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/build.yml)
 [![Unit Tests](https://github.com/whu-ham/ham-web/actions/workflows/test.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/test.yml)
+[![E2E Tests](https://github.com/whu-ham/ham-web/actions/workflows/e2e.yml/badge.svg)](https://github.com/whu-ham/ham-web/actions/workflows/e2e.yml)
 [![codecov](https://codecov.io/gh/whu-ham/ham-web/graph/badge.svg?token=LOXQJAE6PO)](https://codecov.io/gh/whu-ham/ham-web)
 [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/whu-ham/ham-web)
 
@@ -39,6 +40,12 @@ pnpm build:cf
 
 # Lint
 pnpm lint
+
+# Unit tests (Vitest)
+pnpm test
+
+# End-to-end tests (Playwright)
+pnpm test:e2e
 ```
 
 Dev server runs at [http://localhost:3000](http://localhost:3000).
@@ -66,6 +73,11 @@ store/                # Global Jotai atoms
 i18n/                 # next-intl runtime config
 messages/             # Locale message catalogues (en / zh / ja)
 mocks/                # MSW mock handlers & data (dev only)
+e2e/                  # Playwright end-to-end suite
+  stub/               # Backend stub the app is pointed at during e2e runs
+  fixtures/           # Session-cookie fixtures and shared seed data
+  pages/              # Page objects
+  specs/              # Test specs, one per screen or flow
 public/               # Static assets
 middleware.ts         # Locale + auth routing middleware
 ```
@@ -84,6 +96,25 @@ middleware.ts         # Locale + auth routing middleware
 - [ ] Course grade lookup
 - [ ] Course detail lookup
 - [ ] Course selection panel
+
+## Testing
+
+- **Unit** (`pnpm test`) — Vitest, for pure logic and hooks.
+- **E2E** (`pnpm test:e2e`) — Playwright, driving the production build in a
+  real browser.
+
+The e2e suite points `HAM_BACKEND_ORIGIN` at the stub server in `e2e/stub`,
+which stands in for the real backend. A stub is used rather than MSW because
+Server Components call the backend directly (`/web/**`) and never touch
+`/api/**`, so a browser-side service worker cannot intercept them. The stub
+exposes `/__stub/**` control endpoints so specs can seed data and inject
+failures; `setupStub()` resets and patches that state in one atomic call.
+
+Browser binaries are installed separately:
+
+```bash
+pnpm exec playwright install --with-deps chromium
+```
 
 ## Contributing
 
