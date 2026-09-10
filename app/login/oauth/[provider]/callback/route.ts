@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 18:55:06
+ * @version 1.1
+ * @date 2026/09/10 20:26:42
  *
  * Completes a browser OAuth login: /login/oauth/{provider}/callback
  *
@@ -61,7 +61,14 @@ const readBodyPayload = async (
 		contentType.includes('multipart/form-data') ||
 		contentType.includes('application/x-www-form-urlencoded')
 	) {
-		const form = await req.formData();
+		// A malformed or truncated body makes formData() throw, which would
+		// otherwise surface as an unhandled 500. Treat an unparseable body
+		// the same as an empty one so the caller gets the normal
+		// "Missing login payload" redirect instead.
+		const form = await req.formData().catch(() => null);
+		if (!form) {
+			return {};
+		}
 		return {
 			code: form.get('code')?.toString() || undefined,
 			access_token: form.get('access_token')?.toString() || undefined,
