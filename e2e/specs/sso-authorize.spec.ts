@@ -12,7 +12,7 @@
  * decided from the User-Agent.
  */
 import { expect, test } from '../fixtures/index.ts';
-import { setupStub } from '../stub/control.ts';
+import { readStub, setupStub } from '../stub/control.ts';
 import { LoginPage, SsoAuthorizePage } from '../pages/index.ts';
 import { CONSENT_SCOPES, REDIRECT_URI } from '../fixtures/data.ts';
 
@@ -192,6 +192,105 @@ test.describe('sso authorize — desktop', () => {
 		});
 
 		await expect(sso.previouslyAuthorized).toBeVisible();
+	});
+
+	test('does not auto-authorize a previously approved app', async ({
+		authedPage,
+	}) => {
+		// can_auto_authorize only drives the informational banner; the user
+		// must still click Authorize, so the flag must never skip consent.
+		await setupStub({ canAutoAuthorize: true });
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'identity',
+		});
+
+		await expect(sso.previouslyAuthorized).toBeVisible();
+		await expect(sso.authorizeButton).toBeVisible();
+		// Still on the consent screen, not redirected to the client.
+		expect(authedPage.url()).toContain('/sso-authorize');
+	});
+
+	test('sends only the checked scopes when authorizing', async ({
+		authedPage,
+	}) => {
+		await setupStub();
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'identity mcp',
+		});
+
+		await expect(sso.appName).toBeVisible();
+
+		// NOTE: the checkboxes render unselected even though the hook sends
+		// every scope until the user interacts (see effectiveCheckedScopes
+		// in useConsent). Toggle MCP on and back off so the selection is
+		// definitely driven by the UI rather than that fallback.
+		await sso.toggleScope('mcp');
+		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+		await sso.toggleScope('mcp');
+		await expect(sso.scopeCheckbox('mcp')).not.toBeChecked();
+
+		await sso.authorizeButton.click();
+		await authedPage.waitForURL(/example\.com\/callback/, {
+			timeout: 10_000,
+		});
+
+		const state = await readStub();
+		expect(state.lastConfirmedScopes).not.toContain('mcp');
+	});
+
+	test('sends every requested scope when none are unchecked', async ({
+		authedPage,
+	}) => {
+		await setupStub();
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'identity mcp',
+		});
+
+		await expect(sso.authorizeButton).toBeVisible();
+		await sso.authorizeButton.click();
+		await authedPage.waitForURL(/example\.com\/callback/, {
+			timeout: 10_000,
+		});
+
+		const state = await readStub();
+		expect(state.lastConfirmedScopes).toEqual(['identity', 'mcp']);
+	});
+
+	test('keeps a required scope selected when the user tries to drop it', async ({
+		authedPage,
+	}) => {
+		await setupStub();
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'identity mcp',
+		});
+
+		// Required scopes are disabled, so there is no way to drop them:
+		// the control rejects interaction outright.
+		await expect(sso.scopeCheckbox('identity')).toBeDisabled();
+		await expect(sso.scopeRow('Identity')).toContainText('Required');
+
+		await sso.authorizeButton.click();
+		await authedPage.waitForURL(/example\.com\/callback/, {
+			timeout: 10_000,
+		});
+		// withRequiredConsentScopes re-adds it server-side regardless.
+		expect((await readStub()).lastConfirmedScopes).toContain('identity');
 	});
 
 	test('identifies the signed-in user and offers a switch', async ({

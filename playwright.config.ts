@@ -62,6 +62,8 @@ export default defineConfig({
 	timeout: 30_000,
 	expect: { timeout: 7_000 },
 
+	globalSetup: path.resolve(__dirname, 'e2e/stub/reset-setup.ts'),
+
 	use: {
 		baseURL: APP_ORIGIN,
 		// Pin the locale so i18n assertions do not depend on the host's

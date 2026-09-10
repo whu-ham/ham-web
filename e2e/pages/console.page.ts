@@ -24,8 +24,12 @@ export class ConsolePage {
 		this.themeSwitcher = page
 			.getByRole('button', { name: 'Change theme' })
 			.first();
+		// Located by slot, not by accessible name: the switchers' labels
+		// come from i18n, so they change once the locale changes and a
+		// name-based lookup would stop matching mid-test.
 		this.languageSwitcher = page
-			.getByRole('button', { name: 'Change language' })
+			.locator('[data-slot="dropdown-trigger"]')
+			.filter({ hasText: 'language' })
 			.first();
 		// The header renders two user menus (compact and full) and hides
 		// one via CSS, so the visible one must be picked explicitly.
@@ -57,14 +61,37 @@ export class ConsolePage {
 	}
 
 	/** Choose a theme from the header switcher. */
-	async switchTheme(name: 'Light' | 'Dark'): Promise<void> {
+	async switchTheme(name: 'Light' | 'Dark' | 'Follow system'): Promise<void> {
 		await this.themeSwitcher.click();
-		await this.page.getByRole('menuitemradio', { name }).click();
+		await this.menuOption(name).click();
 	}
 
-	/** Choose a language from the header switcher. */
+	/**
+	 * Choose a language from the header switcher.
+	 *
+	 * Waits for the greeting to settle afterwards: switching locale
+	 * re-renders the whole page, so acting on a locator captured before
+	 * the switch can hit a detached node.
+	 */
 	async switchLanguage(label: string): Promise<void> {
 		await this.languageSwitcher.click();
-		await this.page.getByRole('menuitemradio', { name: label }).click();
+		await this.menuOption(label).click();
+		// Switching locale re-renders the whole page, so the next action
+		// must wait rather than reuse a locator from before the switch.
+		await this.greeting.waitFor({ state: 'visible' });
+	}
+
+	/**
+	 * An option inside an open switcher menu.
+	 *
+	 * Matched by substring: each option renders its Material glyph before
+	 * the label (e.g. "AEnglish"), so the accessible name is the
+	 * concatenation and an exact match would never hold.
+	 */
+	private menuOption(label: string): Locator {
+		return this.page
+			.getByRole('menuitemradio')
+			.filter({ hasText: new RegExp(label, 'i') })
+			.first();
 	}
 }

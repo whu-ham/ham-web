@@ -96,6 +96,30 @@ export class SsoAuthorizePage {
 		await this.page.waitForURL(urlPattern, { timeout: 10_000 });
 	}
 
+	/**
+	 * The consent checkbox for a scope value.
+	 *
+	 * Matched on the input's `value` rather than its visible text: scope
+	 * labels are short and overlap with the group headings they sit under
+	 * (e.g. "MCP" appears in both the checkbox and its group title).
+	 */
+	scopeCheckbox(scope: string): Locator {
+		return this.page.locator(`[data-slot="checkbox"] input[value="${scope}"]`);
+	}
+
+	/**
+	 * Toggle a consent scope.
+	 *
+	 * HeroUI renders the visible control as an overlay on top of the
+	 * native input, so clicking the input directly is blocked. The
+	 * surrounding row is what a user actually hits.
+	 */
+	async toggleScope(scope: string): Promise<void> {
+		await this.page
+			.locator(`[data-slot="checkbox"]:has(input[value="${scope}"])`)
+			.click();
+	}
+
 	/** The consent checkbox row for a scope label. */
 	scopeRow(label: string): Locator {
 		return this.page
