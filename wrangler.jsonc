@@ -7,6 +7,15 @@
 		"nodejs_compat",
 		"global_fetch_strictly_public"
 	],
+	"vars": {
+		// Public OAuth client ids, read at request time by
+		// services/oauth-providers.ts to build each provider's authorize URL.
+		// They are not secrets, but the matching client secrets belong in
+		// `secrets` (or the dashboard), never here.
+		"NEXT_PUBLIC_APPLE_CLIENT_ID": "com.nowcent.ham.web",
+		"NEXT_PUBLIC_GITHUB_CLIENT_ID": "c223dc85135721a00dff",
+		"NEXT_PUBLIC_QQ_CLIENT_ID": "1905592964"
+	},
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
