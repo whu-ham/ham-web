@@ -44,16 +44,21 @@ for details on the e2e suite and how to install browser binaries.
 The instruction files live in one place and are exposed to Claude Code through
 symlinks, so there is no second copy to keep in sync:
 
-| Path                        | What it is                          |
-| --------------------------- | ----------------------------------- |
-| `AGENTS.md`                 | The real file — agent instructions  |
-| `CLAUDE.md`                 | Symlink → `AGENTS.md`               |
-| `.agents/ham-web.md`        | The real file — agent definition    |
-| `.claude/agents/`           | Symlink → `../.agents/` (directory) |
+| Path                        | What it is                                       |
+| --------------------------- | ------------------------------------------------ |
+| `AGENTS.md`                 | The real file — agent instructions                |
+| `CLAUDE.md`                 | Symlink → `AGENTS.md`                             |
+| `.agents/ham-web.md`        | The real file — agent definition (with frontmatter) |
+| `.claude/agents/`           | Symlink → `../.agents/` (whole directory, not one file) |
 
-Git records symlinks as links rather than content, so a fresh clone preserves
-them. Edit `AGENTS.md` and `.agents/ham-web.md` only — never write to the
-symlinked paths, or you will replace the link with a regular file.
+Git records symlinks as links rather than as content, so a fresh clone
+preserves them and there is no second copy to drift. Two consequences worth
+knowing:
+
+- Edit `AGENTS.md` and `.agents/ham-web.md` only. Writing to the symlinked
+  paths can replace the link with a regular file.
+- Because `.claude/agents/` is a link to the whole directory, a new file
+  dropped into `.agents/` is visible at `.claude/agents/` with no extra step.
 
 To re-create the links if they are ever lost:
 

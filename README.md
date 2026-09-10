@@ -58,38 +58,6 @@ pnpm test:e2e
 
 Dev server runs at [http://localhost:3000](http://localhost:3000).
 
-## Repository Layout
-
-```
-app/                  # Next.js App Router pages & components
-  lib/auth.ts         # Server-side auth helpers (fetchMe, requireAuth, processAppCallback)
-  console/            # Authenticated console (API key management)
-    tokens/           # Token CRUD pages
-  login/              # Standalone login page
-    callback/         # OAuth2 app-callback (code → session)
-  sso-authorize/      # SSO consent + deep-link handoff
-  api/                # BFF route handlers (proxy to backend)
-components/           # Shared UI components (theme, language switcher, header bar, …)
-hooks/                # Shared React hooks
-services/             # Service layer
-  shared.ts           # Client-side HTTP infrastructure (ApiError, request<T>)
-  server-fetch.ts     # Server-side fetch (cookie forwarding, Set-Cookie relay)
-  redirect.ts         # Safe redirect URL validation
-  sso/                # SSO client API (WebAuthApi), deep-link builder, UA detection
-  token/              # Token client API & server-side data fetching
-store/                # Global Jotai atoms
-i18n/                 # next-intl runtime config
-messages/             # Locale message catalogues (en / zh / ja)
-mocks/                # MSW mock handlers & data (dev only)
-e2e/                  # Playwright end-to-end suite
-  stub/               # Backend stub the app is pointed at during e2e runs
-  fixtures/           # Session-cookie fixtures and shared seed data
-  pages/              # Page objects
-  specs/              # Test specs, one per screen or flow
-public/               # Static assets
-middleware.ts         # Locale + auth routing middleware
-```
-
 ## Features
 
 - [x] SSO authorisation flow (consent view, QR login, deep-link to native app)
