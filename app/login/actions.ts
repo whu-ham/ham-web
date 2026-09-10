@@ -1,4 +1,8 @@
 /**
+ * @author Claude
+ * @version 2.0
+ * @date 2026/9/10 18:55:06
+ *
  * Server actions for the /login page.
  *
  * setLoginCookies — writes OAuth2 state and redirect target into HttpOnly

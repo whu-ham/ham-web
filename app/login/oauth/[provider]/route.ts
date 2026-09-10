@@ -57,7 +57,9 @@ export const GET = async (
 
 	const from = safeRedirect(req.nextUrl.searchParams.get('from'), '/console');
 	const cookieStore = await cookies();
-	const state = setLoginCookies(cookieStore, from);
+	const state = setLoginCookies(cookieStore, from, {
+		crossSiteCallback: config.crossSiteCallback,
+	});
 	const callbackUrl = `${req.nextUrl.origin}${buildLoginOAuthCallbackPath(
 		provider
 	)}`;

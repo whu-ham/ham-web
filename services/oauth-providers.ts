@@ -19,6 +19,13 @@ export interface OAuthProviderConfig {
 	id: OAuthProvider;
 	accentClassName: string;
 	buildAuthorizeUrl: (params: { callbackUrl: string; state: string }) => string;
+	/**
+	 * Whether the provider POSTs its callback cross-site. Only Apple does:
+	 * `response_mode=form_post` makes appleid.apple.com the initiator of a
+	 * POST to us, and browsers withhold `SameSite=Lax` cookies from that.
+	 * The caller uses this to relax the login cookies to `SameSite=None`.
+	 */
+	crossSiteCallback: boolean;
 }
 
 const getPublicEnv = (name: string): string => process.env[name] ?? '';
@@ -35,6 +42,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 	qq: {
 		id: 'qq',
 		accentClassName: 'bg-[#12B7F5]',
+		crossSiteCallback: false,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
 				client_id: getPublicEnv('NEXT_PUBLIC_QQ_CLIENT_ID'),
@@ -49,6 +57,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 	github: {
 		id: 'github',
 		accentClassName: 'bg-[#24292F]',
+		crossSiteCallback: false,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
 				client_id: getPublicEnv('NEXT_PUBLIC_GITHUB_CLIENT_ID'),
@@ -62,6 +71,7 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 	apple: {
 		id: 'apple',
 		accentClassName: 'bg-[#111111]',
+		crossSiteCallback: true,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
 			const query = buildCallbackQuery({
 				client_id: getPublicEnv('NEXT_PUBLIC_APPLE_CLIENT_ID'),
