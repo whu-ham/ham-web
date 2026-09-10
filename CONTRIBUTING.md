@@ -41,17 +41,25 @@ for details on the e2e suite and how to install browser binaries.
 
 ## Keeping the Agent Instruction Files in Sync
 
-`.claude/agents/ham-web.md` is a hard link to `.agents/ham-web.md`, and
-`CLAUDE.md` is a hard link to `AGENTS.md`, so in a checkout that has them the
-pairs cannot drift apart.
+The instruction files live in one place and are exposed to Claude Code through
+symlinks, so there is no second copy to keep in sync:
 
-Note that git stores file content, not hard link relationships: a fresh clone
-materialises each path as its own independent file. Keep the mirrors in sync
-when editing, or re-create the links locally:
+| Path                        | What it is                          |
+| --------------------------- | ----------------------------------- |
+| `AGENTS.md`                 | The real file — agent instructions  |
+| `CLAUDE.md`                 | Symlink → `AGENTS.md`               |
+| `.agents/ham-web.md`        | The real file — agent definition    |
+| `.claude/agents/`           | Symlink → `../.agents/` (directory) |
+
+Git records symlinks as links rather than content, so a fresh clone preserves
+them. Edit `AGENTS.md` and `.agents/ham-web.md` only — never write to the
+symlinked paths, or you will replace the link with a regular file.
+
+To re-create the links if they are ever lost:
 
 ```bash
-ln .agents/ham-web.md .claude/agents/ham-web.md
-ln AGENTS.md CLAUDE.md
+ln -s AGENTS.md CLAUDE.md
+ln -s ../.agents .claude/agents
 ```
 
 ## For AI Pair-Programming Agents
