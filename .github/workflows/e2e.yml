@@ -33,7 +33,10 @@ jobs:
           # releases but keeps 22.16 able to run the stub's .ts entry point.
           NODE_OPTIONS: --experimental-strip-types
       - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
+        # Trace, screenshots and the report are only written for failures
+        # (see `trace`/`screenshot` in playwright.config.ts), so uploading on
+        # a green run would just produce an empty artifact.
+        if: failure()
         with:
           name: playwright-report
           path: |
