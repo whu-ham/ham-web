@@ -131,16 +131,9 @@ pnpm exec playwright install --with-deps chromium
 
 ## Contributing
 
-All contributors — human or AI — MUST follow the rules defined in the [`ham-web` agent](./.agents/ham-web.md):
-
-1. **Pre-commit**: `pnpm lint` and `pnpm build` must both pass — see [`.agents/ham-web.md`](./.agents/ham-web.md#1-pre-commit-lint-and-build).
-2. **Commit style**: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — see [`.agents/ham-web.md`](./.agents/ham-web.md#2-commit-style-conventional-commits).
-3. **Language**: commit messages, identifiers, and code comments must be in English — see [`.agents/ham-web.md`](./.agents/ham-web.md#3-language-english-only). User-facing strings go through `messages/*.json`.
-4. **File header**: every created or modified file needs a JSDoc header — see [`.agents/ham-web.md`](./.agents/ham-web.md#4-file-header-jsdoc-comment-required).
-
-`.claude/agents/ham-web.md` is a hard link to `.agents/ham-web.md`, and `CLAUDE.md` is a hard link to `AGENTS.md`, so in a checkout that has them the pairs cannot drift apart. Note that git stores file content, not hard links: a fresh clone materialises each path as its own independent file. Keep the mirrors in sync when editing, or re-create the links locally with `ln .agents/ham-web.md .claude/agents/ham-web.md` and `ln AGENTS.md CLAUDE.md`.
-
-AI pair-programming agents should additionally read [`AGENTS.md`](./AGENTS.md).
+All contributors — human or AI — MUST follow the rules defined in the
+[`ham-web` agent](./.agents/ham-web.md). See
+[`CONTRIBUTING.md`](./CONTRIBUTING.md) for the full contribution guide.
 
 ## License
 
