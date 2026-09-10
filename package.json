@@ -78,15 +78,5 @@
 		"workerDirectory": [
 			"public"
 		]
-	},
-	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@parcel/watcher",
-			"@swc/core",
-			"esbuild",
-			"msw",
-			"sharp",
-			"workerd"
-		]
 	}
 }

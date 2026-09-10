@@ -1,0 +1,23 @@
+# pnpm workspace and dependency build-script approval settings.
+#
+# pnpm 11 removed `onlyBuiltDependencies` (and the related
+# `neverBuiltDependencies` / `ignoredBuiltDependencies` settings) from the
+# `pnpm` field in package.json. Build-script approval now lives in the
+# `allowBuilds` map here, not in package.json or `.npmrc`: pnpm reads
+# non-auth settings from this file only. A dependency with a postinstall
+# script and no `allowBuilds` entry makes pnpm fail the install with
+# ERR_PNPM_IGNORED_BUILDS instead of silently skipping the script.
+#
+# Every entry below is a native or generated-code dependency whose
+# postinstall step the toolchain needs: esbuild and @swc/core back Next.js
+# and Vitest, workerd backs the Cloudflare (OpenNext) build, sharp backs
+# Next.js image optimization, and msw, @parcel/watcher and unrs-resolver
+# back the test and lint tooling.
+allowBuilds:
+  '@parcel/watcher': true
+  '@swc/core': true
+  esbuild: true
+  msw: true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
