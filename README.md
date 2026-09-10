@@ -10,7 +10,7 @@ Web frontend for **Ham** (WHU) — an SSO + academic toolkit companion to the Ha
 
 > 🚧 Still work in progress.
 
-User documentation: [https://orangeboychen.github.io/whu-ham/](https://orangeboychen.github.io/whu-ham/)
+User documentation: [https://docs.ham.nowcent.cn](https://docs.ham.nowcent.cn)
 
 ## Tech Stack
 
@@ -131,13 +131,16 @@ pnpm exec playwright install --with-deps chromium
 
 ## Contributing
 
-All contributors — human or AI — MUST follow the rules under [`.claude/rules/`](./.claude/rules/):
+All contributors — human or AI — MUST follow the rules defined in the [`ham-web` agent](./.agents/ham-web.md):
 
-1. **Pre-commit**: `pnpm lint` and `pnpm build` must both pass — see [`01-pre-commit.md`](./.claude/rules/01-pre-commit.md).
-2. **Commit style**: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — see [`02-commit-style.md`](./.claude/rules/02-commit-style.md).
-3. **Language**: commit messages, identifiers, and code comments must be in English — see [`03-language.md`](./.claude/rules/03-language.md). User-facing strings go through `messages/*.json`.
+1. **Pre-commit**: `pnpm lint` and `pnpm build` must both pass — see [`.agents/ham-web.md`](./.agents/ham-web.md#1-pre-commit-lint-and-build).
+2. **Commit style**: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/) — see [`.agents/ham-web.md`](./.agents/ham-web.md#2-commit-style-conventional-commits).
+3. **Language**: commit messages, identifiers, and code comments must be in English — see [`.agents/ham-web.md`](./.agents/ham-web.md#3-language-english-only). User-facing strings go through `messages/*.json`.
+4. **File header**: every created or modified file needs a JSDoc header — see [`.agents/ham-web.md`](./.agents/ham-web.md#4-file-header-jsdoc-comment-required).
 
-AI pair-programming agents should additionally read [`CLAUDE.md`](./CLAUDE.md).
+The same file is mirrored into [`.claude/agents/ham-web.md`](./.claude/agents/ham-web.md) so Claude Code picks it up; both paths are hard links to one file, so edit either and the other follows.
+
+AI pair-programming agents should additionally read [`AGENTS.md`](./AGENTS.md).
 
 ## License
 
