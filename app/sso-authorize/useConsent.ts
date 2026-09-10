@@ -10,10 +10,12 @@
 'use client';
 
 import { useAtomValue } from 'jotai';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 
+import { loginUrlWithFrom } from '@/services/redirect';
 import { ApiError, ConsentInfoResponse, WebAuthApi } from '@/services/sso/api';
 import { withRequiredConsentScopes } from '@/app/sso-authorize/consentScopes';
 import { paramsAtom, stageAtom } from '@/app/sso-authorize/store';
@@ -31,6 +33,7 @@ export interface UseConsentReturn {
 }
 
 export const useConsent = (): UseConsentReturn => {
+	const router = useRouter();
 	const params = useAtomValue(paramsAtom)!;
 	const stage = useAtomValue(stageAtom);
 	const me = stage.kind === 'consent' ? stage.me : null;
@@ -51,12 +54,12 @@ export const useConsent = (): UseConsentReturn => {
 		try {
 			await WebAuthApi.logout();
 		} finally {
-			const from = encodeURIComponent(
-				window.location.pathname + window.location.search
-			);
-			window.location.href = `/login?from=${from}`;
+			// Router navigation keeps this an in-app transition; a
+			// location.href assignment would reload the document.
+			const from = window.location.pathname + window.location.search;
+			router.push(loginUrlWithFrom(from));
 		}
-	}, []);
+	}, [router]);
 
 	const bail = useCallback(
 		(oauthError: 'access_denied' | 'server_error') => {

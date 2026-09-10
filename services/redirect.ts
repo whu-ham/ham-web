@@ -44,3 +44,12 @@ export const safeRedirect = (
 	from: string | null | undefined,
 	fallback = '/console'
 ): string => safeRedirectWithAllowedHosts(from, ALLOWED_HOSTS, fallback);
+
+/**
+ * Build a /login URL that returns to `path` after sign-in.
+ *
+ * Shared by the SSO screens so every entry point encodes `from` the same
+ * way — a mismatch here silently loses the user's original destination.
+ */
+export const loginUrlWithFrom = (path: string): string =>
+	`/login?from=${encodeURIComponent(path)}`;

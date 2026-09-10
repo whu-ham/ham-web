@@ -29,6 +29,10 @@ const QRLoginView = ({ onLoginSucceeded }: QRLoginViewProps) => {
 		isScanned,
 	} = useQrLogin(onLoginSucceeded);
 
+	// A blank nickname would otherwise render an empty name and an empty
+	// avatar initial, same fallback rule as the signed-in user's name.
+	const scannerName = check?.scan_user_info?.nickname?.trim() ?? '';
+
 	return (
 		<div className={'flex flex-col items-center gap-4'}>
 			<div className={'text-sm text-muted'}>{t('tip')}</div>
@@ -85,11 +89,11 @@ const QRLoginView = ({ onLoginSucceeded }: QRLoginViewProps) => {
 							{check?.scan_user_info?.avatar_url ? (
 								<Avatar.Image
 									src={check.scan_user_info.avatar_url}
-									alt={check.scan_user_info.nickname ?? ''}
+									alt={scannerName}
 								/>
 							) : null}
 							<Avatar.Fallback>
-								{(check?.scan_user_info?.nickname ?? '?').slice(0, 1)}
+								{(scannerName || '?').slice(0, 1)}
 							</Avatar.Fallback>
 						</Avatar>
 						<div
@@ -97,7 +101,7 @@ const QRLoginView = ({ onLoginSucceeded }: QRLoginViewProps) => {
 								'max-w-[140px] text-center text-sm font-semibold truncate'
 							}
 						>
-							{check?.scan_user_info?.nickname ?? ''}
+							{scannerName}
 						</div>
 						<div className={'text-xs text-muted text-center'}>
 							{t('scanned')}

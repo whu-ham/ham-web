@@ -16,7 +16,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { MeResponse } from '@/services/sso/api';
+import { displayName, MeResponse } from '@/services/sso/api';
 
 interface ConsoleViewProps {
 	me: MeResponse;
@@ -48,7 +48,7 @@ const ConsoleView = ({ me }: ConsoleViewProps) => {
 	return (
 		<>
 			<h1 className={'text-2xl font-bold text-foreground'}>
-				{t(`greeting.${greetingKey}`, { name: me.nickname ?? me.user_id })}
+				{t(`greeting.${greetingKey}`, { name: displayName(me) })}
 			</h1>
 
 			<section

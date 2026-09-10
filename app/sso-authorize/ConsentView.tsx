@@ -24,6 +24,7 @@ import {
 	withRequiredConsentScopes,
 } from '@/app/sso-authorize/consentScopes';
 import { useConsent } from '@/app/sso-authorize/useConsent';
+import { displayName } from '@/services/sso/api';
 
 const ConsentView = () => {
 	const t = useTranslations('sso.consent');
@@ -206,15 +207,15 @@ const ConsentView = () => {
 				>
 					<Avatar size={'sm'}>
 						{me.avatar_url ? (
-							<Avatar.Image src={me.avatar_url} alt={me.nickname ?? ''} />
+							<Avatar.Image src={me.avatar_url} alt={displayName(me)} />
 						) : null}
 						<Avatar.Fallback>
-							{(me.nickname ?? me.user_id ?? '?').slice(0, 1)}
+							{(displayName(me) || '?').slice(0, 1)}
 						</Avatar.Fallback>
 					</Avatar>
 					<div className={'flex flex-col items-start min-w-0'}>
 						<span className={'text-sm font-semibold truncate text-foreground'}>
-							{me.nickname ?? me.user_id}
+							{displayName(me)}
 						</span>
 						<Link
 							className={'cursor-pointer text-sm'}

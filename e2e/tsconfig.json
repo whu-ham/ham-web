@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022", "DOM"],
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"allowImportingTsExtensions": true,
+		"strict": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"isolatedModules": true,
+		"types": ["node"],
+		"paths": {
+			"@/*": ["./*"]
+		}
+	},
+	"include": ["**/*.ts"],
+	"exclude": ["node_modules"]
+}

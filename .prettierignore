@@ -1,3 +1,8 @@
 # Ignore artifacts:
 build
 coverage
+
+# Pre-existing formatting drift (Tailwind v4 directives + long utility
+# lists). Reformatting it would bury unrelated changes in the diff; it
+# can be cleaned up in its own commit.
+app/globals.css
