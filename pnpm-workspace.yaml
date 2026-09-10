@@ -1,18 +1,38 @@
 # pnpm workspace and dependency build-script approval settings.
 #
-# pnpm 11 removed `onlyBuiltDependencies` (and the related
-# `neverBuiltDependencies` / `ignoredBuiltDependencies` settings) from the
-# `pnpm` field in package.json. Build-script approval now lives in the
-# `allowBuilds` map here, not in package.json or `.npmrc`: pnpm reads
-# non-auth settings from this file only. A dependency with a postinstall
-# script and no `allowBuilds` entry makes pnpm fail the install with
-# ERR_PNPM_IGNORED_BUILDS instead of silently skipping the script.
+# Build-script approvals live in BOTH `onlyBuiltDependencies` (pnpm 10 and
+# earlier) and `allowBuilds` (pnpm 11 and later). pnpm 11 removed
+# `onlyBuiltDependencies` — along with `neverBuiltDependencies` and
+# `ignoredBuiltDependencies` — and ignores the old key entirely, so a
+# dependency with a postinstall script and no `allowBuilds` entry makes
+# pnpm abort the install with ERR_PNPM_IGNORED_BUILDS. pnpm 10 reads
+# `onlyBuiltDependencies` here and ignores `allowBuilds`, so keeping both
+# is what lets one checkout install on either major. Neither key belongs
+# in package.json any more: pnpm 11 no longer reads the `pnpm` field
+# there, and this is the only place pnpm 11 reads non-auth settings.
 #
-# Every entry below is a native or generated-code dependency whose
-# postinstall step the toolchain needs: esbuild and @swc/core back Next.js
-# and Vitest, workerd backs the Cloudflare (OpenNext) build, sharp backs
-# Next.js image optimization, and msw, @parcel/watcher and unrs-resolver
-# back the test and lint tooling.
+# `packages` is required even though this is a single-package repository:
+# the mere presence of this file puts pnpm in workspace mode, and without
+# a non-empty package list pnpm 10.0.0 and earlier abort with "packages
+# field missing or empty". Listing the root keeps one root package.
+#
+# Every approved dependency below is a native or generated-code package
+# whose postinstall step the toolchain needs: esbuild and @swc/core back
+# Next.js and Vitest, workerd backs the Cloudflare (OpenNext) build, sharp
+# backs Next.js image optimization, and msw, @parcel/watcher and
+# unrs-resolver back the test and lint tooling.
+packages:
+  - '.'
+
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - msw
+  - sharp
+  - unrs-resolver
+  - workerd
+
 allowBuilds:
   '@parcel/watcher': true
   '@swc/core': true
