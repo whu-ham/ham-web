@@ -228,14 +228,22 @@ test.describe('sso authorize — desktop', () => {
 
 		await expect(sso.appName).toBeVisible();
 
-		// NOTE: the checkboxes render unselected even though the hook sends
+		// NOTE: the checkboxes render unselected even while the hook sends
 		// every scope until the user interacts (see effectiveCheckedScopes
-		// in useConsent). Toggle MCP on and back off so the selection is
-		// definitely driven by the UI rather than that fallback.
+		// in useConsent). Drive MCP to "checked" first so the following
+		// deselection is definitely ours rather than that initial state.
 		await sso.toggleScope('mcp');
 		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+
+		// Toggle back off and let the selection settle. Asserting on the
+		// rendered state immediately races the React re-render on slower
+		// machines, so the final scope list is the real assertion.
 		await sso.toggleScope('mcp');
-		await expect(sso.scopeCheckbox('mcp')).not.toBeChecked();
+		await expect
+			.poll(async () => sso.scopeCheckbox('mcp').isChecked(), {
+				timeout: 10_000,
+			})
+			.toBe(false);
 
 		await sso.authorizeButton.click();
 		await authedPage.waitForURL(/example\.com\/callback/, {

@@ -115,8 +115,12 @@ export class SsoAuthorizePage {
 	 * surrounding row is what a user actually hits.
 	 */
 	async toggleScope(scope: string): Promise<void> {
+		// Click the visible label rather than the container's centre: the
+		// centre can be covered by a sibling node, and Playwright refuses
+		// to click through — which failed intermittently on slower runners.
 		await this.page
 			.locator(`[data-slot="checkbox"]:has(input[value="${scope}"])`)
+			.locator('[data-slot="checkbox-content"]')
 			.click();
 	}
 

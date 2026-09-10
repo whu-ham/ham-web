@@ -17,7 +17,7 @@ import {
 
 import { handleBackendRequest } from './handlers.ts';
 import { createStubState, type StubState } from './state.ts';
-import { STUB_PORT } from './port.ts';
+import { STUB_PORT } from '../ports.ts';
 
 export interface StubServer {
 	/** Origin the app should use as HAM_BACKEND_ORIGIN, e.g. http://127.0.0.1:4123. */

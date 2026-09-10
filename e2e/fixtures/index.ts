@@ -27,11 +27,9 @@ import { test as base, expect, type Page } from '@playwright/test';
 
 import { resetStub } from '../stub/control.ts';
 import { sessionCookie, VALID_SESSION } from './data.ts';
+import { APP_ORIGIN } from '../ports.ts';
 
-/** Port the app is served from; see playwright.config.ts. */
-const APP_PORT = 3210;
-
-export const APP_ORIGIN = `http://localhost:${APP_PORT}`;
+export { APP_ORIGIN };
 
 interface Fixtures {
 	/** Page in a context with no session cookie. */

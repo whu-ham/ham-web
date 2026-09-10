@@ -1,11 +1,10 @@
 name: E2E Tests
 
 on:
+  # Every PR, whatever its base — matching the lint, build and unit-test
+  # workflows — plus every push to main, so merging runs the suite again
+  # against the integrated branch.
   pull_request:
-    # Restricted to PRs targeting main, so stacked PRs against another
-    # branch don't burn runner time.
-    branches:
-      - main
   push:
     branches:
       - main

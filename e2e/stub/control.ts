@@ -9,11 +9,36 @@
  * The stub runs in its own process, so all mutation happens over HTTP
  * rather than by sharing in-memory objects.
  */
-import { STUB_ORIGIN } from './port.ts';
+import { STUB_ORIGIN } from '../ports.ts';
 import type { StubState } from './state.ts';
+
+/**
+ * Wait for the stub to accept control requests.
+ *
+ * Playwright starts the stub in the same breath as the app, so a reset
+ * issued the moment a test begins can arrive before it is listening.
+ * Retrying here is cheaper and far more reliable than trying to order
+ * the two processes.
+ */
+const waitForStub = async (timeoutMs = 15_000): Promise<void> => {
+	const deadline = Date.now() + timeoutMs;
+	for (;;) {
+		try {
+			const res = await fetch(`${STUB_ORIGIN}/__stub/state`);
+			if (res.ok) return;
+		} catch {
+			// Not listening yet.
+		}
+		if (Date.now() > deadline) {
+			throw new Error(`stub backend never became ready at ${STUB_ORIGIN}`);
+		}
+		await new Promise((resolve) => setTimeout(resolve, 100));
+	}
+};
 
 /** Reset all stub state to defaults. Call before each test. */
 export const resetStub = async (): Promise<void> => {
+	await waitForStub();
 	const res = await fetch(`${STUB_ORIGIN}/__stub/reset`, { method: 'POST' });
 	if (!res.ok) throw new Error(`stub reset failed: ${res.status}`);
 };
@@ -26,6 +51,7 @@ export const resetStub = async (): Promise<void> => {
  * rows). To arrange state at the start of a test, use {@link setupStub}.
  */
 export const patchStub = async (patch: Partial<StubState>): Promise<void> => {
+	await waitForStub();
 	const res = await fetch(`${STUB_ORIGIN}/__stub/state`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -46,6 +72,7 @@ export const patchStub = async (patch: Partial<StubState>): Promise<void> => {
 export const setupStub = async (
 	patch: Partial<StubState> = {}
 ): Promise<void> => {
+	await waitForStub();
 	const res = await fetch(`${STUB_ORIGIN}/__stub/setup`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -56,6 +83,7 @@ export const setupStub = async (
 
 /** Read the current stub state (useful when debugging a failing spec). */
 export const readStub = async (): Promise<StubState> => {
+	await waitForStub();
 	const res = await fetch(`${STUB_ORIGIN}/__stub/state`);
 	return (await res.json()) as StubState;
 };

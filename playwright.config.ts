@@ -19,20 +19,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import path from 'node:path';
 
-import { STUB_ORIGIN } from './e2e/stub/port';
+import { APP_ORIGIN, APP_PORT, STUB_ORIGIN } from './e2e/ports';
 
-/** Port the Next.js server listens on. Deliberately not 3000. */
-export const APP_PORT = 3210;
-
-/**
- * Origin the app is served from.
- *
- * Next normalises its absolute redirects to `localhost`, so the suite must
- * reach the app on that exact host. Using 127.0.0.1 makes the app hand the
- * browser a redirect to a different origin, which drops the session cookie
- * and turns every authenticated flow into a bounce back to /login.
- */
-export const APP_ORIGIN = `http://localhost:${APP_PORT}`;
+export { APP_ORIGIN, APP_PORT, STUB_ORIGIN };
 
 const isCI = Boolean(process.env.CI);
 
@@ -61,8 +50,6 @@ export default defineConfig({
 	reporter: isCI ? [['github'], ['list']] : [['list']],
 	timeout: 30_000,
 	expect: { timeout: 7_000 },
-
-	globalSetup: path.resolve(__dirname, 'e2e/stub/reset-setup.ts'),
 
 	use: {
 		baseURL: APP_ORIGIN,
@@ -99,15 +86,25 @@ export default defineConfig({
 			// prerendering and on every request.
 			command: 'node e2e/stub/start.ts',
 			url: `${STUB_ORIGIN}/__stub/state`,
-			reuseExistingServer: !isCI,
+			// Same reasoning as the app server below: a leftover process
+			// can hold state or a build that the next run replaces.
+			reuseExistingServer: false,
 			timeout: 60_000,
 			stdout: 'pipe',
 			stderr: 'pipe',
 		},
 		{
-			command: `pnpm build && pnpm start --port ${APP_PORT}`,
+			// Assumes the app is already built (`pnpm build`). Building here
+			// would overwrite the .next of any server already listening on
+			// this port, which then fails every request with a missing
+			// client reference manifest.
+			command: `pnpm start --port ${APP_PORT}`,
 			url: APP_ORIGIN,
-			reuseExistingServer: !isCI,
+			// Never reuse: a leftover server may be serving a stale build,
+			// and its held ports make runs interfere with each other. CI
+			// already behaves this way; matching it locally keeps the two
+			// consistent.
+			reuseExistingServer: false,
 			timeout: 300_000,
 			stdout: 'pipe',
 			stderr: 'pipe',

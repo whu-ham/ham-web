@@ -15,7 +15,7 @@
 		"cf:deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
 		"cf:upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
 		"cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
-		"test:e2e": "playwright test",
+		"test:e2e": "pnpm build && playwright test",
 		"test:e2e:ui": "playwright test --ui",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"app/**/*.{ts,tsx,css}\" \"components/**/*.{ts,tsx}\" \"hooks/**/*.{ts,tsx}\" \"services/**/*.{ts,tsx}\" \"store/**/*.{ts,tsx}\" \"i18n/**/*.ts\" \"mocks/**/*.ts\" \"e2e/**/*.ts\" playwright.config.ts",
