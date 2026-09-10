@@ -43,6 +43,15 @@
 		"divider": {
 			"other": "その他のログイン方法"
 		},
+		"oauth": {
+			"prompt": "ログイン方法を選択してください",
+			"cta": "ログイン",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		},
 		"passkey": {
 			"cta": "パスキーでログイン"
 		}
@@ -95,10 +104,19 @@
 			"title": "Hamにログインして認可を続ける",
 			"subtitle": "認可の前にHamアカウントでのログインが必要です",
 			"signInBrowser": "ブラウザでログイン",
-			"divider": {
-				"other": "または他の方法でログイン"
-			}
+		"divider": {
+			"other": "または他の方法でログイン"
 		},
+		"oauth": {
+			"prompt": "ログイン方法を選択してください",
+			"cta": "ログイン",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		}
+	},
 		"qr": {
 			"tip": "HamまたはカメラでQRコードをスキャンしてください",
 			"scanned": "スキャン完了、確認を待っています",
@@ -161,6 +179,15 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "その他のログイン方法"
+			},
+			"oauth": {
+				"prompt": "ログイン方法を選択してください",
+				"cta": "ログイン",
+				"providers": {
+					"qq": "QQ",
+					"github": "GitHub",
+					"apple": "Apple"
+				}
 			},
 			"openApp": "アプリでログイン",
 			"appCallbackFailed": "アプリログインに失敗しました。再試行してください",

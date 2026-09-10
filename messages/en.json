@@ -43,6 +43,15 @@
 		"divider": {
 			"other": "Or sign in with"
 		},
+		"oauth": {
+			"prompt": "Choose a login method",
+			"cta": "Sign in",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		},
 		"passkey": {
 			"cta": "Sign in with passkey"
 		}
@@ -95,10 +104,19 @@
 			"title": "Sign in to Ham to continue",
 			"subtitle": "You need to sign in before authorizing",
 			"signInBrowser": "Sign in with browser",
-			"divider": {
-				"other": "Or sign in with"
-			}
+		"divider": {
+			"other": "Or sign in with"
 		},
+		"oauth": {
+			"prompt": "Choose a login method",
+			"cta": "Sign in",
+			"providers": {
+				"qq": "QQ",
+				"github": "GitHub",
+				"apple": "Apple"
+			}
+		}
+	},
 		"qr": {
 			"tip": "Scan the QR code with Ham or your camera",
 			"scanned": "Scanned, waiting for confirmation",
@@ -161,6 +179,15 @@
 			"subtitle": "for Web",
 			"divider": {
 				"other": "Or sign in with"
+			},
+			"oauth": {
+				"prompt": "Choose a login method",
+				"cta": "Sign in",
+				"providers": {
+					"qq": "QQ",
+					"github": "GitHub",
+					"apple": "Apple"
+				}
 			},
 			"openApp": "Sign in with App",
 			"appCallbackFailed": "App sign-in failed, please retry",

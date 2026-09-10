@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.1
- * @date 2026/5/22
+ * @version 2.2
+ * @date 2026/9/10 18:55:06
  *
  * Mobile fallback view shown when the `ham://sso-authorize` deep link did
  * not switch the user to the native HAM App.
@@ -9,14 +9,15 @@
  * When the user IS authenticated:
  *   1. Download HAM App — primary CTA.
  *   2. Retry the deep link — useful when the user just installed the App.
- *   3. Sign in with browser — navigates to /login with the current URL
- *      as the return destination.
+ *   3. Sign in with browser — navigates to /login with `from` as the
+ *      return destination.
  *
  * When the user is NOT authenticated:
  *   1. Download HAM App — primary CTA.
  *   2. Retry the deep link.
  *   3. Passkey login — inline passkey sign-in; on success, reloads the
  *      page so the server can pick up the new session.
+ *   4. Browser OAuth providers — QQ / GitHub / Apple browser logins.
  */
 
 'use client';
@@ -29,6 +30,7 @@ import { useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 
 import PasskeyLoginView from '@/app/login/PasskeyLoginView';
+import OAuthProviderButtons from '@/components/login/OAuthProviderButtons';
 import icon from '@/public/icon-1024.png';
 import { loginUrlWithFrom } from '@/services/redirect';
 import { getAppStoreURL } from '@/services/sso/ua';
@@ -36,9 +38,10 @@ import { deepLinkUrlAtom, deviceKindAtom } from '@/app/sso-authorize/store';
 
 interface DeepLinkFallbackProps {
 	isAuthenticated: boolean;
+	from: string;
 }
 
-const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
+const DeepLinkFallback = ({ isAuthenticated, from }: DeepLinkFallbackProps) => {
 	const router = useRouter();
 	const t = useTranslations('sso');
 	const deepLinkUrl = useAtomValue(deepLinkUrlAtom);
@@ -54,7 +57,6 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 	const goToLogin = () => {
 		// Internal route: navigate through the router so this stays an
 		// in-app transition instead of a full document load.
-		const from = window.location.pathname + window.location.search;
 		router.push(loginUrlWithFrom(from));
 	};
 
@@ -121,7 +123,10 @@ const DeepLinkFallback = ({ isAuthenticated }: DeepLinkFallbackProps) => {
 						{t('login.signInBrowser')}
 					</Button>
 				) : (
-					<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+					<div className={'w-full flex flex-col items-center gap-6'}>
+						<PasskeyLoginView onLoginSucceeded={onPasskeyLoginSucceeded} />
+						<OAuthProviderButtons from={from} />
+					</div>
 				)}
 			</div>
 		</>

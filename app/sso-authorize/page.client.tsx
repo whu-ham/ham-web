@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 4.2
- * @date 2026/5/22
+ * @version 4.3
+ * @date 2026/9/10 18:55:06
  *
  * Client-side orchestrator for /sso-authorize.
  * Rendering-only — all orchestration logic lives in useSsoAuthorize.
@@ -21,9 +21,10 @@ import type { MeResponse } from '@/services/sso/api';
 
 interface SsoAuthorizePageProps {
 	me: MeResponse | null;
+	from: string;
 }
 
-const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
+const SsoAuthorizePage = ({ me, from }: SsoAuthorizePageProps) => {
 	const { stage } = useSsoAuthorize(me);
 
 	if (stage.kind === 'loading') {
@@ -41,7 +42,7 @@ const SsoAuthorizePage = ({ me }: SsoAuthorizePageProps) => {
 	if (stage.kind === 'deep-link-fallback') {
 		return (
 			<PageFrame>
-				<DeepLinkFallback isAuthenticated={stage.authenticated} />
+				<DeepLinkFallback isAuthenticated={stage.authenticated} from={from} />
 			</PageFrame>
 		);
 	}
