@@ -70,9 +70,9 @@
 		"sass": "^1.104.0",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^6",
-		"typescript-eslint": "^8.69.0",
+		"typescript-eslint": "^8.70.0",
 		"vitest": "^5.0.0",
-		"wrangler": "^4.129.0"
+		"wrangler": "^4.129.1"
 	},
 	"msw": {
 		"workerDirectory": [
