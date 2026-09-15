@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 3.0
- * @date 2026/5/22
+ * @version 3.1
+ * @date 2026/9/15
  *
  * Consent page rendered once the user is signed into HAM Web.
  * Rendering-only — all logic lives in useConsent.
@@ -154,39 +154,43 @@ const ConsentView = () => {
 									key={s.scope}
 									value={s.scope}
 									isDisabled={s.required || s.already_granted}
-									className={
-										'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
-									}
 								>
-									<Checkbox.Control className={'mt-0.5 shrink-0'}>
-										<Checkbox.Indicator />
-									</Checkbox.Control>
+									{/* The row styling must sit on Checkbox.Content: the
+									    hidden input and the click target both live inside
+									    the label, so a Control outside it is a dead box. */}
 									<Checkbox.Content
-										className={'flex flex-col min-w-0 text-left'}
+										className={
+											'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer'
+										}
 									>
-										<span
-											className={
-												'text-sm font-medium text-foreground break-words'
-											}
-										>
-											{s.label ?? s.description}
-										</span>
-										{s.label && (
-											<span className={'text-xs text-muted break-words'}>
-												{s.description}
+										<Checkbox.Control className={'mt-0.5 shrink-0'}>
+											<Checkbox.Indicator />
+										</Checkbox.Control>
+										<span className={'flex flex-col min-w-0 text-left'}>
+											<span
+												className={
+													'text-sm font-medium text-foreground break-words'
+												}
+											>
+												{s.label ?? s.description}
 											</span>
-										)}
-										{s.required ? (
-											<span className={'text-xs text-muted'}>
-												{t('required')}
-											</span>
-										) : (
-											s.already_granted && (
-												<span className={'text-xs text-muted'}>
-													{t('alreadyGranted')}
+											{s.label && (
+												<span className={'text-xs text-muted break-words'}>
+													{s.description}
 												</span>
-											)
-										)}
+											)}
+											{s.required ? (
+												<span className={'text-xs text-muted'}>
+													{t('required')}
+												</span>
+											) : (
+												s.already_granted && (
+													<span className={'text-xs text-muted'}>
+														{t('alreadyGranted')}
+													</span>
+												)
+											)}
+										</span>
 									</Checkbox.Content>
 								</Checkbox>
 							))}

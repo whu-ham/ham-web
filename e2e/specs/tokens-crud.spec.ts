@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/9/10 12:59:00
  *
  * Token create / rotate / revoke flows on /console/tokens.
@@ -9,6 +9,10 @@
  * error branches (quota, server failure). Scope selection uses the
  * parent/child checkbox relationship, so both are exercised: picking a
  * child alone and picking the parent, which implies all children.
+ *
+ * Scope rows are also driven by their visible control box rather than the
+ * label text: the box is what users aim at, and it was unreachable while
+ * the control sat outside the label.
  */
 import { expect, test } from '../fixtures/index.ts';
 import { makeToken } from '../fixtures/data.ts';
@@ -134,6 +138,74 @@ test.describe('token create', () => {
 
 		const state = await readStub();
 		expect(state.tokens[0]?.scopes).toEqual(['mcp']);
+	});
+
+	test('toggles a scope by clicking the control box, not the label', async ({
+		authedPage,
+	}) => {
+		await setupStub({ tokens: [] });
+
+		const tokens = new TokensPage(authedPage);
+		await tokens.goto();
+
+		const modal = await tokens.openCreate();
+		await modal.nameInput.fill('Box Click Key');
+
+		// The visible square must be a live click target on its own: it is
+		// what users aim at, and it silently did nothing while the control
+		// was rendered outside the label.
+		await modal.scopeControl('MCP read-only access').click();
+		await expect(modal.scopeInput('MCP read-only access')).toBeChecked();
+
+		// Clicking the same box again must toggle it back off.
+		await modal.scopeControl('MCP read-only access').click();
+		await expect(modal.scopeInput('MCP read-only access')).not.toBeChecked();
+	});
+
+	test('clicking the parent box selects the parent scope', async ({
+		authedPage,
+	}) => {
+		await setupStub({ tokens: [] });
+
+		const tokens = new TokensPage(authedPage);
+		await tokens.goto();
+
+		const modal = await tokens.openCreate();
+		await modal.nameInput.fill('Parent Box Key');
+
+		await modal.scopeControl('Full MCP access').click();
+		await expect(modal.scopeInput('Full MCP access')).toBeChecked();
+
+		await modal.submitButton.click();
+
+		const reveal = new TokenRevealModal(authedPage);
+		await reveal.waitFor();
+
+		const state = await readStub();
+		expect(state.tokens[0]?.scopes).toEqual(['mcp']);
+	});
+
+	test('clicking a child box submits only that child scope', async ({
+		authedPage,
+	}) => {
+		await setupStub({ tokens: [] });
+
+		const tokens = new TokensPage(authedPage);
+		await tokens.goto();
+
+		const modal = await tokens.openCreate();
+		await modal.nameInput.fill('Child Box Key');
+
+		await modal.scopeControl('MCP read-only access').click();
+
+		await modal.submitButton.click();
+
+		const reveal = new TokenRevealModal(authedPage);
+		await reveal.waitFor();
+
+		// Only the child scope is sent — the parent stays collapsed off.
+		const state = await readStub();
+		expect(state.tokens[0]?.scopes).toEqual(['mcp:read']);
 	});
 
 	test('rejects a name longer than 128 characters', async ({ authedPage }) => {

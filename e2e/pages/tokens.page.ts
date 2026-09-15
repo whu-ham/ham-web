@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/9/10 12:57:00
  *
  * Page object for the API key management screen at /console/tokens.
@@ -139,6 +139,35 @@ export class TokenCreateModal {
 	async setTtl(days: number): Promise<void> {
 		await this.ttlInput.fill(String(days));
 		await this.ttlInput.blur();
+	}
+
+	/**
+	 * The scope row whose visible text contains `scopeLabel`.
+	 *
+	 * Matched on the checkbox root so the same handle resolves both the row
+	 * text and the control box inside it.
+	 */
+	scopeRow(scopeLabel: string): Locator {
+		return this.dialog
+			.locator('[data-slot="checkbox"]')
+			.filter({ hasText: scopeLabel })
+			.first();
+	}
+
+	/**
+	 * The visible square of a scope row — the part a user actually clicks.
+	 *
+	 * It is rendered inside `Checkbox.Content`, so that is the only place it
+	 * is reachable from; a control placed outside the label is a dead target
+	 * that silently ignores clicks.
+	 */
+	scopeControl(scopeLabel: string): Locator {
+		return this.scopeRow(scopeLabel).locator('[data-slot="checkbox-control"]');
+	}
+
+	/** The hidden native input backing a scope row. */
+	scopeInput(scopeLabel: string): Locator {
+		return this.scopeRow(scopeLabel).locator('input[type="checkbox"]');
 	}
 }
 
