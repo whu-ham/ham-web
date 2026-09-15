@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/10 18:55:06
+ * @version 1.2
+ * @date 2026/9/15 01:05:20
  *
  * Shared login-flow cookie handling.
  *
@@ -44,9 +44,8 @@ export const createLoginState = (): string => crypto.randomUUID();
  * fail every Apple login with "Invalid login state". `None` is what lets
  * the cookie ride along, and it is only ever paired with `Secure`.
  *
- * The other providers stay on `Lax`: GitHub returns through a top-level
- * GET, and the QQ fragment shim posts from our own origin, so neither is
- * a cross-site request.
+ * The other providers stay on `Lax`: every provider returns through a
+ * top-level GET, so none of them is a cross-site request.
  */
 const sameSiteFor = (crossSiteCallback: boolean): 'lax' | 'none' =>
 	crossSiteCallback ? 'none' : 'lax';
