@@ -1,15 +1,19 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/09/10 20:26:42
+ * @version 1.2
+ * @date 2026/09/15 00:55:30
  *
  * Completes a browser OAuth login: /login/oauth/{provider}/callback
  *
  * Verifies the returned state against the stored cookie before
  * exchanging the credential, forwards it to the backend, and replays the
- * session cookies the backend issues. QQ returns its token in the URL
- * fragment, which never reaches the server, so its callback is answered
- * with an HTML shim that reposts the fragment as a form body.
+ * session cookies the backend issues.
+ *
+ * Every provider now returns an authorization code in the query string,
+ * so the callback is a plain server-side exchange. The redirect_uri is
+ * rebuilt here rather than taken from the request: providers compare it
+ * against the one used to request the code and reject a mismatch, so a
+ * client-supplied value would only be a way to break the exchange.
  */
 
 import { cookies } from 'next/headers';
@@ -18,7 +22,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { safeRedirect } from '@/services/redirect';
 import { serverFetch } from '@/services/server-fetch';
 import {
-	buildLoginOAuthCallbackPath,
+	buildLoginOAuthCallbackUrl,
 	isOAuthProvider,
 	type OAuthProvider,
 } from '@/services/oauth-providers';
@@ -94,81 +98,6 @@ const readQueryPayload = (req: NextRequest): OAuthCallbackPayload => ({
 const getPayloadToken = (payload: OAuthCallbackPayload): string | undefined =>
 	payload.identity_token || payload.id_token || payload.access_token;
 
-const buildQQRecoveryHtml = (actionUrl: string) => `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="referrer" content="no-referrer" />
-    <title>Ham Login</title>
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
-        background: #0b1020;
-        color: #f5f7fb;
-      }
-      .card {
-        width: min(92vw, 420px);
-        padding: 24px;
-        border-radius: 20px;
-        background: rgba(255,255,255,.08);
-        border: 1px solid rgba(255,255,255,.12);
-        box-shadow: 0 18px 60px rgba(0,0,0,.28);
-      }
-      .title { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
-      .desc { margin: 0; color: rgba(245,247,251,.72); line-height: 1.6; }
-      .error { margin-top: 14px; color: #ffd2d2; font-size: 14px; }
-      .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
-    </style>
-  </head>
-  <body>
-    <main class="card">
-      <h1 class="title">Completing QQ sign-in</h1>
-      <p class="desc">We are finishing the QQ login flow. If this page does not advance, please go back and try again.</p>
-      <p id="error" class="error" hidden></p>
-      <form id="qq-form" action="${actionUrl}" method="post">
-        <input type="hidden" name="access_token" value="" />
-        <input type="hidden" name="openid" value="" />
-        <input type="hidden" name="state" value="" />
-        <span class="sr-only">Submitting login data</span>
-      </form>
-    </main>
-    <script>
-      (function () {
-        const hash = new URLSearchParams((window.location.hash || '').replace(/^#/, ''));
-        const search = new URLSearchParams(window.location.search);
-        const accessToken = hash.get('access_token') || search.get('access_token') || '';
-        const openid = hash.get('openid') || search.get('openid') || '';
-        const state = hash.get('state') || search.get('state') || '';
-        const error = hash.get('error_description') || hash.get('error') || search.get('error') || '';
-        const form = document.getElementById('qq-form');
-        const errorNode = document.getElementById('error');
-
-        if (!accessToken) {
-          errorNode.hidden = false;
-          errorNode.textContent = 'QQ did not return an access token.';
-          return;
-        }
-
-        form.querySelector('input[name="access_token"]').value = accessToken;
-        form.querySelector('input[name="openid"]').value = openid;
-        form.querySelector('input[name="state"]').value = state;
-
-        if (error) {
-          errorNode.hidden = false;
-          errorNode.textContent = error;
-        }
-
-        form.submit();
-      })();
-    </script>
-  </body>
-</html>`;
-
 const finishOAuthLogin = async (
 	req: NextRequest,
 	provider: OAuthProvider,
@@ -190,7 +119,14 @@ const finishOAuthLogin = async (
 	try {
 		const result = await serverFetch(backendPath, {
 			method: 'POST',
-			body: JSON.stringify(payload),
+			// redirect_uri is derived, never taken from the request: it has to
+			// match the value sent to the authorization endpoint, and letting
+			// a caller supply it would only let them break their own exchange
+			// — or probe the backend with arbitrary URIs.
+			body: JSON.stringify({
+				...payload,
+				redirect_uri: buildLoginOAuthCallbackUrl(req.nextUrl.origin, provider),
+			}),
 		});
 		response = result.response;
 		errorMessage = result.errorEnvelope.message;
@@ -237,16 +173,6 @@ export const GET = async (
 
 	const payload = readQueryPayload(req);
 	if (!payload.code && !getPayloadToken(payload)) {
-		if (provider === 'qq') {
-			const actionUrl = `${req.nextUrl.origin}${buildLoginOAuthCallbackPath(provider)}`;
-			return new NextResponse(buildQQRecoveryHtml(actionUrl), {
-				headers: {
-					'Content-Type': 'text/html; charset=utf-8',
-					'Cache-Control': 'no-store',
-				},
-			});
-		}
-
 		return loginErrorRedirect(
 			req,
 			req.nextUrl.searchParams.get('from') ?? undefined,
