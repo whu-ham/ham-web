@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/11 00:41:35
+ * @version 1.2
+ * @date 2026/9/15 00:52:10
  *
  * Browser OAuth provider registry.
  *
@@ -50,10 +50,15 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 		accentClassName: 'bg-[#12B7F5]',
 		crossSiteCallback: false,
 		buildAuthorizeUrl: ({ callbackUrl, state }) => {
+			// Authorization code, not implicit grant. The backend redeems the
+			// code server-side with the Web app's own appid and appkey, so the
+			// access token never reaches the browser. QQ returns the code in
+			// the query string, which does reach the server — no fragment shim
+			// needed, unlike the implicit-grant flow this replaced.
 			const query = buildCallbackQuery({
 				client_id: getWorkerEnv('QQ_CLIENT_ID'),
 				redirect_uri: callbackUrl,
-				response_type: 'token',
+				response_type: 'code',
 				scope: 'get_user_info',
 				state,
 			});
@@ -110,3 +115,15 @@ export const buildLoginOAuthStartHref = (
 
 export const buildLoginOAuthCallbackPath = (provider: OAuthProvider): string =>
 	`/login/oauth/${provider}/callback`;
+
+/**
+ * Absolute callback URL for a provider.
+ *
+ * QQ's code exchange requires the same redirect_uri that was used to
+ * request the code, and rejects the exchange otherwise, so the callback
+ * route rebuilds this rather than trusting anything from the request.
+ */
+export const buildLoginOAuthCallbackUrl = (
+	origin: string,
+	provider: OAuthProvider
+): string => `${origin}${buildLoginOAuthCallbackPath(provider)}`;

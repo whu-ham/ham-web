@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 18:55:06
+ * @version 1.1
+ * @date 2026/9/15 01:06:40
  *
  * Starts a browser OAuth login: /login/oauth/{provider}?from=...
  *
@@ -16,7 +16,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { safeRedirect } from '@/services/redirect';
 import {
-	buildLoginOAuthCallbackPath,
+	buildLoginOAuthCallbackUrl,
 	getOAuthProviderConfig,
 	isOAuthProvider,
 } from '@/services/oauth-providers';
@@ -60,9 +60,7 @@ export const GET = async (
 	const state = setLoginCookies(cookieStore, from, {
 		crossSiteCallback: config.crossSiteCallback,
 	});
-	const callbackUrl = `${req.nextUrl.origin}${buildLoginOAuthCallbackPath(
-		provider
-	)}`;
+	const callbackUrl = buildLoginOAuthCallbackUrl(req.nextUrl.origin, provider);
 	const authorizeUrl = config.buildAuthorizeUrl({
 		callbackUrl,
 		state,
