@@ -190,6 +190,7 @@
 				}
 			},
 			"openApp": "アプリでログイン",
+			"openAppUnavailable": "アプリログインは現在利用できません",
 			"appCallbackFailed": "アプリログインに失敗しました。再試行してください",
 			"appCallbackProcessing": "ログインを完了しています…"
 		},
