@@ -190,6 +190,7 @@
 				}
 			},
 			"openApp": "跳转到APP登录",
+			"openAppUnavailable": "APP登录暂不可用",
 			"appCallbackFailed": "App登录失败，请重试",
 			"appCallbackProcessing": "正在完成登录…"
 		},
