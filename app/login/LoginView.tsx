@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.0
- * @date 2026/9/10 18:55:06
+ * @version 2.1
+ * @date 2026/9/15 13:42:12
  *
  * Combined login surface for the /login page.
  *
@@ -10,8 +10,11 @@
  * QR is hidden on mobile.
  *
  * Mobile app login: before launching the deep link, calls the
- * setLoginCookies server action to write HttpOnly cookies (state + from),
- * then builds the deep-link URL with the returned state.
+ * setLoginCookies server action to write HttpOnly cookies (state + from)
+ * and read the first-party client id, then builds the deep-link URL from
+ * both. The client id must come from the server because it is a Worker
+ * var — a build-time `process.env` read in this client component would
+ * be inlined as an empty string.
  */
 
 'use client';
@@ -21,6 +24,7 @@ import { Button, Separator } from '@heroui/react';
 import { useAtomValue } from 'jotai';
 import { useTranslations } from 'next-intl';
 import { useCallback } from 'react';
+import toast from 'react-hot-toast';
 
 import { setLoginCookies } from '@/app/login/actions';
 import OAuthProviderButtons from '@/components/login/OAuthProviderButtons';
@@ -51,18 +55,24 @@ const LoginView = ({
 	const mobile = useAtomValue(mobileAtom);
 
 	const handleOpenApp = useCallback(async () => {
-		// 1. Set HttpOnly cookies (state + from) via server action
-		const state = await setLoginCookies(from);
-		// 2. Build the deep-link URL with the server-generated state
+		// The state cookie and the client id both come from the server: the
+		// client id is a Worker var that only exists at request time, so a
+		// build-time `process.env` read here would inline an empty string.
+		const { state, clientId } = await setLoginCookies(from);
+		if (!clientId) {
+			// Surfacing the failure beats launching a deep link the App is
+			// guaranteed to drop for having an empty client_id.
+			toast.error(t('login.openAppUnavailable'));
+			return;
+		}
 		const url = buildSsoAuthorizeDeepLink({
-			appId: process.env.NEXT_PUBLIC_CONSOLE_CLIENT_ID ?? '',
+			appId: clientId,
 			scope: [],
 			state,
 			redirectUri: `${window.location.origin}${APP_CALLBACK_PATH}`,
 		});
-		// 3. Launch the app
 		tryLaunchDeepLink({ url });
-	}, [from]);
+	}, [from, t]);
 
 	return (
 		<>

@@ -9,12 +9,15 @@
 	],
 	"vars": {
 		// OAuth client ids, read at request time by
-		// services/oauth-providers.ts to build each provider's authorize URL.
+		// services/oauth-providers.ts to build each provider's authorize URL,
+		// and by app/login/actions.ts for the first-party Ham Web app id used
+		// by the mobile deep-link login.
 		// They are not secrets, but the matching client secrets belong in
 		// `secrets` (or the dashboard), never here.
 		"APPLE_CLIENT_ID": "com.nowcent.ham.web",
 		"GITHUB_CLIENT_ID": "c223dc85135721a00dff",
-		"QQ_CLIENT_ID": "1905592964"
+		"QQ_CLIENT_ID": "1905592964",
+		"CONSOLE_CLIENT_ID": "app_bfb7ea2f6533371a5de934bd99ac6e05"
 	},
 	"assets": {
 		"directory": ".open-next/assets",
