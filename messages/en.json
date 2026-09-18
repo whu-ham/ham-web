@@ -190,6 +190,7 @@
 				}
 			},
 			"openApp": "Sign in with App",
+			"openAppUnavailable": "App sign-in is temporarily unavailable",
 			"appCallbackFailed": "App sign-in failed, please retry",
 			"appCallbackProcessing": "Completing sign-in…"
 		},

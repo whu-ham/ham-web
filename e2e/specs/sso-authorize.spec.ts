@@ -254,6 +254,27 @@ test.describe('sso authorize — desktop', () => {
 		expect(state.lastConfirmedScopes).not.toContain('mcp');
 	});
 
+	test('toggles a scope by clicking the control box, not the label', async ({
+		authedPage,
+	}) => {
+		await setupStub();
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'identity mcp',
+		});
+
+		await expect(sso.appName).toBeVisible();
+
+		// The visible square must be a live click target on its own: it is
+		// what users aim at, and it silently did nothing while the control
+		// was rendered outside the label.
+		await sso.scopeControl('mcp').click();
+		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+	});
+
 	test('sends every requested scope when none are unchecked', async ({
 		authedPage,
 	}) => {

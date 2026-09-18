@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 15:40:00
+ * @version 1.1
+ * @date 2026/9/18 18:05:08
  *
  * The OAuth2 app-callback route at /login/callback.
  *
@@ -15,6 +15,10 @@
  * missing state must not be exchanged, and a failed exchange must land
  * on /login with the reason attached rather than silently signing the
  * user in.
+ *
+ * The app login keeps its own cookie pair, separate from the browser
+ * OAuth flow: both are reachable at once on /login, so a shared cookie
+ * let the OAuth flow invalidate an app login already in flight.
  */
 import { expect, test } from '../fixtures/index.ts';
 import { setupStub } from '../stub/control.ts';
@@ -27,11 +31,14 @@ import { REDIRECT_URI, VALID_SESSION } from '../fixtures/data.ts';
  */
 const APP_HOST = 'localhost';
 
-/** Cookie holding the OAuth2 state, written before the deep link fires. */
-const STATE_COOKIE = 'ham_login_state';
+/**
+ * Cookie holding the app login's OAuth2 state, written before the deep
+ * link fires. Deliberately not the browser OAuth state cookie.
+ */
+const STATE_COOKIE = 'ham_app_login_state';
 
-/** Cookie holding the post-login redirect target. */
-const FROM_COOKIE = 'ham_login_from';
+/** Cookie holding the app login's post-login redirect target. */
+const FROM_COOKIE = 'ham_app_login_from';
 
 /**
  * A plain (non-HttpOnly) login-flow cookie on the app origin.
@@ -110,6 +117,27 @@ test.describe('app callback', () => {
 		await anonPage.goto(callbackUrl('good-code', 'state-123'));
 
 		await expect(anonPage).toHaveURL(/\/login/);
+	});
+
+	// Regression: both login flows used to share one state cookie. next/link
+	// prefetches the browser OAuth start endpoint, and every prefetch minted a
+	// fresh state, so the app login's state was gone by the time the App
+	// handed the user back and the callback rejected it. The app login must
+	// read only its own cookie.
+	test('ignores the browser OAuth cookie', async ({ anonPage }) => {
+		await setupStub();
+		await anonPage
+			.context()
+			.addCookies([
+				loginCookie('ham_login_state', 'state-123'),
+				loginCookie('ham_login_from', '/console/tokens'),
+			]);
+
+		await anonPage.goto(callbackUrl('good-code', 'state-123'));
+
+		await expect(anonPage).toHaveURL(/\/login\?/);
+		const cookies = await anonPage.context().cookies();
+		expect(cookies.find((c) => c.name === 'ham_session')).toBeUndefined();
 	});
 
 	test('rejects a callback missing the code or state parameter', async ({

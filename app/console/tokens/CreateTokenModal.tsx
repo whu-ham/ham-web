@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.0
- * @date 2026/5/22
+ * @version 2.1
+ * @date 2026/9/15
  *
  * Modal for creating a new API token with name, scopes, and TTL.
  * Rendering-only — all logic in useCreateToken.
@@ -72,25 +72,29 @@ const CreateTokenModal = () => {
 									<span className={'text-xs font-medium text-muted mb-1'}>
 										{t('scopeGroup.mcp')}
 									</span>
+									{/* The card styling must sit on Checkbox.Content: the hidden
+									    native input and the click target both live inside the
+									    label, so a Control rendered outside it is a dead box. */}
 									<Checkbox
 										isSelected={isParentChecked}
 										isIndeterminate={isParentIndeterminate}
 										onChange={(v) => handleScopeChange(PARENT_SCOPE, v)}
-										className={
-											'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer mt-2'
-										}
 									>
-										<Checkbox.Control className={'mt-0.5 shrink-0'}>
-											<Checkbox.Indicator />
-										</Checkbox.Control>
 										<Checkbox.Content
-											className={'flex flex-col min-w-0 text-left'}
+											className={
+												'flex items-start gap-3 bg-default rounded-[12px] p-3 w-full cursor-pointer mt-2'
+											}
 										>
-											<span className={'text-sm font-medium text-foreground'}>
-												{PARENT_SCOPE}
-											</span>
-											<span className={'text-xs text-muted'}>
-												{t(`scope.${PARENT_SCOPE}`)}
+											<Checkbox.Control className={'mt-0.5 shrink-0'}>
+												<Checkbox.Indicator />
+											</Checkbox.Control>
+											<span className={'flex flex-col min-w-0 text-left'}>
+												<span className={'text-sm font-medium text-foreground'}>
+													{PARENT_SCOPE}
+												</span>
+												<span className={'text-xs text-muted'}>
+													{t(`scope.${PARENT_SCOPE}`)}
+												</span>
 											</span>
 										</Checkbox.Content>
 									</Checkbox>
@@ -104,23 +108,24 @@ const CreateTokenModal = () => {
 												key={scope}
 												isSelected={scopes.includes(scope)}
 												onChange={(v) => handleScopeChange(scope, v)}
-												className={
-													'flex items-start gap-3 rounded-[12px] p-3 w-full cursor-pointer'
-												}
 											>
-												<Checkbox.Control className={'mt-0.5 shrink-0'}>
-													<Checkbox.Indicator />
-												</Checkbox.Control>
 												<Checkbox.Content
-													className={'flex flex-col min-w-0 text-left'}
+													className={
+														'flex items-start gap-3 rounded-[12px] p-3 w-full cursor-pointer'
+													}
 												>
-													<span
-														className={'text-sm font-medium text-foreground'}
-													>
-														{scope}
-													</span>
-													<span className={'text-xs text-muted'}>
-														{t(`scope.${scope}`)}
+													<Checkbox.Control className={'mt-0.5 shrink-0'}>
+														<Checkbox.Indicator />
+													</Checkbox.Control>
+													<span className={'flex flex-col min-w-0 text-left'}>
+														<span
+															className={'text-sm font-medium text-foreground'}
+														>
+															{scope}
+														</span>
+														<span className={'text-xs text-muted'}>
+															{t(`scope.${scope}`)}
+														</span>
 													</span>
 												</Checkbox.Content>
 											</Checkbox>

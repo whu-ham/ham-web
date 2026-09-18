@@ -1,6 +1,6 @@
 /**
  * @author Claude
- * @version 1.0
+ * @version 1.1
  * @date 2026/9/10 12:57:00
  *
  * Page object for the SSO consent screen at /sso-authorize.
@@ -122,6 +122,19 @@ export class SsoAuthorizePage {
 			.locator(`[data-slot="checkbox"]:has(input[value="${scope}"])`)
 			.locator('[data-slot="checkbox-content"]')
 			.click();
+	}
+
+	/**
+	 * The visible square of a consent checkbox row.
+	 *
+	 * It is rendered inside `Checkbox.Content`, so that is the only place it
+	 * is reachable from; a control placed outside the label is a dead target
+	 * that silently ignores clicks.
+	 */
+	scopeControl(scope: string): Locator {
+		return this.page
+			.locator(`[data-slot="checkbox"]:has(input[value="${scope}"])`)
+			.locator('[data-slot="checkbox-control"]');
 	}
 
 	/** The consent checkbox row for a scope label. */

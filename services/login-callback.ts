@@ -1,10 +1,22 @@
-import { FROM_COOKIE, STATE_COOKIE } from './cookies';
+/**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/18 16:56:23
+ *
+ * Helpers for the mobile app deep-link login callback.
+ *
+ * The callback reads the app-login cookie pair, which is deliberately
+ * separate from the browser OAuth pair: /login renders the OAuth provider
+ * links alongside the "Open App" button, so a shared cookie would let a
+ * prefetched OAuth start overwrite an app login already in flight.
+ */
+import { APP_FROM_COOKIE, APP_STATE_COOKIE } from './cookies';
 
 export const APP_CALLBACK_BACKEND_PATH = '/web/auth/app-callback';
 
 export const LOGIN_CALLBACK_COOKIES = {
-	from: FROM_COOKIE,
-	state: STATE_COOKIE,
+	from: APP_FROM_COOKIE,
+	state: APP_STATE_COOKIE,
 } as const;
 
 export const parseAllowedRedirectHosts = (
