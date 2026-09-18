@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/09/10 20:26:42
+ * @version 1.2
+ * @date 2026/9/18 16:56:23
  *
  * Shared browser OAuth provider entry list for login surfaces.
  *
@@ -81,10 +81,14 @@ const OAuthProviderButtons = ({ from }: OAuthProviderButtonsProps) => {
 							: visualConfig.icon.src;
 					const iconSize = visualConfig.button.kind === 'circle' ? 22 : 32;
 
+					// prefetch={false} is load-bearing: the start endpoint mints a
+					// CSRF state, and a prefetch would rotate the state cookie out
+					// from under another login already in flight on this page.
 					return (
 						<Link
 							key={provider}
 							href={href}
+							prefetch={false}
 							aria-label={label}
 							title={label}
 							className={

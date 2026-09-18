@@ -63,10 +63,11 @@ export const onRequestGet = async (context: {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
 	const state = url.searchParams.get('state');
-	if (!code || !state) return redirectToLogin(request);
+	if (!code || !state) return redirectToLogin(request, 'missing_code_or_state');
 
 	const storedState = readCookie(request, LOGIN_CALLBACK_COOKIES.state);
-	if (!storedState || storedState !== state) return redirectToLogin(request);
+	if (!storedState) return redirectToLogin(request, 'state_cookie_missing');
+	if (storedState !== state) return redirectToLogin(request, 'state_mismatch');
 
 	let upstreamRes: Response;
 	try {
