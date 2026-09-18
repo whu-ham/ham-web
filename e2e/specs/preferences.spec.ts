@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/18 19:17:29
+ * @version 1.3
+ * @date 2026/9/18 22:43:43
  *
  * Theme and language preferences.
  *
@@ -18,7 +18,7 @@
  */
 import type { Page } from '@playwright/test';
 
-import { expect, test } from '../fixtures/index.ts';
+import { APP_ORIGIN, expect, test } from '../fixtures/index.ts';
 import { ConsolePage, LoginPage } from '../pages/index.ts';
 
 test.describe('theme preference', () => {
@@ -297,5 +297,102 @@ test.describe('language preference', () => {
 		await anonPage.getByRole('menuitemradio', { name: '日本語' }).click();
 
 		await expect(new LoginPage(anonPage).title).toHaveText('Hamにログイン');
+	});
+});
+
+test.describe('compact user menu', () => {
+	test('marks the stored preference, not "follow …"', async ({
+		authedPage,
+	}) => {
+		// The console header mounts the desktop switchers and the compact
+		// user menu at the same time and hides one of them with CSS, so
+		// both have to resolve the cookie independently.
+		await authedPage.context().addCookies([
+			{ name: 'NEXT_THEME', value: 'dark', url: APP_ORIGIN },
+			{ name: 'NEXT_LOCALE', value: 'ja', url: APP_ORIGIN },
+		]);
+		await authedPage.setViewportSize({ width: 390, height: 844 });
+
+		const console_ = new ConsolePage(authedPage);
+		await console_.goto();
+
+		// Located by glyph rather than accessible name: the label is
+		// translated, so a name lookup stops matching once the cookie
+		// switches the page to Japanese.
+		await authedPage
+			.locator('[data-slot="dropdown-trigger"]:visible')
+			.filter({ hasText: 'more_vert' })
+			.first()
+			.click();
+
+		await expect(authedPage.locator('[data-key="theme-dark"]')).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+		await expect(authedPage.locator('[data-key="locale-ja"]')).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+	});
+
+	test('falls back to "follow …" when nothing is stored', async ({
+		authedPage,
+	}) => {
+		await authedPage.setViewportSize({ width: 390, height: 844 });
+
+		const console_ = new ConsolePage(authedPage);
+		await console_.goto();
+
+		await authedPage
+			.locator('[data-slot="dropdown-trigger"]:visible')
+			.filter({ hasText: 'more_vert' })
+			.first()
+			.click();
+
+		await expect(authedPage.locator('[data-key="theme-auto"]')).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+		await expect(
+			authedPage.locator('[data-key="locale-auto"]')
+		).toHaveAttribute('aria-checked', 'true');
+	});
+
+	test('drops the mark again when following the system is restored', async ({
+		authedPage,
+	}) => {
+		await authedPage.setViewportSize({ width: 390, height: 844 });
+
+		const console_ = new ConsolePage(authedPage);
+		await console_.goto();
+		const menu = authedPage
+			.locator('[data-slot="dropdown-trigger"]:visible')
+			.filter({ hasText: 'more_vert' })
+			.first();
+
+		await menu.click();
+		await authedPage.locator('[data-key="theme-dark"]').click();
+		await authedPage.waitForTimeout(300);
+
+		await menu.click();
+		await expect(authedPage.locator('[data-key="theme-dark"]')).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+
+		// Going back to "Follow system" must clear the picked theme rather
+		// than leave the abandoned choice marked.
+		await authedPage.locator('[data-key="theme-auto"]').click();
+		await authedPage.waitForTimeout(300);
+
+		await menu.click();
+		await expect(authedPage.locator('[data-key="theme-auto"]')).toHaveAttribute(
+			'aria-checked',
+			'true'
+		);
+		await expect(authedPage.locator('[data-key="theme-dark"]')).toHaveAttribute(
+			'aria-checked',
+			'false'
+		);
 	});
 });

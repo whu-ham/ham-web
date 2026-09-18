@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.1
+ * @date 2026/9/18 22:43:43
  *
  * Shared hook for locale preference management.
  * M9 fix: Extracted from LanguageSwitcher and UserMenu to avoid duplication.
@@ -89,7 +89,15 @@ export const clearLocaleCookie = () => {
 export const useLocalePreference = () => {
 	const currentLocale = useLocale() as Locale;
 	const [, startTransition] = useTransition();
-	const [hasOverride, setHasOverride] = useAtom(localeOverrideAtom);
+	// Shared flag. A pick made in one switcher is mirrored here so the
+	// other mounted switchers (the header renders the desktop pair and
+	// the compact user menu at once) reflect it without a reload.
+	const [sharedOverride, setSharedOverride] = useAtom(localeOverrideAtom);
+	// The cookie read has to be per-instance too. Whichever switcher
+	// mounts first used to be the only one to publish the value, so the
+	// compact menu kept rendering "Follow browser" even when the cookie
+	// held an explicit language.
+	const [cookieOverride, setCookieOverride] = useState(false);
 	const [browserLocale, setBrowserLocale] = useState<Locale | null>(null);
 	const [hydrated, setHydrated] = useState(false);
 
@@ -106,10 +114,15 @@ export const useLocalePreference = () => {
 			.find((c) => c.startsWith(`${LOCALE_COOKIE}=`));
 		if (raw) {
 			const value = decodeURIComponent(raw.slice(LOCALE_COOKIE.length + 1));
-			if (isLocale(value)) startTransition(() => setHasOverride(true));
+			if (isLocale(value)) {
+				startTransition(() => setCookieOverride(true));
+				startTransition(() => setSharedOverride(true));
+			}
 		}
 		startTransition(() => setHydrated(true));
-	}, [setHasOverride, startTransition]);
+	}, [setSharedOverride, startTransition]);
+
+	const hasOverride = cookieOverride || sharedOverride;
 
 	// Until hydrated, treat as "auto" to match server render.
 	const selectedKey: LocaleKey =
@@ -119,12 +132,14 @@ export const useLocalePreference = () => {
 		if (rawKey === AUTO_KEY) {
 			if (!hasOverride) return;
 			clearLocaleCookie();
-			setHasOverride(false);
+			setCookieOverride(false);
+			setSharedOverride(false);
 			startTransition(() => window.location.reload());
 		} else if (isLocale(rawKey)) {
 			if (hasOverride && rawKey === currentLocale) return;
 			writeLocaleCookie(rawKey);
-			setHasOverride(true);
+			setCookieOverride(true);
+			setSharedOverride(true);
 			if (!hasOverride && rawKey === browserLocale) return;
 			startTransition(() => window.location.reload());
 		}

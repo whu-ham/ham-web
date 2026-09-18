@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/18 19:17:29
+ * @version 1.3
+ * @date 2026/9/18 22:43:43
  *
  * Shared hook for theme preference management.
  * M9 fix: Extracted from ThemeSwitcher and UserMenu to avoid duplication.
@@ -103,6 +103,10 @@ export const useThemePreference = () => {
 	// Track whether the cookie has been read so we can suppress the
 	// hydration-sensitive derived values until the client is ready.
 	const [hydrated, setHydrated] = useState(false);
+	// The cookie read has to be per-instance, not just published to the
+	// shared atom by whichever switcher mounts first: the compact user
+	// menu never observed that write and kept rendering "Follow system".
+	const [cookieTheme, setCookieTheme] = useState<Theme | null>(null);
 
 	// Read the persisted theme cookie AFTER hydration so the first
 	// client render matches the server (which always sees `null`).
@@ -113,7 +117,12 @@ export const useThemePreference = () => {
 			.find((c) => c.startsWith(`${THEME_COOKIE}=`));
 		if (raw) {
 			const value = decodeURIComponent(raw.slice(THEME_COOKIE.length + 1));
-			if (isTheme(value)) startTransition(() => setOverride(value));
+			if (isTheme(value)) {
+				// `override` still has to be published: `resolvedThemeAtom`
+				// derives the palette actually applied to the document.
+				startTransition(() => setOverride(value));
+				startTransition(() => setCookieTheme(value));
+			}
 		}
 		startTransition(() => setHydrated(true));
 	}, [setOverride]);
@@ -135,14 +144,20 @@ export const useThemePreference = () => {
 
 	// Until hydrated, `selectedKey` must be `'auto'` to match the
 	// server render (override is always `null` on the server).
-	const selectedKey: ThemeKey = hydrated ? (override ?? AUTO_KEY) : AUTO_KEY;
+	const selectedKey: ThemeKey = hydrated
+		? (override ?? cookieTheme ?? AUTO_KEY)
+		: AUTO_KEY;
 
 	const onSelectionChange = (key: string) => {
 		if (key === AUTO_KEY) {
 			setOverride(null);
+			// The per-instance cache has to go too, or `selectedKey` falls
+			// straight back to it and keeps marking the abandoned choice.
+			setCookieTheme(null);
 			applyThemeColor(null);
 		} else if (isTheme(key)) {
 			setOverride(key);
+			setCookieTheme(key);
 			applyThemeColor(key);
 		}
 	};
