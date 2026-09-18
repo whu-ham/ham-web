@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/18 16:56:23
+ * @version 1.3
+ * @date 2026/9/18 18:08:58
  *
  * Starts a browser OAuth login: /login/oauth/{provider}?from=...
  *
@@ -25,7 +25,10 @@ import {
 	getOAuthProviderConfig,
 	isOAuthProvider,
 } from '@/services/oauth-providers';
-import { setLoginCookies } from '@/services/login-flow';
+import {
+	LOGIN_FLOW_COOKIE_NAMES,
+	setLoginCookies,
+} from '@/services/login-flow';
 
 /**
  * next/link prefetches its targets in production and marks those requests
@@ -76,8 +79,12 @@ export const GET = async (
 
 	const from = safeRedirect(req.nextUrl.searchParams.get('from'), '/console');
 	const cookieStore = await cookies();
+	// Name the pair explicitly even though it is the default: the app
+	// deep-link login uses a different pair, and this flow has to keep
+	// reading what it writes regardless of what the default becomes.
 	const state = setLoginCookies(cookieStore, from, {
 		crossSiteCallback: config.crossSiteCallback,
+		names: LOGIN_FLOW_COOKIE_NAMES,
 	});
 	const callbackUrl = buildLoginOAuthCallbackUrl(req.nextUrl.origin, provider);
 	const authorizeUrl = config.buildAuthorizeUrl({

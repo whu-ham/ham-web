@@ -1,8 +1,20 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/18 18:05:08
+ *
  * EdgeOne Edge Function: GET /login/callback
  *
  * Mobile app OAuth2 callback handler for deployments where the callback path
  * is handled directly by EdgeOne. Mirrors the App Router route handler.
+ *
+ * Reads the app-login cookie pair, which is separate from the browser OAuth
+ * pair: /login renders the OAuth provider links next to the "Open App"
+ * button, so a shared cookie let OAuth activity invalidate an app login
+ * that had already started.
+ *
+ * Every rejection carries a distinct `error` so a failed app login says
+ * why on the login page instead of bouncing back in silence.
  */
 import {
 	APP_CALLBACK_BACKEND_PATH,
