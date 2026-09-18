@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.1
+ * @date 2026/9/18 18:42:33
  *
  * Shared hook for theme preference management.
  * M9 fix: Extracted from ThemeSwitcher and UserMenu to avoid duplication.
@@ -11,7 +11,12 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { useEffect, useState, startTransition } from 'react';
 
-import { THEME_CLASSES, Theme, isTheme } from '@/components/theme/config';
+import {
+	THEME_CLASSES,
+	THEME_COLOR,
+	Theme,
+	isTheme,
+} from '@/components/theme/config';
 import { THEME_COOKIE } from '@/components/theme/config';
 import {
 	resolvedThemeAtom,
@@ -40,6 +45,46 @@ export const applyThemeToDocument = (resolved: Theme) => {
 	root.classList.add(THEME_CLASSES[resolved]);
 	root.setAttribute('data-theme', resolved);
 	root.style.colorScheme = resolved;
+};
+
+/**
+ * Rewrites `<meta name="theme-color">` — the tint the browser paints the
+ * strip above the page with, since iOS Safari owns that strip and no page
+ * element can show through it — to match an explicit theme choice.
+ *
+ * `generateViewport` in `app/layout.tsx` emits one media-scoped entry per
+ * palette plus, when a theme cookie is present, an unconditional entry
+ * that outranks them. A concrete choice rewrites that entry; going back
+ * to "follow system" removes it, so the media-scoped entries resume
+ * tracking the OS with no further help from us.
+ *
+ * Driven from the selection handler rather than from an effect: a choice
+ * is the only thing that can make the stored preference disagree with
+ * what the server rendered, and an effect would have to re-derive the
+ * choice from the shared atom. Several components call this hook, and
+ * they do not all observe an update made while they are mounting — the
+ * atom subscription is established in a passive effect, so an instance
+ * that subscribes late can still render the pre-update value and undo
+ * what an earlier instance just wrote.
+ */
+export const applyThemeColor = (theme: Theme | null) => {
+	if (typeof document === 'undefined') return;
+	const plain = Array.from(
+		document.head.querySelectorAll('meta[name="theme-color"]')
+	).find((meta) => !meta.getAttribute('media'));
+
+	if (!theme) {
+		plain?.remove();
+		return;
+	}
+	if (plain) {
+		plain.setAttribute('content', THEME_COLOR[theme]);
+		return;
+	}
+	const meta = document.createElement('meta');
+	meta.setAttribute('name', 'theme-color');
+	meta.setAttribute('content', THEME_COLOR[theme]);
+	document.head.appendChild(meta);
 };
 
 export const useThemePreference = () => {
@@ -87,8 +132,10 @@ export const useThemePreference = () => {
 	const onSelectionChange = (key: string) => {
 		if (key === AUTO_KEY) {
 			setOverride(null);
+			applyThemeColor(null);
 		} else if (isTheme(key)) {
 			setOverride(key);
+			applyThemeColor(key);
 		}
 	};
 
