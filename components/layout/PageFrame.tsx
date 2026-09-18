@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/21
+ * @version 1.1
+ * @date 2026/9/18 19:17:29
  *
  * Shared page frame component providing a full-screen centered layout
  * with HeaderBar (theme + language switchers) and a rounded Card container.
@@ -27,7 +27,7 @@ const PageFrame = ({
 }: PageFrameProps) => (
 	<div
 		className={
-			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-1 sm:px-2 md:px-4 py-20 ' +
+			'min-h-screen w-full overflow-x-hidden flex flex-col items-center justify-center bg-default px-5 sm:px-6 md:px-8 py-20 ' +
 			(className ?? '')
 		}
 	>

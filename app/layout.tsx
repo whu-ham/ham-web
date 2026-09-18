@@ -1,12 +1,12 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/4/22 10:32:00
+ * @version 1.4
+ * @date 2026/9/18 19:17:29
  */
 import './globals.css';
 import '@material-design-icons/font/index.css';
 import React from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 import { Providers } from '@/app/providers';
 import { NextIntlClientProvider } from 'next-intl';
@@ -16,6 +16,7 @@ import { HTML_LANG, isLocale } from '@/i18n/config';
 import {
 	DEFAULT_SERVER_THEME,
 	THEME_BOOTSTRAP_SCRIPT,
+	THEME_COLOR,
 	THEME_COOKIE,
 	Theme,
 	isTheme,
@@ -29,6 +30,33 @@ export const metadata: Metadata = {
 		icon: '/icon.png',
 		apple: '/icon.png',
 	},
+};
+
+/**
+ * Browser-chrome tint for the strip iOS Safari paints above the page.
+ *
+ * Safari owns that strip — the header's own background cannot show
+ * through it — so `theme-color` is the only lever we have. Both
+ * palettes are declared under `prefers-color-scheme` media queries so a
+ * visitor in "follow system" mode gets a tint that tracks their OS.
+ *
+ * Order is load-bearing: the user agent walks the candidates in tree
+ * order and takes the FIRST one whose media query matches, so the
+ * unconditional entry for a concrete switcher choice must precede the
+ * media-scoped ones to outrank them.
+ */
+export const generateViewport = async (): Promise<Viewport> => {
+	const rawTheme = (await cookies()).get(THEME_COOKIE)?.value;
+	const override = isTheme(rawTheme) ? rawTheme : null;
+
+	return {
+		themeColor: [
+			// No `media`: matches unconditionally, so it wins when present.
+			...(override ? [{ color: THEME_COLOR[override] }] : []),
+			{ media: '(prefers-color-scheme: light)', color: THEME_COLOR.light },
+			{ media: '(prefers-color-scheme: dark)', color: THEME_COLOR.dark },
+		],
+	};
 };
 
 export default async function RootLayout({

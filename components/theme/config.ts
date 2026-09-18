@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.1
+ * @date 2026/9/18 18:42:33
  *
  * Central theme catalogue shared by the `ThemeSwitcher` component and
  * any surrounding code that needs to read/write the user's theme
@@ -39,6 +39,27 @@ export const THEME_CLASSES: Record<Theme, string> = {
 
 export const isTheme = (value: string | undefined | null): value is Theme =>
 	typeof value === 'string' && (THEMES as readonly string[]).includes(value);
+
+/**
+ * Tint offered to the user agent for the browser chrome around the page
+ * (`<meta name="theme-color">`), one entry per palette.
+ *
+ * iOS Safari paints the strip above the page itself — no page element's
+ * background can show through it, so the only way to keep the top of the
+ * screen continuous with the header is to hand the browser the colour to
+ * paint. Both values mirror HeroUI's `--surface` token, which is the base
+ * of every header in the app: the floating `HeaderBar` pill and the
+ * sticky console header are both `bg-surface/60`.
+ *
+ *   light ← `--surface: var(--white)`  = oklch(100% 0 0)             = #ffffff
+ *   dark  ← `--surface`                = oklch(0.2103 0.0059 285.89) = #18181b
+ *
+ * @see node_modules/@heroui/styles/dist/themes/default/variables.css
+ */
+export const THEME_COLOR: Record<Theme, string> = {
+	light: '#ffffff',
+	dark: '#18181b',
+};
 
 /**
  * Theme used when we can't infer a better one on the server (no cookie
