@@ -1,10 +1,17 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/18 16:56:23
+ *
  * OAuth2 callback route for mobile app login.
  *
  * This endpoint only validates state, exchanges the code for backend session
  * cookies, and redirects. It is a route handler instead of a page because
  * callback handling must mutate cookies, which is not allowed while rendering
  * a Server Component page.
+ *
+ * Every rejection carries a distinct `error` so a failed app login says why
+ * on the login page instead of bouncing back in silence.
  */
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -35,13 +42,16 @@ export const GET = async (req: NextRequest) => {
 	const code = req.nextUrl.searchParams.get('code');
 	const state = req.nextUrl.searchParams.get('state');
 	if (!code || !state) {
-		return loginRedirect(req);
+		return loginRedirect(req, 'missing_code_or_state');
 	}
 
 	const cookieStore = await cookies();
 	const storedState = cookieStore.get(LOGIN_CALLBACK_COOKIES.state)?.value;
-	if (!storedState || storedState !== state) {
-		return loginRedirect(req);
+	if (!storedState) {
+		return loginRedirect(req, 'state_cookie_missing');
+	}
+	if (storedState !== state) {
+		return loginRedirect(req, 'state_mismatch');
 	}
 
 	let response: Response;

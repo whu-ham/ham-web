@@ -1,8 +1,20 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/18 18:05:08
+ *
  * EdgeOne Edge Function: GET /login/callback
  *
  * Mobile app OAuth2 callback handler for deployments where the callback path
  * is handled directly by EdgeOne. Mirrors the App Router route handler.
+ *
+ * Reads the app-login cookie pair, which is separate from the browser OAuth
+ * pair: /login renders the OAuth provider links next to the "Open App"
+ * button, so a shared cookie let OAuth activity invalidate an app login
+ * that had already started.
+ *
+ * Every rejection carries a distinct `error` so a failed app login says
+ * why on the login page instead of bouncing back in silence.
  */
 import {
 	APP_CALLBACK_BACKEND_PATH,
@@ -63,10 +75,11 @@ export const onRequestGet = async (context: {
 	const url = new URL(request.url);
 	const code = url.searchParams.get('code');
 	const state = url.searchParams.get('state');
-	if (!code || !state) return redirectToLogin(request);
+	if (!code || !state) return redirectToLogin(request, 'missing_code_or_state');
 
 	const storedState = readCookie(request, LOGIN_CALLBACK_COOKIES.state);
-	if (!storedState || storedState !== state) return redirectToLogin(request);
+	if (!storedState) return redirectToLogin(request, 'state_cookie_missing');
+	if (storedState !== state) return redirectToLogin(request, 'state_mismatch');
 
 	let upstreamRes: Response;
 	try {

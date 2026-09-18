@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/15 01:05:20
+ * @version 1.3
+ * @date 2026/9/18 16:56:23
  *
  * Shared login-flow cookie handling.
  *
@@ -10,9 +10,19 @@
  * store interfaces keep this module independent of `next/headers`,
  * which is what lets it run under both server actions and route
  * handlers.
+ *
+ * Two flows share this module and each gets its own cookie pair (see
+ * `LOGIN_FLOW_COOKIE_NAMES` / `APP_LOGIN_COOKIE_NAMES`). They must stay
+ * separate: both are reachable from /login at the same time, so a shared
+ * cookie lets one flow overwrite the other's pending CSRF state.
  */
 
-import { FROM_COOKIE, STATE_COOKIE } from '@/services/cookies';
+import {
+	APP_FROM_COOKIE,
+	APP_STATE_COOKIE,
+	FROM_COOKIE,
+	STATE_COOKIE,
+} from '@/services/cookies';
 
 const LOGIN_COOKIE_MAX_AGE = 60 * 10;
 
@@ -50,15 +60,29 @@ export const createLoginState = (): string => crypto.randomUUID();
 const sameSiteFor = (crossSiteCallback: boolean): 'lax' | 'none' =>
 	crossSiteCallback ? 'none' : 'lax';
 
+/** The cookie pair a login flow stores its CSRF state and destination in. */
+export interface LoginCookieNames {
+	state: string;
+	from: string;
+}
+
+interface SetLoginCookieOptions {
+	crossSiteCallback?: boolean;
+	names?: LoginCookieNames;
+}
+
 export const setLoginCookies = (
 	cookies: LoginCookieWriter,
 	from: string,
-	{ crossSiteCallback = false }: { crossSiteCallback?: boolean } = {}
+	{
+		crossSiteCallback = false,
+		names = LOGIN_FLOW_COOKIE_NAMES,
+	}: SetLoginCookieOptions = {}
 ): string => {
 	const state = createLoginState();
 	const sameSite = sameSiteFor(crossSiteCallback);
 
-	cookies.set(STATE_COOKIE, state, {
+	cookies.set(names.state, state, {
 		httpOnly: true,
 		secure: true,
 		sameSite,
@@ -66,7 +90,7 @@ export const setLoginCookies = (
 		maxAge: LOGIN_COOKIE_MAX_AGE,
 	});
 
-	cookies.set(FROM_COOKIE, from, {
+	cookies.set(names.from, from, {
 		httpOnly: true,
 		secure: true,
 		sameSite,
@@ -77,12 +101,22 @@ export const setLoginCookies = (
 	return state;
 };
 
-export const clearLoginCookies = (cookies: LoginCookieRead) => {
-	cookies.delete(STATE_COOKIE);
-	cookies.delete(FROM_COOKIE);
+export const clearLoginCookies = (
+	cookies: LoginCookieRead,
+	names: LoginCookieNames = LOGIN_FLOW_COOKIE_NAMES
+) => {
+	cookies.delete(names.state);
+	cookies.delete(names.from);
 };
 
-export const LOGIN_FLOW_COOKIE_NAMES = {
+/** Cookie pair for browser OAuth logins (/login/oauth/{provider}). */
+export const LOGIN_FLOW_COOKIE_NAMES: LoginCookieNames = {
 	state: STATE_COOKIE,
 	from: FROM_COOKIE,
-} as const;
+};
+
+/** Cookie pair for the mobile app deep-link login (/login/callback). */
+export const APP_LOGIN_COOKIE_NAMES: LoginCookieNames = {
+	state: APP_STATE_COOKIE,
+	from: APP_FROM_COOKIE,
+};

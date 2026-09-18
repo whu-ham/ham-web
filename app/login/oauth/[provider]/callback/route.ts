@@ -1,13 +1,18 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/09/15 00:55:30
+ * @version 1.3
+ * @date 2026/9/18 18:08:58
  *
  * Completes a browser OAuth login: /login/oauth/{provider}/callback
  *
  * Verifies the returned state against the stored cookie before
  * exchanging the credential, forwards it to the backend, and replays the
  * session cookies the backend issues.
+ *
+ * Reads and clears the browser OAuth cookie pair explicitly rather than
+ * relying on the shared default: the mobile app deep-link login keeps a
+ * separate pair, and this flow must keep reading what its start endpoint
+ * writes whatever the default becomes.
  *
  * Every provider now returns an authorization code in the query string,
  * so the callback is a plain server-side exchange. The redirect_uri is
@@ -108,7 +113,7 @@ const finishOAuthLogin = async (
 	const storedFrom = cookieStore.get(LOGIN_FLOW_COOKIE_NAMES.from)?.value;
 
 	if (!storedState || storedState !== payload.state) {
-		clearLoginCookies(cookieStore);
+		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
 		return loginErrorRedirect(req, storedFrom, 'Invalid login state');
 	}
 
@@ -131,7 +136,7 @@ const finishOAuthLogin = async (
 		response = result.response;
 		errorMessage = result.errorEnvelope.message;
 	} catch (e) {
-		clearLoginCookies(cookieStore);
+		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
 		return loginErrorRedirect(
 			req,
 			storedFrom,
@@ -140,7 +145,7 @@ const finishOAuthLogin = async (
 	}
 
 	if (!response.ok) {
-		clearLoginCookies(cookieStore);
+		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
 		return loginErrorRedirect(
 			req,
 			storedFrom,
@@ -151,7 +156,7 @@ const finishOAuthLogin = async (
 	const res = NextResponse.redirect(
 		new URL(safeRedirect(storedFrom, '/console'), req.url)
 	);
-	clearLoginCookies(res.cookies);
+	clearLoginCookies(res.cookies, LOGIN_FLOW_COOKIE_NAMES);
 	for (const setCookie of getBackendSetCookies(response)) {
 		res.headers.append('Set-Cookie', setCookie);
 	}
