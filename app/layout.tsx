@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/9/18 18:42:33
+ * @version 1.4
+ * @date 2026/9/18 19:17:29
  */
 import './globals.css';
 import '@material-design-icons/font/index.css';
@@ -38,10 +38,12 @@ export const metadata: Metadata = {
  * Safari owns that strip — the header's own background cannot show
  * through it — so `theme-color` is the only lever we have. Both
  * palettes are declared under `prefers-color-scheme` media queries so a
- * visitor in "follow system" mode gets a tint that tracks their OS, and
- * a concrete switcher choice (cookie) appends an unconditional entry
- * that outranks them, because the user agent uses the last
- * `theme-color` in the document whose media query matches.
+ * visitor in "follow system" mode gets a tint that tracks their OS.
+ *
+ * Order is load-bearing: the user agent walks the candidates in tree
+ * order and takes the FIRST one whose media query matches, so the
+ * unconditional entry for a concrete switcher choice must precede the
+ * media-scoped ones to outrank them.
  */
 export const generateViewport = async (): Promise<Viewport> => {
 	const rawTheme = (await cookies()).get(THEME_COOKIE)?.value;
@@ -49,10 +51,10 @@ export const generateViewport = async (): Promise<Viewport> => {
 
 	return {
 		themeColor: [
-			{ media: '(prefers-color-scheme: light)', color: THEME_COLOR.light },
-			{ media: '(prefers-color-scheme: dark)', color: THEME_COLOR.dark },
 			// No `media`: matches unconditionally, so it wins when present.
 			...(override ? [{ color: THEME_COLOR[override] }] : []),
+			{ media: '(prefers-color-scheme: light)', color: THEME_COLOR.light },
+			{ media: '(prefers-color-scheme: dark)', color: THEME_COLOR.dark },
 		],
 	};
 };

@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/18 18:42:33
+ * @version 1.2
+ * @date 2026/9/18 19:17:29
  *
  * Theme and language preferences.
  *
@@ -129,7 +129,10 @@ test.describe('browser chrome tint', () => {
 	// background cannot show through it — so `<meta name="theme-color">`
 	// is the only lever the app has over that colour. Both palettes are
 	// offered under `prefers-color-scheme`, and an explicit switcher
-	// choice appends an unconditional entry that outranks them.
+	// choice adds an unconditional entry that outranks them by being
+	// FIRST in tree order: the user agent walks the candidates in tree
+	// order and takes the first one whose media query matches, so an
+	// override placed after the scoped entries would never win.
 	//
 	// The two values mirror THEME_COLOR in components/theme/config.ts,
 	// i.e. HeroUI's `--surface` — the base colour of every header.
@@ -142,6 +145,16 @@ test.describe('browser chrome tint', () => {
 		);
 	const unconditional = (page: Page) =>
 		page.locator('meta[name="theme-color"]:not([media])');
+
+	// True when the first `theme-color` in document order is the
+	// unconditional override, i.e. the one the browser actually honours.
+	const overrideComesFirst = (page: Page) =>
+		page.evaluate(
+			() =>
+				document.head
+					.querySelector('meta[name="theme-color"]')
+					?.getAttribute('media') === null
+		);
 
 	test('offers one tint per palette when following the system', async ({
 		anonPage,
@@ -168,9 +181,13 @@ test.describe('browser chrome tint', () => {
 
 		await console_.switchTheme('Dark');
 		await expect(unconditional(authedPage)).toHaveAttribute('content', DARK);
+		// The client inserts the override dynamically — it must land ahead
+		// of the scoped entries, not after them.
+		expect(await overrideComesFirst(authedPage)).toBe(true);
 
 		await console_.switchTheme('Light');
 		await expect(unconditional(authedPage)).toHaveAttribute('content', LIGHT);
+		expect(await overrideComesFirst(authedPage)).toBe(true);
 	});
 
 	test('an explicit choice is rendered on the server', async ({
@@ -184,6 +201,7 @@ test.describe('browser chrome tint', () => {
 		// not depend on the client having applied it after hydration.
 		await authedPage.reload();
 		await expect(unconditional(authedPage)).toHaveAttribute('content', DARK);
+		expect(await overrideComesFirst(authedPage)).toBe(true);
 	});
 
 	test('following the system again drops the override', async ({

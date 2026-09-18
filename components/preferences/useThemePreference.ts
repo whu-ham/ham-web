@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/18 18:42:33
+ * @version 1.2
+ * @date 2026/9/18 19:17:29
  *
  * Shared hook for theme preference management.
  * M9 fix: Extracted from ThemeSwitcher and UserMenu to avoid duplication.
@@ -54,9 +54,10 @@ export const applyThemeToDocument = (resolved: Theme) => {
  *
  * `generateViewport` in `app/layout.tsx` emits one media-scoped entry per
  * palette plus, when a theme cookie is present, an unconditional entry
- * that outranks them. A concrete choice rewrites that entry; going back
- * to "follow system" removes it, so the media-scoped entries resume
- * tracking the OS with no further help from us.
+ * that outranks them by preceding them in tree order. A concrete choice
+ * rewrites that entry; going back to "follow system" removes it, so the
+ * media-scoped entries resume tracking the OS with no further help from
+ * us.
  *
  * Driven from the selection handler rather than from an effect: a choice
  * is the only thing that can make the stored preference disagree with
@@ -84,7 +85,14 @@ export const applyThemeColor = (theme: Theme | null) => {
 	const meta = document.createElement('meta');
 	meta.setAttribute('name', 'theme-color');
 	meta.setAttribute('content', THEME_COLOR[theme]);
-	document.head.appendChild(meta);
+	// Tree order decides the winner, so the unconditional entry has to go
+	// ahead of every media-scoped one rather than at the end of <head>.
+	const first = document.head.querySelector('meta[name="theme-color"]');
+	if (first) {
+		document.head.insertBefore(meta, first);
+	} else {
+		document.head.appendChild(meta);
+	}
 };
 
 export const useThemePreference = () => {
