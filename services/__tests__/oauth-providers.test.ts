@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/15 01:02:15
+ * @version 1.1
+ * @date 2026/9/19 19:01:29
  *
  * Unit tests for the browser OAuth provider registry.
  *
@@ -17,11 +17,15 @@ import {
 	buildLoginOAuthCallbackUrl,
 	getOAuthProviderConfig,
 	OAUTH_PROVIDER_IDS,
+	type OAuthProvider,
 } from '@/services/oauth-providers';
 
 const ORIGIN = 'https://ham.example.com';
 
-const authorizeUrlFor = (provider: 'qq', env: Record<string, string>) => {
+const authorizeUrlFor = (
+	provider: OAuthProvider,
+	env: Record<string, string>
+) => {
 	for (const [key, value] of Object.entries(env)) {
 		vi.stubEnv(key, value);
 	}
@@ -37,8 +41,8 @@ const authorizeUrlFor = (provider: 'qq', env: Record<string, string>) => {
 };
 
 describe('oauth-providers', () => {
-	it('registers qq, github and apple', () => {
-		expect(OAUTH_PROVIDER_IDS).toEqual(['qq', 'github', 'apple']);
+	it('registers qq, github, apple and soruxgpt', () => {
+		expect(OAUTH_PROVIDER_IDS).toEqual(['qq', 'github', 'apple', 'soruxgpt']);
 	});
 
 	// The backend redeems the code server-side with the Web app's appkey,
@@ -75,6 +79,37 @@ describe('oauth-providers', () => {
 
 	it('keeps QQ on a same-site callback', () => {
 		const config = getOAuthProviderConfig('qq');
+		expect(config?.crossSiteCallback).toBe(false);
+	});
+
+	// SoruxGPT is an OpenID Connect provider, so the scope list is
+	// space-separated and URLSearchParams encodes it as `+`.
+	it('requests an authorization code from SoruxGPT', () => {
+		const { url, search } = authorizeUrlFor('soruxgpt', {
+			SORUXGPT_CLIENT_ID: 'soruxgpt-web-client',
+		});
+
+		expect(url.origin + url.pathname).toBe(
+			'https://app.soruxgpt.com/oauth/authorize'
+		);
+		expect(search.get('response_type')).toBe('code');
+		expect(search.get('client_id')).toBe('soruxgpt-web-client');
+		expect(search.get('scope')).toBe('openid profile email');
+		expect(search.get('state')).toBe('state-123');
+	});
+
+	it('sends the absolute callback url as the SoruxGPT redirect_uri', () => {
+		const { search } = authorizeUrlFor('soruxgpt', {
+			SORUXGPT_CLIENT_ID: 'soruxgpt-web-client',
+		});
+
+		expect(search.get('redirect_uri')).toBe(
+			`${ORIGIN}/login/oauth/soruxgpt/callback`
+		);
+	});
+
+	it('keeps SoruxGPT on a same-site callback', () => {
+		const config = getOAuthProviderConfig('soruxgpt');
 		expect(config?.crossSiteCallback).toBe(false);
 	});
 });

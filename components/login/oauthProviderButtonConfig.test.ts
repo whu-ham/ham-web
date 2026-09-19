@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 18:55:06
+ * @version 1.1
+ * @date 2026/9/19 19:01:29
  *
  * Tests for the OAuth provider button visual configuration.
  */
@@ -26,7 +26,7 @@ const collectAssetPaths = () =>
 	);
 
 describe('oauthProviderButtonConfig', () => {
-	it('keeps QQ and Apple on circular buttons with themed colors', () => {
+	it('keeps QQ, Apple and SoruxGPT on circular buttons with themed colors', () => {
 		expect(getProviderConfig('qq')).toMatchObject({
 			button: {
 				backgroundColor: '#12B7F5',
@@ -51,6 +51,18 @@ describe('oauthProviderButtonConfig', () => {
 			},
 			provider: 'apple',
 		});
+		expect(getProviderConfig('soruxgpt')).toMatchObject({
+			button: {
+				backgroundColor: '#000000',
+				darkBackgroundColor: '#FFFFFF',
+				kind: 'circle',
+			},
+			icon: {
+				darkSrc: '/login/login_soruxgpt_dark.png',
+				src: '/login/login_soruxgpt.png',
+			},
+			provider: 'soruxgpt',
+		});
 	});
 
 	it('keeps GitHub as the image-only provider', () => {
@@ -72,10 +84,12 @@ describe('oauthProviderButtonConfig', () => {
 		const github = getProviderConfig('github');
 		const apple = getProviderConfig('apple');
 		const qq = getProviderConfig('qq');
+		const soruxgpt = getProviderConfig('soruxgpt');
 
 		expect(github?.icon.darkSrc).toBe('/login/login_github_light.png');
 		expect(apple?.icon.darkSrc).toBe('/login/login_apple_dark.png');
 		expect(qq?.icon.darkSrc).toBeNull();
+		expect(soruxgpt?.icon.darkSrc).toBe('/login/login_soruxgpt_dark.png');
 	});
 
 	it('references existing files under public/login', () => {
