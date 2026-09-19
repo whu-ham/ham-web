@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/18 16:56:23
+ * @version 1.3
+ * @date 2026/9/19 19:01:29
  *
  * Shared browser OAuth provider entry list for login surfaces.
  *
@@ -60,7 +60,7 @@ const OAuthProviderButtons = ({ from }: OAuthProviderButtonsProps) => {
 			<div className={'text-sm text-muted text-center'}>
 				{t('oauth.prompt')}
 			</div>
-			<div className={'grid grid-cols-3 gap-4 w-fit mx-auto'}>
+			<div className={'grid grid-cols-4 gap-4 w-fit mx-auto'}>
 				{OAUTH_PROVIDER_IDS.map((provider) => {
 					const config = OAUTH_PROVIDER_CONFIGS[provider];
 					const href = buildLoginOAuthStartHref(provider, from);

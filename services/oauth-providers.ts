@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/15 00:52:10
+ * @version 1.3
+ * @date 2026/9/19 19:01:29
  *
  * Browser OAuth provider registry.
  *
@@ -13,7 +13,12 @@
  * routes; the upstream authorization request just fails there.
  */
 
-export const OAUTH_PROVIDER_IDS = ['qq', 'github', 'apple'] as const;
+export const OAUTH_PROVIDER_IDS = [
+	'qq',
+	'github',
+	'apple',
+	'soruxgpt',
+] as const;
 
 export type OAuthProvider = (typeof OAUTH_PROVIDER_IDS)[number];
 
@@ -93,6 +98,25 @@ export const OAUTH_PROVIDER_CONFIGS: Record<
 				state,
 			});
 			return `https://appleid.apple.com/auth/authorize?${query}`;
+		},
+	},
+	soruxgpt: {
+		id: 'soruxgpt',
+		accentClassName: 'bg-[#000000]',
+		crossSiteCallback: false,
+		buildAuthorizeUrl: ({ callbackUrl, state }) => {
+			// Standard authorization-code + OIDC request. The callback URL is
+			// rebuilt server-side on the callback leg, and the backend redeems
+			// the code against the token endpoint, so neither the code nor the
+			// access token is ever exchanged in the browser.
+			const query = buildCallbackQuery({
+				client_id: getWorkerEnv('SORUXGPT_CLIENT_ID'),
+				redirect_uri: callbackUrl,
+				response_type: 'code',
+				scope: 'openid profile email',
+				state,
+			});
+			return `https://app.soruxgpt.com/oauth/authorize?${query}`;
 		},
 	},
 };

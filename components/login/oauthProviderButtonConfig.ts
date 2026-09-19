@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 18:55:06
+ * @version 1.1
+ * @date 2026/9/19 19:01:29
  *
  * Visual configuration for the browser OAuth provider buttons.
  *
@@ -64,5 +64,17 @@ export const OAUTH_PROVIDER_BUTTON_CONFIGS: readonly OAuthProviderButtonVisualCo
 				src: '/login/login_apple_light.png',
 			},
 			provider: 'apple',
+		},
+		{
+			button: {
+				backgroundColor: '#000000',
+				darkBackgroundColor: '#FFFFFF',
+				kind: 'circle',
+			},
+			icon: {
+				darkSrc: '/login/login_soruxgpt_dark.png',
+				src: '/login/login_soruxgpt.png',
+			},
+			provider: 'soruxgpt',
 		},
 	];
