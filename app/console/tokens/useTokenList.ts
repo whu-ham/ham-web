@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/9/23 00:27:15
+ * @version 1.4
+ * @date 2026/9/23 01:48:20
  *
  * Custom hook for token list management.
  * Handles fetching, revoking, rotate modal, and create modal coordination.
@@ -63,6 +63,10 @@ export const useTokenList = (
 	const cancelledRef = useRef(false);
 	// Guard: only initialize atoms once per mount
 	const initRef = useRef(false);
+	// Last version this instance has acted on. The atom survives
+	// navigation, so a fresh mount has to know which bumps it has already
+	// handled rather than replaying the counter from zero.
+	const seenVersionRef = useRef(tokenListVersion);
 
 	useEffect(() => {
 		// M2: Reset on every mount. Strict Mode mounts, unmounts and mounts
@@ -109,11 +113,14 @@ export const useTokenList = (
 		setMounted(true);
 	}, [initialTokens, setTokens, setLoading, setFetchError, fetchTokens]);
 
-	// Refetch when version changes (create/rotate success)
+	// Refetch when the version moves past what this instance has seen
+	// (create/rotate success).
 	useEffect(() => {
-		if (tokenListVersion > 0) {
-			fetchTokens();
+		if (tokenListVersion === seenVersionRef.current) {
+			return;
 		}
+		seenVersionRef.current = tokenListVersion;
+		fetchTokens();
 	}, [tokenListVersion, fetchTokens]);
 
 	// Before atoms are initialized, use initialTokens directly so the
