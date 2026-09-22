@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/23 01:07:29
+ * @version 1.3
+ * @date 2026/9/23 01:38:14
  *
  * Shared BFF proxy helper used by all EdgeOne Edge Function handlers.
  * Forwards requests to the backend origin (env var HAM_BACKEND_ORIGIN)
@@ -128,6 +128,14 @@ export const proxyToBackend = async (
 	env: Record<string, string>
 ): Promise<Response> => {
 	const origin = env.HAM_BACKEND_ORIGIN ?? '';
+	// An unset binding would degrade every call into a relative fetch that
+	// fails inside the runtime with an opaque message, which looks like a
+	// backend outage rather than a missing binding. Fail here instead.
+	if (!origin) {
+		throw new Error(
+			'[proxy] HAM_BACKEND_ORIGIN is not configured — cannot reach the backend'
+		);
+	}
 	// The caller's query string belongs to the request as much as the path
 	// does — dropping it here silently unfilters every upstream call.
 	const url = `${origin}${path}${new URL(req.url).search}`;
