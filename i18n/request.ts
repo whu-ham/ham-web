@@ -1,22 +1,21 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.1
+ * @date 2026/9/23 00:53:12
  *
  * Server-side `next-intl` request config. Because the project keeps the
  * URL shape stable (no `[locale]` segment), we resolve the active
  * locale on each request from:
  *
- *   1. `?lang=` query parameter (highest priority — useful when the App
- *      deep-links back into the web and wants to pin a language).
- *   2. `NEXT_LOCALE` cookie (user explicit pick).
- *   3. `Accept-Language` header (first supported match).
- *   4. `DEFAULT_LOCALE` fallback.
+ *   1. `NEXT_LOCALE` cookie (user explicit pick).
+ *   2. `Accept-Language` header (first supported match).
+ *   3. `DEFAULT_LOCALE` fallback.
  *
- * Note: step (1) is best-effort. `getRequestConfig` in next-intl 4.x
- * does not expose the query string directly, so we also honour the
- * `?lang=` path inside the Language Switcher by writing the cookie
- * before triggering `router.refresh()`.
+ * A `?lang=` query parameter is deliberately NOT honoured here:
+ * `getRequestConfig` in next-intl 4.x is not given the query string, so
+ * there is nothing to read. The previous header claimed otherwise, which
+ * made a language switch look like it should work without the cookie the
+ * switcher actually writes.
  */
 
 import { cookies, headers } from 'next/headers';

@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/4/20
+ * @version 1.1
+ * @date 2026/9/23 00:53:12
  *
  * Central locale catalogue shared by the server runtime
  * (`i18n/request.ts`) and the client `LanguageSwitcher`. The list is
@@ -22,8 +22,6 @@ export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'zh';
 
 export { LOCALE_COOKIE } from '@/services/cookies';
-
-export const LOCALE_QUERY_KEY = 'lang';
 
 // The language names are intentionally written in their own language so
 // that a Chinese speaker, an English speaker and a Japanese speaker can
