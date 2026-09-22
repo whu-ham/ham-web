@@ -1,10 +1,15 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/26 10:42:28
+ * @version 1.2
+ * @date 2026/9/23 00:29:36
  *
  * Custom hook for SSO consent view logic.
  * Handles consent info fetching, scope selection, confirm/reject/switch account.
+ *
+ * r3 fix: `checkedScopes` now reports the scopes that will actually be
+ * submitted. It used to report the raw selection, which is empty until
+ * the user touches a checkbox — so the screen showed nothing selected
+ * while a confirm sent every scope.
  */
 
 'use client';
@@ -41,13 +46,15 @@ export const useConsent = (): UseConsentReturn => {
 	const [info, setInfo] = useState<ConsentInfoResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
-	const [checkedScopes, setCheckedScopes] = useState<string[]>([]);
-	const effectiveCheckedScopes = useMemo(
+	// Empty until the user touches a checkbox; until then every scope the
+	// app asked for is the effective selection.
+	const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
+	const checkedScopes = useMemo(
 		() =>
-			checkedScopes.length > 0
-				? checkedScopes
+			selectedScopes.length > 0
+				? selectedScopes
 				: (info?.scopes.map((scope) => scope.scope) ?? []),
-		[checkedScopes, info]
+		[selectedScopes, info]
 	);
 
 	const onSwitchAccount = useCallback(async () => {
@@ -86,8 +93,8 @@ export const useConsent = (): UseConsentReturn => {
 				const resp = await WebAuthApi.consentConfirm({
 					client_id: params.appId,
 					scope: info
-						? withRequiredConsentScopes(effectiveCheckedScopes, info.scopes)
-						: effectiveCheckedScopes,
+						? withRequiredConsentScopes(checkedScopes, info.scopes)
+						: checkedScopes,
 					redirect_uri: params.redirectUri,
 					state: params.state,
 					nonce,
@@ -106,7 +113,7 @@ export const useConsent = (): UseConsentReturn => {
 		},
 		[
 			bail,
-			effectiveCheckedScopes,
+			checkedScopes,
 			info,
 			params.appId,
 			params.redirectUri,
@@ -132,13 +139,11 @@ export const useConsent = (): UseConsentReturn => {
 				if (cancelled) return;
 				setInfo(resp);
 			})
-			.catch((e: unknown) => {
+			.catch(() => {
 				if (cancelled) return;
-				if (e instanceof ApiError) {
-					setError(t('fetchFailed'));
-				} else {
-					setError(t('fetchFailed'));
-				}
+				// The backend message is not user-safe and the screen offers
+				// no recovery beyond retrying, so both branches say the same.
+				setError(t('fetchFailed'));
 			});
 		return () => {
 			cancelled = true;
@@ -160,7 +165,7 @@ export const useConsent = (): UseConsentReturn => {
 		error,
 		submitting,
 		checkedScopes,
-		setCheckedScopes,
+		setCheckedScopes: setSelectedScopes,
 		onSwitchAccount,
 		bail,
 		confirm,
