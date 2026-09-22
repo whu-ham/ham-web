@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/18 16:56:23
+ * @version 1.2
+ * @date 2026/9/23 00:38:02
  *
  * Unit tests for the shared login-flow cookie helpers.
  *
@@ -119,6 +119,22 @@ describe('setLoginCookies', () => {
 		for (const call of calls) {
 			expect(call.options.sameSite).toBe('lax');
 		}
+	});
+
+	// Regression guard for a shared SameSite decision: the policy is per
+	// call, so a cross-site provider must not relax the cookies a later
+	// same-site provider writes.
+	it('does not carry the SameSite decision across calls', () => {
+		const { calls, writer } = createWriter();
+		setLoginCookies(writer, '/a', { crossSiteCallback: true });
+		setLoginCookies(writer, '/b', { crossSiteCallback: false });
+
+		expect(calls.map((call) => call.options.sameSite)).toEqual([
+			'none',
+			'none',
+			'lax',
+			'lax',
+		]);
 	});
 
 	it('writes to the cookie names it is given', () => {
