@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/23 00:53:12
+ * @version 1.2
+ * @date 2026/9/23 02:02:11
  *
  * Central locale catalogue shared by the server runtime
  * (`i18n/request.ts`) and the client `LanguageSwitcher`. The list is
@@ -9,10 +9,10 @@
  * `messages/<code>.json` catalogue checked into the repo.
  *
  * Ham ships without a `[locale]` URL segment: the active language is
- * persisted in the `NEXT_LOCALE` cookie and the `?lang=` query
- * parameter, so no routing changes are required when a new language is
- * added. Simply append the code + label pair below, drop the matching
- * JSON catalogue under `messages/`, and the UI picks it up.
+ * persisted in the `NEXT_LOCALE` cookie, so no routing changes are
+ * required when a new language is added. Simply append the code + label
+ * pair below, drop the matching JSON catalogue under `messages/`, and
+ * the UI picks it up.
  */
 
 export const LOCALES = ['zh', 'en', 'ja'] as const;
