@@ -1,14 +1,23 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:24:07
+ *
  * Custom hook for Passkey (WebAuthn) login flow.
  * Handles credential request and server verification.
  * On success, session cookie is set by backend — just call onLoginSucceeded.
+ *
+ * r2 fix: the WebAuthn support check runs after mount. It used to run
+ * during render, which made the server render nothing (window is absent)
+ * and the first client render a button — a hydration mismatch on every
+ * /login load.
  */
 
 'use client';
 
 import toast from 'react-hot-toast';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
 	base64ToArrayBuffer,
@@ -28,13 +37,19 @@ export const usePasskeyLogin = (
 ): UsePasskeyLoginReturn => {
 	const t = useTranslations('sso.passkey');
 	const [loading, setLoading] = useState(false);
-	const supported = useMemo<boolean | null>(() => {
-		if (typeof window === 'undefined') return null;
-		return isPasskeySupported();
-	}, []);
+	// `null` until the browser has been probed: the server cannot run the
+	// check, so the first client render has to agree with it and stay
+	// empty. Rendering the button straight away mismatches the HTML.
+	const [supported, setSupported] = useState<boolean | null>(null);
 	const cancelledRef = useRef(false);
 
 	useEffect(() => {
+		// Reset on every mount: a remounted instance (React Strict Mode
+		// mounts, unmounts and mounts again) would otherwise inherit the
+		// "unmounted" flag and never settle its loading state.
+		cancelledRef.current = false;
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- must run after hydration
+		setSupported(isPasskeySupported());
 		return () => {
 			cancelledRef.current = true;
 		};
