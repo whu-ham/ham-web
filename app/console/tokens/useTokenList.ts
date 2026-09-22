@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/5/22
+ * @version 1.3
+ * @date 2026/9/23 00:27:15
  *
  * Custom hook for token list management.
  * Handles fetching, revoking, rotate modal, and create modal coordination.
@@ -65,6 +65,10 @@ export const useTokenList = (
 	const initRef = useRef(false);
 
 	useEffect(() => {
+		// M2: Reset on every mount. Strict Mode mounts, unmounts and mounts
+		// again, and an instance that inherits the "unmounted" flag would
+		// drop every response — leaving the list stuck in its loading state.
+		cancelledRef.current = false;
 		return () => {
 			cancelledRef.current = true;
 		};

@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.1
+ * @date 2026/9/23 00:27:15
  *
  * Custom hook for the create token modal.
  * Handles scope selection (with parent/child checkbox logic),
@@ -54,6 +54,10 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 
 	// s5: Clean up on unmount
 	useEffect(() => {
+		// Reset on every mount: Strict Mode mounts, unmounts and mounts
+		// again, and an instance that inherits the "unmounted" flag would
+		// never clear its submitting state after a create.
+		cancelledRef.current = false;
 		return () => {
 			cancelledRef.current = true;
 		};
