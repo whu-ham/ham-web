@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/5/22
+ * @version 1.3
+ * @date 2026/9/23 00:17:03
  *
  * Server-side fetch infrastructure for Server Components.
  * Forwards browser cookies to the backend and handles Set-Cookie forwarding.
@@ -12,11 +12,16 @@
  * C2 fix: Empty Cookie header is no longer sent when no relevant
  * cookies exist, avoiding misleading the backend.
  *
- * M6 fix: Validates HAM_BACKEND_ORIGIN at module load time to
- * prevent silent failures from misconfigured deployments.
+ * M6 fix: HAM_BACKEND_ORIGIN is validated before a request is issued,
+ * so a misconfigured deployment fails loudly instead of silently
+ * degrading into a relative fetch.
  *
  * m6 fix: parseSetCookieHeader now validates Date objects from
  * the expires attribute before including them in options.
+ *
+ * r1 fix: response bodies are parsed defensively. A 204/205 reply or an
+ * HTML error page has no JSON to parse, and `Response.json()` throws on
+ * both — which turned a benign "no content" into a network failure.
  */
 import { cookies } from 'next/headers';
 
@@ -28,6 +33,47 @@ import {
 } from '@/services/cookies';
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
+
+/**
+ * Absolute URL for a backend path.
+ *
+ * M6: an unset `HAM_BACKEND_ORIGIN` used to degrade into a relative
+ * `fetch('/web/...')`, which fails deep inside undici with an opaque
+ * "Failed to parse URL" and looks like a backend outage. Fail at the
+ * boundary instead so a misconfigured deployment is obvious.
+ */
+const resolveBackendUrl = (path: string): string => {
+	if (!BACKEND_ORIGIN) {
+		throw new Error(
+			'[server-fetch] HAM_BACKEND_ORIGIN is not configured — cannot reach the backend'
+		);
+	}
+	return `${BACKEND_ORIGIN}${path}`;
+};
+
+/**
+ * Parse a backend response body without assuming it is JSON.
+ *
+ * 204/205 carry no body by definition, and a gateway error page or an
+ * empty 200 is not JSON either. `Response.json()` rejects on all of
+ * them, so the caller would report a network error for what is really
+ * "the backend said nothing". Returns `null` whenever there is no
+ * parseable object to hand back.
+ */
+const parseJsonBody = async (response: Response): Promise<unknown> => {
+	if (response.status === 204 || response.status === 205) {
+		return null;
+	}
+	const text = await response.text();
+	if (text.trim() === '') {
+		return null;
+	}
+	try {
+		return JSON.parse(text) as unknown;
+	} catch {
+		return null;
+	}
+};
 
 /**
  * Cookie names that are relevant to the backend.
@@ -174,12 +220,12 @@ export const serverFetch = async <T = unknown>(
 		headers.Cookie = relevantCookies;
 	}
 
-	const response = await fetch(`${BACKEND_ORIGIN}${path}`, {
+	const response = await fetch(resolveBackendUrl(path), {
 		...init,
 		headers,
 	});
 
-	const body: unknown = await response.json();
+	const body: unknown = await parseJsonBody(response);
 	// Successful responses are raw JSON payloads (same shape the BFF proxy
 	// streams to the client). Error responses may carry { code, message }.
 	const isEnvelope =
