@@ -4,7 +4,7 @@ import { SearchBarItem } from '@/components/search/types';
 import classNames from 'classnames';
 
 /**
- * @author orangeboyChen
+ * @author Claude
  * @version 1.0
  * @date 2025/1/26 15:47
  */

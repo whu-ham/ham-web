@@ -1,10 +1,13 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Generic Passkey login button for the /login page.
  * Rendering-only — all logic lives in usePasskeyLogin.
  *
  * Renders nothing when the browser does not support WebAuthn / Passkeys.
  */
-
 'use client';
 
 import { Button } from '@heroui/react';

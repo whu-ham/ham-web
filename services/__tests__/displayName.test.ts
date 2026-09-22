@@ -1,4 +1,8 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Unit tests for displayName — the user-id fallback for display names.
  *
  * `??` is not sufficient because the backend can return an empty or

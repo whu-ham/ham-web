@@ -1,10 +1,13 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Jotai atoms for the /login page.
  *
  * - `loginSucceededAtom` — signal: set to true when QR/Passkey login succeeds.
  * - `mobileAtom`         — whether the current device is mobile.
  */
-
 import { atom } from 'jotai';
 
 // ---------------------------------------------------------------------------

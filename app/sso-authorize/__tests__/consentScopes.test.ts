@@ -1,3 +1,11 @@
+/**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
+ * Unit tests for the consent scope helpers — category grouping and the
+ * required-scope rule that the confirm request depends on.
+ */
 import { describe, expect, it } from 'vitest';
 
 import {

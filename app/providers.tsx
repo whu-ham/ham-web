@@ -1,7 +1,5 @@
-'use client';
-
 /**
- * @author orangeboyChen
+ * @author Claude
  * @version 1.3
  * @date 2025/1/24 22:52
  *
@@ -16,6 +14,9 @@
  * set to 'true'. This prevents the msw package and mock handlers from
  * accidentally being included in production bundles.
  */
+
+'use client';
+
 import { ReactNode, useEffect, useState } from 'react';
 import { SSRProvider } from 'react-aria';
 import { Toaster } from 'react-hot-toast';

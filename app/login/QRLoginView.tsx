@@ -1,8 +1,11 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Generic QR login view for the /login page.
  * Rendering-only — all logic lives in useQrLogin.
  */
-
 'use client';
 
 import { Avatar } from '@heroui/react';

@@ -1,4 +1,8 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * MSW request handlers for token and auth API endpoints.
  * Intercepts /api/tokens/** and /api/auth/** requests and returns mock data.
  */
