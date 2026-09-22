@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/9/23 00:20:11
+ * @version 1.4
+ * @date 2026/9/23 00:22:40
  *
  * Shared BFF proxy helper used by all /api/** route handlers.
  * Forwards requests to the backend origin (server-side env var
@@ -20,9 +20,29 @@
  * and credentials-with-cookies will work across origins. Leave
  * `WEB_BASE_URL` unset for single-origin deployments — no CORS headers
  * are added in that case.
+ *
+ * `HAM_BACKEND_ORIGIN` is required: without it every proxy call would
+ * degrade into a relative fetch that fails inside the runtime.
  */
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
+
+/**
+ * Absolute URL of the backend for a proxied path.
+ *
+ * An unset `HAM_BACKEND_ORIGIN` would turn every proxy call into a
+ * relative fetch, which fails inside the runtime with an opaque message
+ * and looks like the backend is down. Fail at the boundary instead so a
+ * misconfigured deployment is diagnosable from the first request.
+ */
+const resolveBackendUrl = (path: string, search: string): string => {
+	if (!BACKEND_ORIGIN) {
+		throw new Error(
+			'[proxy] HAM_BACKEND_ORIGIN is not configured — cannot reach the backend'
+		);
+	}
+	return `${BACKEND_ORIGIN}${path}${search}`;
+};
 
 /**
  * Absolute frontend origins that are allowed to call this BFF cross-origin.
@@ -118,7 +138,7 @@ export const proxyToBackend = async (
 	// The backend path is fixed per route, but the caller's query string is
 	// part of the request: dropping it silently turns any filtered or
 	// paginated call into an unfiltered one.
-	const url = `${BACKEND_ORIGIN}${path}${new URL(req.url).search}`;
+	const url = resolveBackendUrl(path, new URL(req.url).search);
 
 	// Forward all original headers except Host (which fetch sets automatically).
 	const forwardHeaders = new Headers(req.headers);
