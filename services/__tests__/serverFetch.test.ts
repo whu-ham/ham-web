@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/23 00:17:03
+ * @version 1.1
+ * @date 2026/9/23 01:31:52
  *
  * Unit tests for serverFetch — defensive body parsing.
  *
@@ -10,6 +10,10 @@
  * `response.json()` reject on those turned "the backend said nothing"
  * into a network failure that surfaced as a misleading error on the
  * login and consent screens.
+ *
+ * The parse flag is what keeps that from going the other way: a 200 that
+ * carries no JSON must not be reported as an empty payload, or a
+ * signed-in user gets bounced to /login.
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -39,28 +43,34 @@ describe('serverFetch', () => {
 	it('returns null for a 204 No Content reply', async () => {
 		stubFetch({ status: 204 });
 
-		const { data, errorEnvelope } = await serverFetch('/web/auth/logout', {
-			method: 'POST',
-		});
+		const { data, errorEnvelope, bodyIsJson } = await serverFetch(
+			'/web/auth/logout',
+			{ method: 'POST' }
+		);
 
 		expect(data).toBeNull();
+		expect(bodyIsJson).toBe(false);
 		expect(errorEnvelope).toEqual({});
 	});
 
 	it('returns null for an empty 200 body', async () => {
 		stubFetch({ status: 200, body: '' });
 
-		const { data } = await serverFetch('/web/tokens');
+		const { data, bodyIsJson } = await serverFetch('/web/tokens');
 
 		expect(data).toBeNull();
+		expect(bodyIsJson).toBe(false);
 	});
 
 	it('returns null for a non-JSON body instead of throwing', async () => {
 		stubFetch({ status: 200, body: '<html>gateway error</html>' });
 
-		const { data } = await serverFetch('/web/tokens');
+		// The 200 is the dangerous case: without the flag a caller cannot
+		// tell this apart from a genuinely empty payload.
+		const { data, bodyIsJson } = await serverFetch('/web/tokens');
 
 		expect(data).toBeNull();
+		expect(bodyIsJson).toBe(false);
 	});
 
 	it('unwraps the backend error envelope on failure', async () => {
@@ -84,8 +94,19 @@ describe('serverFetch', () => {
 	it('keeps raw JSON payloads untouched', async () => {
 		stubFetch({ status: 200, body: JSON.stringify([{ id: 'tok_1' }]) });
 
-		const { data } = await serverFetch<{ id: string }[]>('/web/tokens');
+		const { data, bodyIsJson } =
+			await serverFetch<{ id: string }[]>('/web/tokens');
 
 		expect(data).toEqual([{ id: 'tok_1' }]);
+		expect(bodyIsJson).toBe(true);
+	});
+
+	it('reports a JSON null payload as parsed', async () => {
+		stubFetch({ status: 200, body: 'null' });
+
+		const { data, bodyIsJson } = await serverFetch('/web/tokens');
+
+		expect(data).toBeNull();
+		expect(bodyIsJson).toBe(true);
 	});
 });

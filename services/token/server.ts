@@ -1,13 +1,17 @@
 /**
  * @author Claude
- * @version 1.4
- * @date 2026/5/22
+ * @version 1.5
+ * @date 2026/9/23 01:31:52
  *
  * Server-side data fetching for token endpoints.
  * Calls the backend directly via serverFetch.
  *
  * M1 fix: Returns null on error instead of an empty array, so the
  * client can distinguish "no tokens" from "fetch failed".
+ *
+ * r6 fix: a 200 with a body that is not JSON is a failure too. It used
+ * to become an empty array, which the client renders as "no API keys"
+ * with no retry button.
  * Mock data is only loaded when NEXT_PUBLIC_ENABLE_MSW is
  * explicitly 'true', preventing mocks from entering production bundles.
  */
@@ -22,9 +26,10 @@ import type { TokenListItem } from '@/services/token/api';
  */
 export const fetchTokenList = async (): Promise<TokenListItem[] | null> => {
 	try {
-		const { response, data } =
+		const { response, data, bodyIsJson } =
 			await serverFetch<TokenListItem[]>('/web/tokens');
-		if (!response.ok) return null;
+		// A gateway error page must not be reported as an empty list.
+		if (!response.ok || !bodyIsJson) return null;
 		return Array.isArray(data) ? data : [];
 	} catch {
 		return null;

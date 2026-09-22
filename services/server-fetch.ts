@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/9/23 00:17:03
+ * @version 1.4
+ * @date 2026/9/23 01:31:52
  *
  * Server-side fetch infrastructure for Server Components.
  * Forwards browser cookies to the backend and handles Set-Cookie forwarding.
@@ -22,6 +22,10 @@
  * r1 fix: response bodies are parsed defensively. A 204/205 reply or an
  * HTML error page has no JSON to parse, and `Response.json()` throws on
  * both — which turned a benign "no content" into a network failure.
+ *
+ * r6 fix: callers can tell "no body" from "empty payload". Treating a
+ * non-JSON 200 as an empty result made fetchMe bounce a signed-in user
+ * to /login and made the token list render "no keys" with no retry.
  */
 import { cookies } from 'next/headers';
 
@@ -52,26 +56,35 @@ const resolveBackendUrl = (path: string): string => {
 };
 
 /**
+ * Outcome of reading a backend body: the parsed value plus whether it
+ * was JSON at all.
+ */
+interface ParsedBody {
+	isJson: boolean;
+	value: unknown;
+}
+
+/**
  * Parse a backend response body without assuming it is JSON.
  *
  * 204/205 carry no body by definition, and a gateway error page or an
  * empty 200 is not JSON either. `Response.json()` rejects on all of
  * them, so the caller would report a network error for what is really
- * "the backend said nothing". Returns `null` whenever there is no
- * parseable object to hand back.
+ * "the backend said nothing". The flag lets callers tell that case
+ * apart from a payload that is genuinely `null`.
  */
-const parseJsonBody = async (response: Response): Promise<unknown> => {
+const parseJsonBody = async (response: Response): Promise<ParsedBody> => {
 	if (response.status === 204 || response.status === 205) {
-		return null;
+		return { isJson: false, value: null };
 	}
 	const text = await response.text();
 	if (text.trim() === '') {
-		return null;
+		return { isJson: false, value: null };
 	}
 	try {
-		return JSON.parse(text) as unknown;
+		return { isJson: true, value: JSON.parse(text) as unknown };
 	} catch {
-		return null;
+		return { isJson: false, value: null };
 	}
 };
 
@@ -181,6 +194,13 @@ export interface ServerFetchResult<T = unknown> {
 	response: Response;
 	data: T;
 	errorEnvelope: BackendErrorEnvelope;
+	/**
+	 * Whether the body was valid JSON. `false` means the backend sent
+	 * nothing parseable — a 204, an empty body, or an HTML error page —
+	 * so `data` is `null` regardless of the status code. Callers must not
+	 * mistake that for an empty payload.
+	 */
+	bodyIsJson: boolean;
 }
 
 /**
@@ -225,7 +245,7 @@ export const serverFetch = async <T = unknown>(
 		headers,
 	});
 
-	const body: unknown = await parseJsonBody(response);
+	const { isJson: bodyIsJson, value: body } = await parseJsonBody(response);
 	// Successful responses are raw JSON payloads (same shape the BFF proxy
 	// streams to the client). Error responses may carry { code, message }.
 	const isEnvelope =
@@ -239,5 +259,5 @@ export const serverFetch = async <T = unknown>(
 	const errorEnvelope: BackendErrorEnvelope = isEnvelope
 		? (body as BackendErrorEnvelope)
 		: {};
-	return { response, data, errorEnvelope };
+	return { response, data, errorEnvelope, bodyIsJson };
 };

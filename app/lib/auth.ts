@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/22
+ * @version 1.2
+ * @date 2026/9/23 01:31:52
  *
  * Server-side authentication helpers for Server Components.
  *
@@ -15,6 +15,11 @@
  *
  * M5 fix: processAppCallback returns error details so the callback
  * page can communicate the failure reason to the user.
+ *
+ * r6 fix: fetchMe treats a 200 that carries no JSON as an error. The
+ * defensive body parsing in serverFetch turns an HTML gateway page into
+ * `null`, and returning `null` from here sends a signed-in visitor to
+ * /login.
  */
 import { redirect } from 'next/navigation';
 
@@ -28,9 +33,13 @@ import { forwardSetCookies, serverFetch } from '@/services/server-fetch';
  * unauthenticated.
  */
 export const fetchMe = async (): Promise<MeResponse | null> => {
-	const { response, data } = await serverFetch<MeResponse>('/web/auth/me');
+	const { response, data, bodyIsJson } =
+		await serverFetch<MeResponse>('/web/auth/me');
 	if (response.status === 401 || response.status === 403) return null;
 	if (!response.ok) throw new Error(`fetchMe failed: ${response.status}`);
+	// A signed-in user must never be redirected to /login because the
+	// backend answered with something that is not JSON.
+	if (!bodyIsJson) throw new Error('fetchMe failed: non-JSON response');
 	return data;
 };
 
