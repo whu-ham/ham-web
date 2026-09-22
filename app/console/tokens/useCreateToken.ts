@@ -1,11 +1,15 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.2
+ * @date 2026/9/23 00:58:40
  *
  * Custom hook for the create token modal.
  * Handles scope selection (with parent/child checkbox logic),
  * validation, and submission.
+ *
+ * The TTL range check rejects non-finite values. Clearing the
+ * field leaves NaN, and every comparison against NaN is false, so the
+ * range check waved through a value that serialises to `null`.
  */
 
 'use client';
@@ -54,6 +58,10 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 
 	// s5: Clean up on unmount
 	useEffect(() => {
+		// Reset on every mount: Strict Mode mounts, unmounts and mounts
+		// again, and an instance that inherits the "unmounted" flag would
+		// never clear its submitting state after a create.
+		cancelledRef.current = false;
 		return () => {
 			cancelledRef.current = true;
 		};
@@ -119,7 +127,9 @@ export const useCreateToken = (): UseCreateTokenReturn => {
 			toast.error(t('validation.scopesRequired'));
 			return;
 		}
-		if (ttl < 1 || ttl > 30) {
+		// NaN fails every comparison, so an emptied field used to sail
+		// through this check and serialise to `null` in the request body.
+		if (!Number.isFinite(ttl) || ttl < 1 || ttl > 30) {
 			toast.error(t('validation.ttlRange'));
 			return;
 		}

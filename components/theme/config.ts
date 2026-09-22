@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/18 18:42:33
+ * @version 1.2
+ * @date 2026/9/23 00:55:02
  *
  * Central theme catalogue shared by the `ThemeSwitcher` component and
  * any surrounding code that needs to read/write the user's theme
@@ -21,13 +21,13 @@
  * `[data-theme="dark"]` selector — picks up the change without
  * additional wiring.
  */
+import { THEME_COOKIE } from '@/services/cookies';
+
+export { THEME_COOKIE };
 
 export const THEMES = ['light', 'dark'] as const;
 
 export type Theme = (typeof THEMES)[number];
-
-import { THEME_COOKIE } from '@/services/cookies';
-export { THEME_COOKIE };
 
 // Key on `<html>` used by the inline bootstrap script to avoid a
 // flash of incorrect theme on first paint. Keeping it named is

@@ -1,4 +1,8 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * s6: Unit tests for handleScopeChange — validates parent/child scope checkbox logic.
  */
 import { describe, expect, it } from 'vitest';

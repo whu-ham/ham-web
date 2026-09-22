@@ -195,7 +195,14 @@
 			"openApp": "Sign in with App",
 			"openAppUnavailable": "App sign-in is temporarily unavailable",
 			"appCallbackFailed": "App sign-in failed, please retry",
-			"appCallbackProcessing": "Completing sign-in…"
+			"appCallbackProcessing": "Completing sign-in…",
+			"errors": {
+				"invalidState": "Sign-in state expired or did not match, please try again",
+				"unsupportedProvider": "That sign-in provider is not supported",
+				"missingPayload": "The sign-in response was incomplete, please try again",
+				"oauthFailed": "The provider could not complete sign-in, please try again",
+				"unknown": "Sign-in failed, please try again"
+			}
 		},
 		"greeting": {
 			"lateNight": "Still up, {name}?",

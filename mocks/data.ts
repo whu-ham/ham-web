@@ -1,8 +1,11 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Shared mock data for token and auth API.
  * Used by both MSW handlers (client) and server-side data fetching (SSR).
  */
-
 const now = Date.now();
 const dayMs = 86_400_000;
 

@@ -1,10 +1,18 @@
 /**
+ * @author Claude
+ * @version 1.2
+ * @date 2026/9/23 02:02:11
+ *
  * Standalone login page. Redirects here from protected routes
  * when the user is not authenticated.
  *
  * No cookies are generated on this page. STATE_COOKIE and FROM_COOKIE
  * are set lazily via a server action when the user initiates mobile
  * app login (see app/login/actions.ts).
+ *
+ * The scheme of the redirect target is never taken from the
+ * request. A client-supplied `x-forwarded-proto: http` used to downgrade
+ * an authenticated visitor's redirect to plaintext.
  */
 import { Suspense } from 'react';
 

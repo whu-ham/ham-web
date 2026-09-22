@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/18 16:56:23
+ * @version 1.2
+ * @date 2026/9/23 01:53:07
  *
  * OAuth2 callback route for mobile app login.
  *
@@ -12,6 +12,10 @@
  *
  * Every rejection carries a distinct `error` so a failed app login says why
  * on the login page instead of bouncing back in silence.
+ *
+ * The codes are stable identifiers, never backend text. Whatever
+ * lands in `?error=` is shown to the user, and the backend message can
+ * carry internals — including a missing-env diagnostic.
  */
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
@@ -64,15 +68,18 @@ export const GET = async (req: NextRequest) => {
 		response = result.response;
 		errorMessage = result.errorEnvelope.message;
 	} catch (e) {
-		return loginRedirect(
-			req,
-			e instanceof Error ? e.message : 'Network error',
-			true
-		);
+		// The message is logged, not shown: it can name internals.
+		console.error('[login/callback] app callback failed', e);
+		return loginRedirect(req, 'app_callback_failed', true);
 	}
 
 	if (!response.ok) {
-		return loginRedirect(req, errorMessage || `HTTP ${response.status}`, true);
+		console.error(
+			'[login/callback] app callback rejected',
+			response.status,
+			errorMessage
+		);
+		return loginRedirect(req, 'app_callback_failed', true);
 	}
 
 	const storedFrom = cookieStore.get(LOGIN_CALLBACK_COOKIES.from)?.value;

@@ -1,10 +1,14 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/5/22
+ * @version 1.2
+ * @date 2026/9/23 00:58:40
  *
  * Custom hook for the rotate token modal.
  * Handles TTL state, submission, and modal close.
+ *
+ * The TTL is validated before it is sent. Rotation used to
+ * forward whatever the field held, including the NaN an emptied field
+ * leaves behind.
  */
 
 'use client';
@@ -42,6 +46,10 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 
 	// s5: Clean up on unmount
 	useEffect(() => {
+		// Reset on every mount: Strict Mode mounts, unmounts and mounts
+		// again, and an instance that inherits the "unmounted" flag would
+		// never clear its submitting state after a rotate.
+		cancelledRef.current = false;
 		return () => {
 			cancelledRef.current = true;
 		};
@@ -55,6 +63,12 @@ export const useRotateToken = (): UseRotateTokenReturn => {
 	const handleSubmit = useCallback(async () => {
 		if (!rotateModal.tokenId) return;
 		if (submittingRef.current) return; // M8: Prevent double submit
+		// Same range the field advertises; NaN would otherwise pass and
+		// serialise to `null`.
+		if (!Number.isFinite(ttl) || ttl < 1 || ttl > 30) {
+			toast.error(t('validation.ttlRange'));
+			return;
+		}
 
 		submittingRef.current = true;
 		setSubmitting(true);

@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/4/20
+ * @version 1.3
+ * @date 2026/9/23 01:02:47
  *
  * Dark-mode toggle for HeroUI v3 modeled after `LanguageSwitcher`.
  *
@@ -49,7 +49,7 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 			>
 				<span
 					className={
-						'material-icons-round text-[18px]! leading-none! text-gray-500'
+						'material-icons-round text-[18px]! leading-none! text-muted'
 					}
 					aria-hidden={true}
 				>
@@ -72,7 +72,7 @@ const ThemeSwitcher = ({ className }: ThemeSwitcherProps) => {
 								<Label className={'inline-flex items-center gap-2'}>
 									<span
 										className={
-											'material-icons-round text-[18px]! leading-none! text-gray-500'
+											'material-icons-round text-[18px]! leading-none! text-muted'
 										}
 										aria-hidden={true}
 									>

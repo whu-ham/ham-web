@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/10 13:04:00
+ * @version 1.2
+ * @date 2026/9/23 02:35:10
  *
  * The /sso-authorize screen.
  *
@@ -228,14 +228,11 @@ test.describe('sso authorize — desktop', () => {
 
 		await expect(sso.appName).toBeVisible();
 
-		// NOTE: the checkboxes render unselected even while the hook sends
-		// every scope until the user interacts (see effectiveCheckedScopes
-		// in useConsent). Drive MCP to "checked" first so the following
-		// deselection is definitely ours rather than that initial state.
-		await sso.toggleScope('mcp');
+		// Every requested scope starts checked: that is exactly what
+		// Authorize would send before the user touches anything.
 		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
 
-		// Toggle back off and let the selection settle. Asserting on the
+		// Deselect MCP and let the selection settle. Asserting on the
 		// rendered state immediately races the React re-render on slower
 		// machines, so the final scope list is the real assertion.
 		await sso.toggleScope('mcp');
@@ -252,6 +249,50 @@ test.describe('sso authorize — desktop', () => {
 
 		const state = await readStub();
 		expect(state.lastConfirmedScopes).not.toContain('mcp');
+	});
+
+	test('keeps an empty selection empty when the last scope is dropped', async ({
+		authedPage,
+	}) => {
+		// No required scope here, so dropping the only one is an answer the
+		// user made, not "they have not chosen yet".
+		await setupStub({
+			consentScopes: [
+				{
+					scope: 'mcp',
+					label: 'MCP',
+					description: 'Full MCP access (read + write)',
+					category: 'mcp',
+					already_granted: false,
+					required: false,
+				},
+			],
+		});
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'mcp',
+		});
+
+		await expect(sso.appName).toBeVisible();
+		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+
+		await sso.toggleScope('mcp');
+		await expect
+			.poll(async () => sso.scopeCheckbox('mcp').isChecked(), {
+				timeout: 10_000,
+			})
+			.toBe(false);
+
+		await sso.authorizeButton.click();
+		await authedPage.waitForURL(/example\.com\/callback/, {
+			timeout: 10_000,
+		});
+
+		const state = await readStub();
+		expect(state.lastConfirmedScopes).toEqual([]);
 	});
 
 	test('toggles a scope by clicking the control box, not the label', async ({
@@ -271,8 +312,21 @@ test.describe('sso authorize — desktop', () => {
 		// The visible square must be a live click target on its own: it is
 		// what users aim at, and it silently did nothing while the control
 		// was rendered outside the label.
-		await sso.scopeControl('mcp').click();
 		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+
+		await sso.scopeControl('mcp').click();
+		await expect
+			.poll(async () => sso.scopeCheckbox('mcp').isChecked(), {
+				timeout: 10_000,
+			})
+			.toBe(false);
+
+		await sso.scopeControl('mcp').click();
+		await expect
+			.poll(async () => sso.scopeCheckbox('mcp').isChecked(), {
+				timeout: 10_000,
+			})
+			.toBe(true);
 	});
 
 	test('sends every requested scope when none are unchecked', async ({

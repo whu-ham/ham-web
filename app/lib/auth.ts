@@ -1,25 +1,26 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/22
+ * @version 2.0
+ * @date 2026/9/23 01:41:09
  *
  * Server-side authentication helpers for Server Components.
  *
- * - fetchMe           — get current user, null if unauthenticated
- * - requireAuth       — get current user, redirect to /login if unauthenticated
- * - processAppCallback — exchange OAuth2 code for session (mobile app login)
+ * - fetchMe     — get current user, null if unauthenticated
+ * - requireAuth — get current user, redirect to /login if unauthenticated
  *
  * C3 fix: fetchMe now distinguishes 401 (unauthenticated) from 5xx
  * (server error). 5xx errors are thrown so Next.js error boundary
  * handles them instead of silently redirecting to /login.
  *
- * M5 fix: processAppCallback returns error details so the callback
- * page can communicate the failure reason to the user.
+ * FetchMe treats a 200 that carries no JSON as an error. The
+ * defensive body parsing in serverFetch turns an HTML gateway page into
+ * `null`, and returning `null` from here sends a signed-in visitor to
+ * /login.
  */
 import { redirect } from 'next/navigation';
 
 import type { MeResponse } from '@/services/sso/api';
-import { forwardSetCookies, serverFetch } from '@/services/server-fetch';
+import { serverFetch } from '@/services/server-fetch';
 
 /**
  * Fetch current user info. Returns null if not authenticated (401).
@@ -28,9 +29,13 @@ import { forwardSetCookies, serverFetch } from '@/services/server-fetch';
  * unauthenticated.
  */
 export const fetchMe = async (): Promise<MeResponse | null> => {
-	const { response, data } = await serverFetch<MeResponse>('/web/auth/me');
+	const { response, data, bodyIsJson } =
+		await serverFetch<MeResponse>('/web/auth/me');
 	if (response.status === 401 || response.status === 403) return null;
 	if (!response.ok) throw new Error(`fetchMe failed: ${response.status}`);
+	// A signed-in user must never be redirected to /login because the
+	// backend answered with something that is not JSON.
+	if (!bodyIsJson) throw new Error('fetchMe failed: non-JSON response');
 	return data;
 };
 
@@ -52,46 +57,4 @@ export const requireAuth = async (currentPath: string): Promise<MeResponse> => {
 
 	// Use relative path so safeRedirect works on any domain (localhost, staging, etc.)
 	redirect(`/login?from=${encodeURIComponent(currentPath)}`);
-};
-
-/**
- * Result of processing an app callback (mobile app login).
- * M5 fix: returns error details so the callback page can communicate
- * the failure reason to the user.
- */
-export interface AppCallbackResult {
-	ok: boolean;
-	reason?: string;
-}
-
-/**
- * Process an app callback (exchange code for session) in SSR.
- * Forwards Set-Cookie headers from the backend to the browser.
- * Returns result with ok=true on success, or ok=false with reason on failure.
- */
-export const processAppCallback = async (
-	code: string
-): Promise<AppCallbackResult> => {
-	try {
-		const { response, errorEnvelope } = await serverFetch(
-			'/web/auth/app-callback',
-			{
-				method: 'POST',
-				body: JSON.stringify({ code }),
-			}
-		);
-
-		if (!response.ok) {
-			const reason = errorEnvelope.message || `HTTP ${response.status}`;
-			return { ok: false, reason };
-		}
-
-		await forwardSetCookies(response);
-		return { ok: true };
-	} catch (e) {
-		return {
-			ok: false,
-			reason: e instanceof Error ? e.message : 'Network error',
-		};
-	}
 };

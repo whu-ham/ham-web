@@ -1,4 +1,8 @@
 /**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
  * Custom hook for QR login flow:
  *   1. POST /api/auth/qr/ticket → get ticket
  *   2. GET /api/auth/qr/ticket/:ticket → poll state
@@ -10,7 +14,6 @@
  *     poll. If the ticket had expired while hidden it is automatically
  *     refreshed.
  */
-
 'use client';
 
 import toast from 'react-hot-toast';

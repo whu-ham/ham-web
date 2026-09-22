@@ -195,7 +195,14 @@
 			"openApp": "アプリでログイン",
 			"openAppUnavailable": "アプリログインは現在利用できません",
 			"appCallbackFailed": "アプリログインに失敗しました。再試行してください",
-			"appCallbackProcessing": "ログインを完了しています…"
+			"appCallbackProcessing": "ログインを完了しています…",
+			"errors": {
+				"invalidState": "ログイン状態が失効または不一致です。もう一度お試しください",
+				"unsupportedProvider": "このログイン方法はサポートされていません",
+				"missingPayload": "ログイン応答が不完全です。もう一度お試しください",
+				"oauthFailed": "外部サービスでのログインが完了しませんでした。もう一度お試しください",
+				"unknown": "ログインに失敗しました。もう一度お試しください"
+			}
 		},
 		"greeting": {
 			"lateNight": "まだ起きてますか？",

@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/4/30 15:27:00
+ * @version 1.3
+ * @date 2026/9/23 01:38:14
  *
  * Shared BFF proxy helper used by all EdgeOne Edge Function handlers.
  * Forwards requests to the backend origin (env var HAM_BACKEND_ORIGIN)
@@ -118,7 +118,8 @@ export const handlePreflight = (context: {
 /**
  * Proxy an incoming Request to the backend and return the backend Response.
  * @param req     The incoming Request object.
- * @param path    The backend path to forward to (e.g. "/web/auth/me").
+ * @param path    The backend path to forward to (e.g. "/web/auth/me"). The
+ *                request's query string is appended to it.
  * @param env     The EdgeOne environment bindings (must contain HAM_BACKEND_ORIGIN).
  */
 export const proxyToBackend = async (
@@ -127,7 +128,17 @@ export const proxyToBackend = async (
 	env: Record<string, string>
 ): Promise<Response> => {
 	const origin = env.HAM_BACKEND_ORIGIN ?? '';
-	const url = `${origin}${path}`;
+	// An unset binding would degrade every call into a relative fetch that
+	// fails inside the runtime with an opaque message, which looks like a
+	// backend outage rather than a missing binding. Fail here instead.
+	if (!origin) {
+		throw new Error(
+			'[proxy] HAM_BACKEND_ORIGIN is not configured — cannot reach the backend'
+		);
+	}
+	// The caller's query string belongs to the request as much as the path
+	// does — dropping it here silently unfilters every upstream call.
+	const url = `${origin}${path}${new URL(req.url).search}`;
 
 	// Forward all original headers except Host (set automatically by fetch).
 	const forwardHeaders = new Headers(req.headers);

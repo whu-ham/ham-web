@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.1
- * @date 2026/9/15
+ * @version 2.2
+ * @date 2026/9/23 00:58:40
  *
  * Modal for creating a new API token with name, scopes, and TTL.
  * Rendering-only — all logic in useCreateToken.
@@ -134,7 +134,7 @@ const CreateTokenModal = () => {
 								</div>
 								<NumberField
 									value={ttl}
-									onChange={(v) => setTtl(v ?? 1)}
+									onChange={(v) => setTtl(v ?? 30)}
 									minValue={1}
 									maxValue={30}
 									variant='secondary'

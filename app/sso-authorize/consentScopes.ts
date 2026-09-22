@@ -1,3 +1,11 @@
+/**
+ * @author Claude
+ * @version 1.1
+ * @date 2026/9/23 00:41:00
+ *
+ * Helpers for the SSO consent screen: grouping the requested scopes by
+ * category, and keeping required scopes in the selection.
+ */
 import type { ConsentScopeDetail } from '@/services/sso/api';
 
 export type ConsentScopeCategory = 'identity' | 'mcp' | 'other';
