@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/23 02:12:36
+ * @version 1.2
+ * @date 2026/9/23 02:35:10
  *
  * The /sso-authorize screen.
  *
@@ -249,6 +249,50 @@ test.describe('sso authorize — desktop', () => {
 
 		const state = await readStub();
 		expect(state.lastConfirmedScopes).not.toContain('mcp');
+	});
+
+	test('keeps an empty selection empty when the last scope is dropped', async ({
+		authedPage,
+	}) => {
+		// No required scope here, so dropping the only one is an answer the
+		// user made, not "they have not chosen yet".
+		await setupStub({
+			consentScopes: [
+				{
+					scope: 'mcp',
+					label: 'MCP',
+					description: 'Full MCP access (read + write)',
+					category: 'mcp',
+					already_granted: false,
+					required: false,
+				},
+			],
+		});
+
+		const sso = new SsoAuthorizePage(authedPage);
+		await sso.goto({
+			clientId: 'stub-app',
+			redirectUri: REDIRECT_URI,
+			scope: 'mcp',
+		});
+
+		await expect(sso.appName).toBeVisible();
+		await expect(sso.scopeCheckbox('mcp')).toBeChecked();
+
+		await sso.toggleScope('mcp');
+		await expect
+			.poll(async () => sso.scopeCheckbox('mcp').isChecked(), {
+				timeout: 10_000,
+			})
+			.toBe(false);
+
+		await sso.authorizeButton.click();
+		await authedPage.waitForURL(/example\.com\/callback/, {
+			timeout: 10_000,
+		});
+
+		const state = await readStub();
+		expect(state.lastConfirmedScopes).toEqual([]);
 	});
 
 	test('toggles a scope by clicking the control box, not the label', async ({

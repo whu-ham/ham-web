@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/9/23 00:29:36
+ * @version 1.3
+ * @date 2026/9/23 02:35:10
  *
  * Custom hook for SSO consent view logic.
  * Handles consent info fetching, scope selection, confirm/reject/switch account.
@@ -10,6 +10,12 @@
  * submitted. It used to report the raw selection, which is empty until
  * the user touches a checkbox — so the screen showed nothing selected
  * while a confirm sent every scope.
+ *
+ * "Untouched" is `undefined`, never an empty array: deselecting the last
+ * optional scope is a real answer, and an empty array used to fall back to
+ * every requested scope — rechecking the boxes the user had just cleared
+ * and granting them anyway. The duplicated branches in the info-fetch
+ * error handler collapse into one.
  */
 
 'use client';
@@ -46,14 +52,17 @@ export const useConsent = (): UseConsentReturn => {
 	const [info, setInfo] = useState<ConsentInfoResponse | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [submitting, setSubmitting] = useState(false);
-	// Empty until the user touches a checkbox; until then every scope the
-	// app asked for is the effective selection.
-	const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
+	// `undefined` until the user touches a checkbox; until then every scope
+	// the app asked for is the effective selection. It has to be
+	// `undefined` rather than `[]` because an empty array is a real answer:
+	// deselecting the last optional scope means "grant nothing", and
+	// reading it as "untouched" would hand back every scope the user just
+	// removed.
+	const [selectedScopes, setSelectedScopes] = useState<string[] | undefined>(
+		undefined
+	);
 	const checkedScopes = useMemo(
-		() =>
-			selectedScopes.length > 0
-				? selectedScopes
-				: (info?.scopes.map((scope) => scope.scope) ?? []),
+		() => selectedScopes ?? info?.scopes.map((scope) => scope.scope) ?? [],
 		[selectedScopes, info]
 	);
 
