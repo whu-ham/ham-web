@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.2
- * @date 2026/4/30 15:25:00
+ * @version 1.3
+ * @date 2026/9/23 00:20:11
  *
  * Shared BFF proxy helper used by all /api/** route handlers.
  * Forwards requests to the backend origin (server-side env var
@@ -108,13 +108,17 @@ export const handlePreflight = (req: Request): Response => {
 /**
  * Proxy a Next.js Request to the backend and return the backend Response.
  * @param req  The incoming Next.js Request object.
- * @param path The backend path to forward to (e.g. "/web/auth/me").
+ * @param path The backend path to forward to (e.g. "/web/auth/me"). The
+ *             request's query string is appended to it.
  */
 export const proxyToBackend = async (
 	req: Request,
 	path: string
 ): Promise<Response> => {
-	const url = `${BACKEND_ORIGIN}${path}`;
+	// The backend path is fixed per route, but the caller's query string is
+	// part of the request: dropping it silently turns any filtered or
+	// paginated call into an unfiltered one.
+	const url = `${BACKEND_ORIGIN}${path}${new URL(req.url).search}`;
 
 	// Forward all original headers except Host (which fetch sets automatically).
 	const forwardHeaders = new Headers(req.headers);
