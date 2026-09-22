@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.4
- * @date 2026/5/22
+ * @version 1.5
+ * @date 2026/9/23 01:02:47
  *
  * User menu dropdown with logout action.
  * In compact mode (mobile), also includes theme & language switching.
@@ -93,7 +93,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 			>
 				<span
 					className={
-						'material-icons-round text-[18px]! leading-none! text-gray-500'
+						'material-icons-round text-[18px]! leading-none! text-muted'
 					}
 					aria-hidden={true}
 				>
@@ -126,7 +126,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 											<Label className={'inline-flex items-center gap-2'}>
 												<span
 													className={
-														'material-icons-round text-[18px]! leading-none! text-gray-500'
+														'material-icons-round text-[18px]! leading-none! text-muted'
 													}
 													aria-hidden={true}
 												>
@@ -157,7 +157,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 									<Label className={'inline-flex items-center gap-2'}>
 										<span
 											className={
-												'material-icons-round text-[18px]! leading-none! text-gray-500'
+												'material-icons-round text-[18px]! leading-none! text-muted'
 											}
 											aria-hidden={true}
 										>
@@ -176,7 +176,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 										<Label className={'inline-flex items-center gap-2'}>
 											<span
 												className={
-													'text-[14px] font-medium leading-none! text-gray-500 w-[18px] text-center shrink-0'
+													'text-[14px] font-medium leading-none! text-muted w-[18px] text-center shrink-0'
 												}
 												aria-hidden={true}
 											>
@@ -202,7 +202,7 @@ const UserMenu = ({ onLogout, compact }: UserMenuProps) => {
 						<Label className={'inline-flex items-center gap-2'}>
 							<span
 								className={
-									'material-icons-round text-[18px]! leading-none! text-gray-500'
+									'material-icons-round text-[18px]! leading-none! text-muted'
 								}
 								aria-hidden={true}
 							>

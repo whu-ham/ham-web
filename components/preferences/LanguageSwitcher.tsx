@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.6
- * @date 2026/4/21 19:56:00
+ * @version 1.2
+ * @date 2026/9/23 01:02:47
  *
  * M9 fix: Locale logic extracted to useLocalePreference hook, shared with UserMenu.
  */
@@ -57,7 +57,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 			>
 				<span
 					className={
-						'material-icons-round text-[18px]! leading-none! text-gray-500'
+						'material-icons-round text-[18px]! leading-none! text-muted'
 					}
 					aria-hidden={true}
 				>
@@ -77,7 +77,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 						<Label className={'inline-flex items-center gap-2'}>
 							<span
 								className={
-									'material-icons-round text-[18px]! leading-none! text-gray-500'
+									'material-icons-round text-[18px]! leading-none! text-muted'
 								}
 								aria-hidden={true}
 							>
@@ -92,7 +92,7 @@ const LanguageSwitcher = ({ className }: LanguageSwitcherProps) => {
 							<Label className={'inline-flex items-center gap-2'}>
 								<span
 									className={
-										'text-[14px] font-medium leading-none! text-gray-500 w-[18px] text-center shrink-0'
+										'text-[14px] font-medium leading-none! text-muted w-[18px] text-center shrink-0'
 									}
 									aria-hidden={true}
 								>
