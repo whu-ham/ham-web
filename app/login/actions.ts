@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.2
- * @date 2026/9/18 16:56:23
+ * @version 2.3
+ * @date 2026/9/23 00:32:19
  *
  * Server actions for the /login page.
  *
@@ -14,6 +14,11 @@
  * OAuth provider links on /login are prefetched by next/link, and every
  * prefetch mints a fresh state, so sharing a cookie let those prefetches
  * invalidate the app login milliseconds after it started.
+ *
+ * r2 fix: `from` is validated before it is stored. A server action is a
+ * public endpoint, so anything the browser passes — not just what the
+ * login page renders — can reach this cookie, and the stored value is
+ * what /login/callback redirects to.
  */
 'use server';
 
@@ -23,6 +28,7 @@ import {
 	APP_LOGIN_COOKIE_NAMES,
 	setLoginCookies as setLoginFlowCookies,
 } from '@/services/login-flow';
+import { safeRedirect } from '@/services/redirect';
 
 export interface LoginCookiesResult {
 	/** CSRF state bound to the current session, echoed back on the callback. */
@@ -38,7 +44,7 @@ export const setLoginCookies = async (
 	from: string
 ): Promise<LoginCookiesResult> => {
 	const cookieStore = await cookies();
-	const state = setLoginFlowCookies(cookieStore, from, {
+	const state = setLoginFlowCookies(cookieStore, safeRedirect(from), {
 		names: APP_LOGIN_COOKIE_NAMES,
 	});
 	return { state, clientId: process.env.CONSOLE_CLIENT_ID ?? '' };
