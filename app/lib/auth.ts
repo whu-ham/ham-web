@@ -12,7 +12,7 @@
  * (server error). 5xx errors are thrown so Next.js error boundary
  * handles them instead of silently redirecting to /login.
  *
- * r6 fix: fetchMe treats a 200 that carries no JSON as an error. The
+ * FetchMe treats a 200 that carries no JSON as an error. The
  * defensive body parsing in serverFetch turns an HTML gateway page into
  * `null`, and returning `null` from here sends a signed-in visitor to
  * /login.

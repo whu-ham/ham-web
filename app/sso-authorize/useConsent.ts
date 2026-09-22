@@ -6,7 +6,7 @@
  * Custom hook for SSO consent view logic.
  * Handles consent info fetching, scope selection, confirm/reject/switch account.
  *
- * r3 fix: `checkedScopes` now reports the scopes that will actually be
+ * `checkedScopes` now reports the scopes that will actually be
  * submitted. It used to report the raw selection, which is empty until
  * the user touches a checkbox — so the screen showed nothing selected
  * while a confirm sent every scope.

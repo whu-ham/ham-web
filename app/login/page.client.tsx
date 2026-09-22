@@ -11,7 +11,7 @@
  * setLoginCookies server action when the user taps the mobile app
  * login button.
  *
- * r6 fix: the `error` query value is a code, not a message. The callback
+ * The `error` query value is a code, not a message. The callback
  * redirect used to carry the backend's text (or an exception message)
  * straight into a toast, which is how a missing-env diagnostic would end
  * up on screen.

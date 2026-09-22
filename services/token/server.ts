@@ -9,7 +9,7 @@
  * M1 fix: Returns null on error instead of an empty array, so the
  * client can distinguish "no tokens" from "fetch failed".
  *
- * r6 fix: a 200 with a body that is not JSON is a failure too. It used
+ * A 200 with a body that is not JSON is a failure too. It used
  * to become an empty array, which the client renders as "no API keys"
  * with no retry button.
  * Mock data is only loaded when NEXT_PUBLIC_ENABLE_MSW is

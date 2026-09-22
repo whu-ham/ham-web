@@ -13,7 +13,7 @@
  * Every rejection carries a distinct `error` so a failed app login says why
  * on the login page instead of bouncing back in silence.
  *
- * r6 fix: the codes are stable identifiers, never backend text. Whatever
+ * The codes are stable identifiers, never backend text. Whatever
  * lands in `?error=` is shown to the user, and the backend message can
  * carry internals — including a missing-env diagnostic.
  */

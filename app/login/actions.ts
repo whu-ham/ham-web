@@ -15,7 +15,7 @@
  * prefetch mints a fresh state, so sharing a cookie let those prefetches
  * invalidate the app login milliseconds after it started.
  *
- * r2 fix: `from` is validated before it is stored. A server action is a
+ * `from` is validated before it is stored. A server action is a
  * public endpoint, so anything the browser passes — not just what the
  * login page renders — can reach this cookie, and the stored value is
  * what /login/callback redirects to.

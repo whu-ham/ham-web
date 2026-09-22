@@ -7,7 +7,7 @@
  * Handles credential request and server verification.
  * On success, session cookie is set by backend — just call onLoginSucceeded.
  *
- * r2 fix: the WebAuthn support check runs after mount. It used to run
+ * The WebAuthn support check runs after mount. It used to run
  * during render, which made the server render nothing (window is absent)
  * and the first client render a button — a hydration mismatch on every
  * /login load.

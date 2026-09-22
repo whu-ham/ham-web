@@ -16,11 +16,11 @@
  * so a misconfigured deployment fails loudly instead of silently
  * degrading into a relative fetch.
  *
- * r1 fix: response bodies are parsed defensively. A 204/205 reply or an
+ * Response bodies are parsed defensively. A 204/205 reply or an
  * HTML error page has no JSON to parse, and `Response.json()` throws on
  * both — which turned a benign "no content" into a network failure.
  *
- * r6 fix: callers can tell "no body" from "empty payload". Treating a
+ * Callers can tell "no body" from "empty payload". Treating a
  * non-JSON 200 as an empty result made fetchMe bounce a signed-in user
  * to /login and made the token list render "no keys" with no retry.
  */

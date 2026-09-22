@@ -7,7 +7,7 @@
  * Handles scope selection (with parent/child checkbox logic),
  * validation, and submission.
  *
- * r5 fix: the TTL range check rejects non-finite values. Clearing the
+ * The TTL range check rejects non-finite values. Clearing the
  * field leaves NaN, and every comparison against NaN is false, so the
  * range check waved through a value that serialises to `null`.
  */

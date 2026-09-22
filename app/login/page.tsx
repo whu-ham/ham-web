@@ -10,7 +10,7 @@
  * are set lazily via a server action when the user initiates mobile
  * app login (see app/login/actions.ts).
  *
- * r6 fix: the scheme of the redirect target is never taken from the
+ * The scheme of the redirect target is never taken from the
  * request. A client-supplied `x-forwarded-proto: http` used to downgrade
  * an authenticated visitor's redirect to plaintext.
  */

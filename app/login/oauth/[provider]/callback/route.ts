@@ -20,7 +20,7 @@
  * against the one used to request the code and reject a mismatch, so a
  * client-supplied value would only be a way to break the exchange.
  *
- * r6 fix: failures redirect with stable identifiers instead of the
+ * Failures redirect with stable identifiers instead of the
  * backend message or the exception text. Those strings reach the browser
  * through `?error=` and can name internals.
  */

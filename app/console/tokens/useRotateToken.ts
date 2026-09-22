@@ -6,7 +6,7 @@
  * Custom hook for the rotate token modal.
  * Handles TTL state, submission, and modal close.
  *
- * r5 fix: the TTL is validated before it is sent. Rotation used to
+ * The TTL is validated before it is sent. Rotation used to
  * forward whatever the field held, including the NaN an emptied field
  * leaves behind.
  */
