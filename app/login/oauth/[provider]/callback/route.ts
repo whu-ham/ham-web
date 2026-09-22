@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.3
- * @date 2026/9/18 18:08:58
+ * @version 1.4
+ * @date 2026/9/23 01:53:07
  *
  * Completes a browser OAuth login: /login/oauth/{provider}/callback
  *
@@ -19,6 +19,10 @@
  * rebuilt here rather than taken from the request: providers compare it
  * against the one used to request the code and reject a mismatch, so a
  * client-supplied value would only be a way to break the exchange.
+ *
+ * r6 fix: failures redirect with stable identifiers instead of the
+ * backend message or the exception text. Those strings reach the browser
+ * through `?error=` and can name internals.
  */
 
 import { cookies } from 'next/headers';
@@ -114,7 +118,7 @@ const finishOAuthLogin = async (
 
 	if (!storedState || storedState !== payload.state) {
 		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
-		return loginErrorRedirect(req, storedFrom, 'Invalid login state');
+		return loginErrorRedirect(req, storedFrom, 'invalid_state');
 	}
 
 	const backendPath = `/web/auth/oauth/${provider}/callback`;
@@ -137,20 +141,19 @@ const finishOAuthLogin = async (
 		errorMessage = result.errorEnvelope.message;
 	} catch (e) {
 		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
-		return loginErrorRedirect(
-			req,
-			storedFrom,
-			e instanceof Error ? e.message : 'Network error'
-		);
+		// Logged for diagnosis; the user gets a code the client translates.
+		console.error('[oauth/callback] exchange failed', e);
+		return loginErrorRedirect(req, storedFrom, 'oauth_failed');
 	}
 
 	if (!response.ok) {
 		clearLoginCookies(cookieStore, LOGIN_FLOW_COOKIE_NAMES);
-		return loginErrorRedirect(
-			req,
-			storedFrom,
-			errorMessage || `HTTP ${response.status}`
+		console.error(
+			'[oauth/callback] backend rejected the exchange',
+			response.status,
+			errorMessage
 		);
+		return loginErrorRedirect(req, storedFrom, 'oauth_failed');
 	}
 
 	const res = NextResponse.redirect(
@@ -172,7 +175,7 @@ export const GET = async (
 		return loginErrorRedirect(
 			req,
 			req.nextUrl.searchParams.get('from') ?? undefined,
-			'Unsupported provider'
+			'unsupported_provider'
 		);
 	}
 
@@ -181,7 +184,7 @@ export const GET = async (
 		return loginErrorRedirect(
 			req,
 			req.nextUrl.searchParams.get('from') ?? undefined,
-			'Missing login payload'
+			'missing_payload'
 		);
 	}
 
@@ -197,7 +200,7 @@ export const POST = async (
 		return loginErrorRedirect(
 			req,
 			req.nextUrl.searchParams.get('from') ?? undefined,
-			'Unsupported provider'
+			'unsupported_provider'
 		);
 	}
 
@@ -211,7 +214,7 @@ export const POST = async (
 		return loginErrorRedirect(
 			req,
 			req.nextUrl.searchParams.get('from') ?? undefined,
-			'Missing login payload'
+			'missing_payload'
 		);
 	}
 

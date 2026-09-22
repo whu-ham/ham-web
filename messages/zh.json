@@ -195,7 +195,14 @@
 			"openApp": "跳转到APP登录",
 			"openAppUnavailable": "APP登录暂不可用",
 			"appCallbackFailed": "App登录失败，请重试",
-			"appCallbackProcessing": "正在完成登录…"
+			"appCallbackProcessing": "正在完成登录…",
+			"errors": {
+				"invalidState": "登录状态已失效或不匹配，请重新登录",
+				"unsupportedProvider": "暂不支持该登录方式",
+				"missingPayload": "登录返回信息不完整，请重试",
+				"oauthFailed": "第三方登录未能完成，请重试",
+				"unknown": "登录失败，请重试"
+			}
 		},
 		"greeting": {
 			"lateNight": "还不睡吗，{name}",
