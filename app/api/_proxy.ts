@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.4
- * @date 2026/9/23 00:22:40
+ * @version 1.5
+ * @date 2026/9/23 01:20:36
  *
  * Shared BFF proxy helper used by all /api/** route handlers.
  * Forwards requests to the backend origin (server-side env var
@@ -23,6 +23,11 @@
  *
  * `HAM_BACKEND_ORIGIN` is required: without it every proxy call would
  * degrade into a relative fetch that fails inside the runtime.
+ *
+ * Every state-changing call is guarded with Fetch Metadata (see
+ * `isCrossSiteWrite`): these endpoints act on the session cookie alone,
+ * so without it a foreign page could confirm an OAuth consent or revoke
+ * an API token by simply navigating the victim's browser here.
  */
 
 const BACKEND_ORIGIN = process.env.HAM_BACKEND_ORIGIN ?? '';
@@ -73,6 +78,40 @@ const ALLOWED_REQUEST_HEADERS = [
 ].join(', ');
 
 const ALLOWED_METHODS = 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+
+/**
+ * Decide whether a request is a cross-site write, i.e. a state-changing
+ * call that a foreign page caused the browser to make.
+ *
+ * The BFF authenticates with the session cookie and carries no CSRF
+ * token, so the browser's own Fetch Metadata is the signal we have: it
+ * reports whether the request was initiated from our origin
+ * (`same-origin`), from a sibling of it (`same-site`), directly by the
+ * user (`none`), or from somewhere else entirely (`cross-site`).
+ *
+ * A cross-site write is only allowed when the caller's origin is one of
+ * the frontends configured in `WEB_BASE_URL` — that is the same
+ * allow-list the CORS headers use, so the deployment that intentionally
+ * calls this BFF from another origin keeps working. Anything else is
+ * rejected.
+ *
+ * Requests without the header are allowed through: it is absent for
+ * non-browser clients and for engines that predate it, and blocking
+ * those would break more than it protects.
+ */
+const isCrossSiteWrite = (req: Request): boolean => {
+	if (
+		req.method === 'GET' ||
+		req.method === 'HEAD' ||
+		req.method === 'OPTIONS'
+	) {
+		return false;
+	}
+	if (req.headers.get('sec-fetch-site') !== 'cross-site') {
+		return false;
+	}
+	return !resolveAllowedOrigin(req);
+};
 
 /**
  * Decide whether the incoming request should receive CORS headers, and
@@ -135,6 +174,10 @@ export const proxyToBackend = async (
 	req: Request,
 	path: string
 ): Promise<Response> => {
+	if (isCrossSiteWrite(req)) {
+		return new Response(null, { status: 403 });
+	}
+
 	// The backend path is fixed per route, but the caller's query string is
 	// part of the request: dropping it silently turns any filtered or
 	// paginated call into an unfiltered one.

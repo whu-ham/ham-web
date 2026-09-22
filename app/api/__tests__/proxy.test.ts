@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.0
- * @date 2026/9/23 00:20:11
+ * @version 1.1
+ * @date 2026/9/23 01:20:36
  *
  * Unit tests for the shared BFF proxy helper.
  *
@@ -72,5 +72,90 @@ describe('proxyToBackend', () => {
 		expect(init.method).toBe('POST');
 		expect(headers.get('host')).toBeNull();
 		expect(headers.get('content-type')).toBe('application/json');
+	});
+
+	// The BFF authenticates on the session cookie alone, so the browser's
+	// Fetch Metadata is what separates a write the user caused from one a
+	// foreign page caused.
+	it('rejects a cross-site write', async () => {
+		const fetch = stubFetch();
+
+		const res = await proxyToBackend(
+			new Request('https://ham.example.com/api/tokens', {
+				method: 'POST',
+				headers: { 'sec-fetch-site': 'cross-site' },
+				body: '{}',
+			}),
+			'/web/tokens'
+		);
+
+		expect(res.status).toBe(403);
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it('lets a same-origin write through', async () => {
+		const fetch = stubFetch();
+
+		const res = await proxyToBackend(
+			new Request('https://ham.example.com/api/tokens', {
+				method: 'POST',
+				headers: { 'sec-fetch-site': 'same-origin' },
+				body: '{}',
+			}),
+			'/web/tokens'
+		);
+
+		expect(res.status).toBe(200);
+		expect(fetch).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not treat reads as cross-site writes', async () => {
+		const fetch = stubFetch();
+
+		const res = await proxyToBackend(
+			new Request('https://ham.example.com/api/tokens', {
+				headers: { 'sec-fetch-site': 'cross-site' },
+			}),
+			'/web/tokens'
+		);
+
+		expect(res.status).toBe(200);
+		expect(fetch).toHaveBeenCalledTimes(1);
+	});
+
+	it('lets non-browser clients through when metadata is absent', async () => {
+		const fetch = stubFetch();
+
+		const res = await proxyToBackend(
+			new Request('https://ham.example.com/api/tokens', {
+				method: 'DELETE',
+			}),
+			'/web/tokens'
+		);
+
+		expect(res.status).toBe(200);
+		expect(fetch).toHaveBeenCalledTimes(1);
+	});
+
+	it('allows a cross-site write from a configured frontend origin', async () => {
+		vi.resetModules();
+		vi.stubEnv('WEB_BASE_URL', 'https://admin.example.com');
+		const { proxyToBackend: proxied } = await import('@/app/api/_proxy');
+		const fetch = stubFetch();
+
+		const res = await proxied(
+			new Request('https://ham.example.com/api/tokens', {
+				method: 'POST',
+				headers: {
+					'sec-fetch-site': 'cross-site',
+					origin: 'https://admin.example.com',
+				},
+				body: '{}',
+			}),
+			'/web/tokens'
+		);
+
+		expect(res.status).toBe(200);
+		expect(fetch).toHaveBeenCalledTimes(1);
 	});
 });
