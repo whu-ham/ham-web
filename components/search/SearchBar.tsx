@@ -1,13 +1,22 @@
+/**
+ * @author Claude
+ * @version 1.2
+ * @date 2026/9/23 00:47:31
+ *
+ * Generic search field with a drop-down result list.
+ *
+ * r4 fix: the empty-state copy is a prop instead of a hard-coded string
+ * (it shipped a Chinese sentence although UI strings live in
+ * `messages/*.json`), the palette uses theme tokens rather than literal
+ * white/black, and every result row is a real button so it can be
+ * reached and activated from the keyboard.
+ */
+
 import { useEffect, useRef, useState } from 'react';
 import { Separator } from '@heroui/react';
 import { SearchBarItem } from '@/components/search/types';
 import classNames from 'classnames';
 
-/**
- * @author Claude
- * @version 1.0
- * @date 2025/1/26 15:47
- */
 interface SearchItemText {
 	type: 'NORMAL' | 'STRONG';
 	text: string;
@@ -48,22 +57,23 @@ const SearchItem = ({
 	onClick: () => void;
 }) => {
 	return (
-		<div
+		<button
+			type={'button'}
 			onClick={onClick}
 			className={
-				'hover:bg-black/10 inline-flex items-center w-full px-[12px] py-[8px]'
+				'hover:bg-default-hover inline-flex items-center w-full px-[12px] py-[8px]'
 			}
 		>
-			<div className={'material-icons-round mr-[2px] text-gray-400'}>
-				search
-			</div>
+			<div className={'material-icons-round mr-[2px] text-muted'}>search</div>
 			<div>
 				{parseSearchItemText(text).map((itemText, i) => {
 					return (
 						<span
 							key={i}
 							className={
-								itemText.type === 'STRONG' ? 'font-bold' : 'text-black/50'
+								itemText.type === 'STRONG'
+									? 'font-bold text-foreground'
+									: 'text-muted'
 							}
 						>
 							{itemText.text}
@@ -71,7 +81,7 @@ const SearchItem = ({
 					);
 				})}
 			</div>
-		</div>
+		</button>
 	);
 };
 
@@ -84,6 +94,7 @@ const SearchBar = <T,>({
 	searchResult = [],
 	clearable = true,
 	className = '',
+	emptyText = '',
 }: {
 	keyword: string;
 	onKeywordChange: (value: string) => void;
@@ -93,6 +104,8 @@ const SearchBar = <T,>({
 	clearable?: boolean;
 	onClickItem?: (SearchBarItem: SearchBarItem<T>) => void;
 	className?: string;
+	/** Copy shown when there is nothing to list. Pass a translated string. */
+	emptyText?: string;
 }) => {
 	const divRef = useRef<HTMLDivElement>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
@@ -119,8 +132,8 @@ const SearchBar = <T,>({
 				className={classNames(
 					'px-[12px] pt-[16px] w-full pb-[16px] h-[56px]',
 					expanded
-						? 'bg-white shadow-[0_2px_8px_1px_rgba(64,60,67,.24)]'
-						: 'bg-black/5 hover:bg-black/10',
+						? 'bg-default shadow-[0_2px_8px_1px_rgba(64,60,67,.24)]'
+						: 'bg-default hover:bg-default-hover',
 					expanded ? 'rounded-t-[16px]' : 'rounded-[16px]'
 				)}
 			>
@@ -161,7 +174,7 @@ const SearchBar = <T,>({
 			{expanded && (
 				<div
 					className={
-						'w-full bg-white absolute overflow-hidden top-[52px] left-0 rounded-b-[16px] shadow-[0_4px_6px_rgba(32,33,36,.28)] z-10'
+						'w-full bg-default absolute overflow-hidden top-[52px] left-0 rounded-b-[16px] shadow-[0_4px_6px_rgba(32,33,36,.28)] z-10'
 					}
 				>
 					<div className={'px-[16px] w-full'}>
@@ -178,8 +191,8 @@ const SearchBar = <T,>({
 									}}
 								/>
 							) : (
-								<p className={'w-full text-center my-2 text-black/50'}>
-									没有找到课程或导师
+								<p className={'w-full text-center my-2 text-muted'}>
+									{emptyText}
 								</p>
 							)}
 						</div>
