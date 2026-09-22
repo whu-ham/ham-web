@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 2.4
- * @date 2026/5/26 10:42:28
+ * @version 2.5
+ * @date 2026/9/23 01:41:09
  *
  * HTTP client for the BFF /api/auth/** endpoints (SSO & session).
  *
@@ -126,7 +126,9 @@ export const WebAuthApi = {
 	logout: () => request<void>('/auth/logout', { method: 'POST' }),
 	refresh: () => request<void>('/auth/refresh', { method: 'POST' }),
 	// App callback -----------------------------------------------------
-	// m2: Removed — app callback is now handled server-side only via processAppCallback.
+	// m2: Removed — the app callback is a route handler
+	// (app/login/callback/route.ts), which is the only place allowed to
+	// write the session cookies the backend returns.
 	// Consent ----------------------------------------------------------
 	consentInfo: (payload: {
 		client_id: string;

@@ -1,10 +1,10 @@
 /**
  * @author Claude
- * @version 1.4
- * @date 2026/9/23 01:31:52
+ * @version 2.0
+ * @date 2026/9/23 01:41:09
  *
  * Server-side fetch infrastructure for Server Components.
- * Forwards browser cookies to the backend and handles Set-Cookie forwarding.
+ * Forwards browser cookies to the backend.
  *
  * M2 fix: Only forwards auth-related cookies to the backend,
  * avoiding unnecessary exposure of frontend-only cookies.
@@ -15,9 +15,6 @@
  * M6 fix: HAM_BACKEND_ORIGIN is validated before a request is issued,
  * so a misconfigured deployment fails loudly instead of silently
  * degrading into a relative fetch.
- *
- * m6 fix: parseSetCookieHeader now validates Date objects from
- * the expires attribute before including them in options.
  *
  * r1 fix: response bodies are parsed defensively. A 204/205 reply or an
  * HTML error page has no JSON to parse, and `Response.json()` throws on
@@ -99,80 +96,6 @@ const FORWARDABLE_COOKIES = new Set([
 	LOCALE_COOKIE,
 	THEME_COOKIE,
 ]);
-
-/**
- * Parse a Set-Cookie header value into name, value, and options.
- * m6 fix: validates Date objects from the expires attribute.
- */
-const parseSetCookieHeader = (header: string) => {
-	const [nameValue, ...attrs] = header.split(';');
-	const eqIdx = nameValue.indexOf('=');
-	if (eqIdx === -1) return null;
-	const name = nameValue.slice(0, eqIdx).trim();
-	const value = nameValue.slice(eqIdx + 1).trim();
-
-	const options: Record<string, unknown> = {};
-	for (const attr of attrs) {
-		const eqPos = attr.indexOf('=');
-		const key = (eqPos === -1 ? attr : attr.slice(0, eqPos))
-			.trim()
-			.toLowerCase();
-		const val = eqPos === -1 ? '' : attr.slice(eqPos + 1).trim();
-		switch (key) {
-			case 'path':
-				options.path = val;
-				break;
-			case 'domain':
-				options.domain = val;
-				break;
-			case 'max-age':
-				options.maxAge = Number(val);
-				break;
-			case 'expires': {
-				const d = new Date(val);
-				if (!Number.isNaN(d.getTime())) options.expires = d;
-				break;
-			}
-			case 'secure':
-				options.secure = true;
-				break;
-			case 'httponly':
-				options.httpOnly = true;
-				break;
-			case 'samesite':
-				options.sameSite = val.toLowerCase();
-				break;
-		}
-	}
-
-	return { name, value, options };
-};
-
-/**
- * Forward Set-Cookie headers from a backend response to the browser response.
- */
-export const forwardSetCookies = async (res: Response) => {
-	const cookieStore = await cookies();
-	const setCookies = res.headers.getSetCookie?.() ?? [];
-	if (setCookies.length === 0) {
-		if (typeof res.headers.getSetCookie !== 'function') {
-			console.warn(
-				'[server-fetch] getSetCookie() is not supported by this runtime. ' +
-					'Set-Cookie headers will be lost — login may fail silently.'
-			);
-		}
-	}
-	for (const sc of setCookies) {
-		const parsed = parseSetCookieHeader(sc);
-		if (parsed) {
-			cookieStore.set(
-				parsed.name,
-				parsed.value,
-				parsed.options as Record<string, unknown>
-			);
-		}
-	}
-};
 
 /**
  * Backend error envelope. Error responses from the backend follow
