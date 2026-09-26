@@ -1,13 +1,17 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/5/22
+ * @version 1.2
+ * @date 2026/9/26 12:28:00
  *
  * Custom hook for copying a token to the clipboard.
  * Falls back to execCommand for older browsers.
  *
  * m3 fix: Shows a toast when both clipboard API and fallback fail,
  * instead of silently ignoring the error.
+ *
+ * The scratch textarea is removed in a `finally`: `execCommand` throws on
+ * browsers that no longer implement it, which used to abandon an
+ * off-screen node in the document on every failed copy.
  */
 'use client';
 
@@ -30,11 +34,14 @@ export const useCopyToken = (token: string | undefined) => {
 				textarea.value = token;
 				textarea.style.position = 'fixed';
 				textarea.style.opacity = '0';
-				document.body.appendChild(textarea);
-				textarea.select();
-				document.execCommand('copy');
-				document.body.removeChild(textarea);
-				setCopied(true);
+				try {
+					document.body.appendChild(textarea);
+					textarea.select();
+					document.execCommand('copy');
+					setCopied(true);
+				} finally {
+					textarea.remove();
+				}
 			} catch {
 				// m3: Show feedback when both methods fail
 				toast.error(t('tokenReveal.copyFailed'));
