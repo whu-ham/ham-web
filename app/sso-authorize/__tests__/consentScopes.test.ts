@@ -60,6 +60,41 @@ describe('groupConsentScopes', () => {
 			},
 		]);
 	});
+
+	// A backend that sends no category must still land somewhere sensible:
+	// an unknown scope is shown under identity rather than dropped, and a
+	// category this screen does not model gets its own group.
+	it('treats an uncategorised scope as identity', () => {
+		const groups = groupConsentScopes([scope({ scope: 'email' })]);
+
+		expect(groups).toEqual([
+			{
+				category: 'identity',
+				scopes: [expect.objectContaining({ scope: 'email' })],
+			},
+		]);
+	});
+
+	it('keeps an unmodelled category in its own group', () => {
+		const groups = groupConsentScopes([
+			scope({ scope: 'billing:read', category: 'billing' }),
+		]);
+
+		expect(groups).toEqual([
+			{
+				category: 'other',
+				scopes: [expect.objectContaining({ scope: 'billing:read' })],
+			},
+		]);
+	});
+
+	// The screen only renders groups that have members, so an empty
+	// category must not produce an empty section.
+	it('omits categories with no scopes', () => {
+		const groups = groupConsentScopes([scope({ scope: 'openid' })]);
+
+		expect(groups.map((group) => group.category)).toEqual(['identity']);
+	});
 });
 
 describe('withRequiredConsentScopes', () => {
