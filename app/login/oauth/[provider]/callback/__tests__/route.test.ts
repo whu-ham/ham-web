@@ -357,7 +357,7 @@ describe('GET /login/oauth/[provider]/callback', () => {
 		expect(backend).not.toHaveBeenCalled();
 	});
 
-	it('falls back to /console for an unknown provider with no destination', async () => {
+	it('sends an unknown provider back to /console when no destination is given', async () => {
 		const backend = stubBackend();
 
 		const res = await GET(
