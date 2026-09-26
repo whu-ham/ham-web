@@ -1,7 +1,7 @@
 /**
  * @author Claude
- * @version 1.1
- * @date 2026/9/23 00:41:00
+ * @version 1.2
+ * @date 2026/9/26 20:30:00
  *
  * Unit tests for displayName — the user-id fallback for display names.
  *
@@ -33,6 +33,14 @@ describe('displayName', () => {
 
 	it('trims surrounding whitespace from a real nickname', () => {
 		expect(displayName({ user_id: 'u_1', nickname: '  Ada  ' })).toBe('Ada');
+	});
+
+	it('prefers the nickname even when the user id is empty', () => {
+		expect(displayName({ user_id: '', nickname: 'Ada' })).toBe('Ada');
+	});
+
+	it('returns an empty string when neither field is usable', () => {
+		expect(displayName({ user_id: '' })).toBe('');
 	});
 
 	it('returns an empty string when there is no user', () => {
